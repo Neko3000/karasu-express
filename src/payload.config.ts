@@ -17,6 +17,12 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      titleSuffix: '- Karasu Studio',
+      description: 'AI Content Generation Studio',
+    },
+    avatar: 'default',
+    dateFormat: 'MMMM do yyyy, h:mm a',
   },
   collections: [Users, Media],
   editor: lexicalEditor(),
@@ -29,4 +35,16 @@ export default buildConfig({
   }),
   sharp,
   plugins: [],
+  upload: {
+    limits: {
+      fileSize: 50 * 1024 * 1024, // 50MB max file size
+    },
+  },
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
+  cors: [
+    process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
+  ].filter(Boolean),
+  csrf: [
+    process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
+  ].filter(Boolean),
 })

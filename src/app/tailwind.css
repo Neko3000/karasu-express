@@ -1,0 +1,20 @@
+@import 'tailwindcss' prefix(twp);
+
+/*
+ * TailwindCSS v4 Configuration for Karasu Express
+ * All Tailwind utilities are scoped with `.twp` prefix
+ * Usage: class="twp:bg-blue-500 twp:text-white twp:p-4"
+ */
+
+@theme {
+  /* Custom theme extensions for AI Content Studio */
+  --color-studio-primary: #6366f1;
+  --color-studio-secondary: #8b5cf6;
+  --color-studio-accent: #ec4899;
+  --color-studio-success: #10b981;
+  --color-studio-warning: #f59e0b;
+  --color-studio-error: #ef4444;
+  --color-studio-background: #0f172a;
+  --color-studio-surface: #1e293b;
+  --color-studio-border: #334155;
+}

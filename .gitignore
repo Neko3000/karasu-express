@@ -43,8 +43,28 @@ next-env.d.ts
 /media
 
 # Playwright
-node_modules/
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Logs
+*.log
+logs/
+
+# OS files
+Thumbs.db
+*.tmp
+*.swp
+
+# IDE
+.vscode/settings.json
+*.sublime-*
+
+# Generated types (can be regenerated)
+# src/payload-types.ts
+
+# Service account keys (never commit)
+*.json.key
+*-credentials.json
+service-account*.json
