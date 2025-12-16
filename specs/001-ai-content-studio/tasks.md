@@ -7,6 +7,8 @@
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+**LLM for Prompt Expansion**: **Gemini Pro** (Google AI) is the primary LLM for prompt optimization. Future expansion will support ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet).
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -34,7 +36,7 @@ Based on plan.md structure:
 - [ ] T002 Initialize PayloadCMS v3 project with Next.js App Router and MongoDB adapter
 - [ ] T003 [P] Configure TailwindCSS with `.twp` scope prefix in tailwind.config.ts
 - [ ] T004 [P] Configure TypeScript strict mode and path aliases in tsconfig.json
-- [ ] T005 [P] Install AI provider dependencies: openai, @anthropic-ai/sdk, @fal-ai/client, @google-cloud/aiplatform
+- [ ] T005 [P] Install AI provider dependencies: @google/generative-ai (Gemini Pro for LLM), @fal-ai/client, openai, @google-cloud/aiplatform
 - [ ] T006 [P] Install UI dependencies: masonic (virtual masonry), react-hook-form
 - [ ] T007 Create environment configuration template (.env.example) with all required variables per quickstart.md
 - [ ] T008 Configure payload.config.ts with MongoDB adapter, admin panel settings, and upload configuration
@@ -98,8 +100,9 @@ Based on plan.md structure:
 
 ### Implementation for User Story 2
 
-- [ ] T034 Implement prompt optimizer service in src/services/prompt-optimizer.ts with expandPrompt() function using Claude/GPT structured output
+- [ ] T034 Implement prompt optimizer service in src/services/prompt-optimizer.ts with expandPrompt() function using Gemini Pro structured output (JSON mode)
 - [ ] T035 Create system prompt template in src/services/prompt-optimizer.ts for "prompt engineering expert" persona with composition/lighting/atmosphere instructions
+- [ ] T035a [P] Add LLM provider abstraction interface in src/services/prompt-optimizer.ts to support future ChatGPT/Claude expansion
 - [ ] T036 Implement web search enhancement in src/services/prompt-optimizer.ts with optional RAG context fetching
 - [ ] T037 Create POST /api/studio/expand-prompt custom endpoint in src/endpoints/expand-prompt-preview.ts for testing prompt expansion without creating task
 - [ ] T038 Update expand-prompt job handler in src/jobs/expand-prompt.ts to use prompt-optimizer service and generate subjectSlug
@@ -359,3 +362,4 @@ With multiple developers:
 - All UI components are React components integrated into PayloadCMS admin
 - TailwindCSS classes must use `.twp` prefix scope
 - **Video generation (Veo) is DEFERRED** - Phase 12 is lowest priority; focus on image generation first
+- **LLM Provider Strategy**: Start with Gemini Pro for prompt expansion; the abstraction layer (T035a) enables future expansion to ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet) without refactoring
