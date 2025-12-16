@@ -11,12 +11,13 @@
 
 - Q: What authentication mechanism should be used for the Studio workspace? → A: PayloadCMS built-in authentication (email/password with admin panel)
 - Q: What is the asset retention policy for generated images? → A: No automatic deletion (retain all assets indefinitely)
+- Q: Should the system support multiple user roles with different permissions? → A: No, single Admin role only; no role-based access control needed
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Batch Generation Task (Priority: P1)
 
-As a **Content Operator**, I want to submit a creative theme and have the system automatically generate hundreds of images across different styles and AI models, so that I can quickly produce diverse visual content for multi-channel distribution without manually configuring each generation.
+As an **Admin**, I want to submit a creative theme and have the system automatically generate hundreds of images across different styles and AI models, so that I can quickly produce diverse visual content for multi-channel distribution without manually configuring each generation.
 
 **Why this priority**: This is the core value proposition of the system - transforming a single creative idea into scalable content production. Without this capability, the system provides no differentiated value.
 
@@ -34,7 +35,7 @@ As a **Content Operator**, I want to submit a creative theme and have the system
 
 ### User Story 2 - Intelligent Prompt Optimization (Priority: P1)
 
-As a **Prompt Engineer**, I want the system to automatically enhance my brief creative themes into detailed, high-quality prompts using AI, so that I can consistently produce better generation results without manually writing complex prompts for each variation.
+As an **Admin**, I want the system to automatically enhance my brief creative themes into detailed, high-quality prompts using AI, so that I can consistently produce better generation results without manually writing complex prompts for each variation.
 
 **Why this priority**: Prompt quality directly determines generation quality. This feature enables non-expert users to achieve professional-level results and is essential for the "creative intent to industrial output" transformation.
 
@@ -52,7 +53,7 @@ As a **Prompt Engineer**, I want the system to automatically enhance my brief cr
 
 ### User Story 3 - Style Configuration and Management (Priority: P2)
 
-As a **Prompt Engineer**, I want to create and manage reusable style templates that can be applied to any generation, so that I can maintain brand consistency and quickly apply proven visual styles across different projects.
+As an **Admin**, I want to create and manage reusable style templates that can be applied to any generation, so that I can maintain brand consistency and quickly apply proven visual styles across different projects.
 
 **Why this priority**: Style templates are the mechanism for ensuring consistent brand identity and reducing repetitive work. While essential for production use, basic generation can work with default styles.
 
@@ -70,7 +71,7 @@ As a **Prompt Engineer**, I want to create and manage reusable style templates t
 
 ### User Story 4 - Task Monitoring and Management (Priority: P2)
 
-As a **Content Operator**, I want to view all my generation tasks with their progress and status, so that I can monitor production capacity and quickly identify and resolve failed tasks.
+As an **Admin**, I want to view all generation tasks with their progress and status, so that I can monitor production capacity and quickly identify and resolve failed tasks.
 
 **Why this priority**: Visibility into task execution is critical for production operations but the system can generate content without it. This enables operational efficiency and troubleshooting.
 
@@ -88,7 +89,7 @@ As a **Content Operator**, I want to view all my generation tasks with their pro
 
 ### User Story 5 - Asset Gallery and Management (Priority: P2)
 
-As a **Content Operator**, I want to browse generated images in a visual gallery with filtering and search capabilities, so that I can quickly find and download the best images for my campaigns.
+As an **Admin**, I want to browse generated images in a visual gallery with filtering and search capabilities, so that I can quickly find and download the best images for my campaigns.
 
 **Why this priority**: The gallery is the primary interface for consuming generated content. Without proper browsing capabilities, finding and using the generated assets becomes impractical at scale.
 
@@ -106,7 +107,7 @@ As a **Content Operator**, I want to browse generated images in a visual gallery
 
 ### User Story 6 - Multi-Model Comparison (Priority: P3)
 
-As a **Product Manager/Design Director**, I want to generate the same prompt across different AI models simultaneously, so that I can compare model capabilities and choose the best results for final production.
+As an **Admin**, I want to generate the same prompt across different AI models simultaneously, so that I can compare model capabilities and choose the best results for final production.
 
 **Why this priority**: Model comparison helps optimize quality and cost decisions but is not essential for basic content generation. This feature supports quality-focused workflows.
 
@@ -124,7 +125,7 @@ As a **Product Manager/Design Director**, I want to generate the same prompt acr
 
 ### User Story 7 - Dashboard Overview (Priority: P3)
 
-As a **Content Operator**, I want to see an overview of system activity including daily generation counts and resource consumption, so that I can track production volume and manage costs.
+As an **Admin**, I want to see an overview of system activity including daily generation counts and resource consumption, so that I can track production volume and manage costs.
 
 **Why this priority**: Analytics and monitoring support operational decisions but the system functions without them. This enables better resource management and planning.
 
@@ -222,7 +223,7 @@ As a **Content Operator**, I want to see an overview of system activity includin
 - **SC-007**: Generated asset file names enable identification of source parameters without accessing the database
 - **SC-008**: System maintains operation when individual AI provider APIs experience temporary failures (graceful degradation)
 - **SC-009**: Users can compare outputs across different models by filtering gallery results by model within 2 clicks
-- **SC-010**: 90% of content operators can complete their first batch generation task without documentation assistance
+- **SC-010**: 90% of admins can complete their first batch generation task without documentation assistance
 
 ## Assumptions
 
@@ -232,6 +233,7 @@ As a **Content Operator**, I want to see an overview of system activity includin
 - Users operate the system through modern web browsers with JavaScript enabled
 - The system will primarily serve internal enterprise users, so public registration is not required
 - Authentication uses PayloadCMS built-in email/password authentication via the admin panel; no external SSO integration required for initial release
+- Single Admin role with full access to all features; no role-based access control or permission differentiation
 - Generated assets are retained indefinitely with no automatic deletion; manual deletion by administrators is supported
 - Default rate limits for AI providers are sufficient for typical usage patterns; heavy users may need upgraded API tiers
 - Image generation models return results within reasonable timeframes (typically under 60 seconds per image)
