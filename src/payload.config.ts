@@ -40,7 +40,10 @@ export default buildConfig({
       fileSize: 50 * 1024 * 1024, // 50MB max file size
     },
   },
-  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
+  // Only set serverURL in production - in development, leaving it undefined avoids URL duplication bugs
+  // See: https://github.com/payloadcms/payload/issues - formatAdminURL returns full URL which gets
+  // concatenated with serverURL again in createLocalReq, causing "http://localhost:3000http://localhost:3000/admin"
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
   cors: [
     process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
   ].filter(Boolean),
