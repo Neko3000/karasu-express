@@ -5,6 +5,13 @@
 **Status**: Draft
 **Input**: User description: "Karasu-Express AI Content Generation and Asset Management System - Enterprise-grade platform for high-throughput AI content production with intelligent prompt engineering and batch generation capabilities"
 
+## Clarifications
+
+### Session 2025-12-16
+
+- Q: What authentication mechanism should be used for the Studio workspace? → A: PayloadCMS built-in authentication (email/password with admin panel)
+- Q: What is the asset retention policy for generated images? → A: No automatic deletion (retain all assets indefinitely)
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Batch Generation Task (Priority: P1)
@@ -224,6 +231,8 @@ As a **Content Operator**, I want to see an overview of system activity includin
 - LLM providers (Claude, GPT) are available for prompt optimization with sufficient rate limits
 - Users operate the system through modern web browsers with JavaScript enabled
 - The system will primarily serve internal enterprise users, so public registration is not required
+- Authentication uses PayloadCMS built-in email/password authentication via the admin panel; no external SSO integration required for initial release
+- Generated assets are retained indefinitely with no automatic deletion; manual deletion by administrators is supported
 - Default rate limits for AI providers are sufficient for typical usage patterns; heavy users may need upgraded API tiers
 - Image generation models return results within reasonable timeframes (typically under 60 seconds per image)
 - Web search enhancement relies on external search APIs that may have their own rate limits and availability constraints
