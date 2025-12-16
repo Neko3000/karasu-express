@@ -12,6 +12,7 @@
 - Q: What authentication mechanism should be used for the Studio workspace? → A: PayloadCMS built-in authentication (email/password with admin panel)
 - Q: What is the asset retention policy for generated images? → A: No automatic deletion (retain all assets indefinitely)
 - Q: Should the system support multiple user roles with different permissions? → A: No, single Admin role only; no role-based access control needed
+- Q: Should video generation (Veo) be included in the initial implementation? → A: No, video generation is deferred to lowest priority; focus on image generation first
 
 ## User Scenarios & Testing *(mandatory)*
 

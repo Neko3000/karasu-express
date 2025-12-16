@@ -164,18 +164,17 @@ Based on plan.md structure:
 
 ## Phase 8: User Story 6 - Multi-Model Comparison (Priority: P3)
 
-**Goal**: Admin can generate the same prompt across different AI models simultaneously and compare results
+**Goal**: Admin can generate the same prompt across different AI **image** models simultaneously and compare results
 
-**Independent Test**: Submit a generation with multiple models selected and verify outputs from each model are generated and properly labeled
+**Independent Test**: Submit a generation with multiple image models selected and verify outputs from each model are generated and properly labeled
 
 ### Implementation for User Story 6
 
-- [ ] T054 Implement Veo video adapter in src/adapters/veo.ts for Google Veo integration with long-running operation polling
-- [ ] T055 Update task orchestrator in src/services/task-orchestrator.ts to generate sub-tasks for all selected model combinations
-- [ ] T056 Add model-specific parameter configuration UI in src/components/Studio/ModelParams.tsx for per-model settings (inference steps, quality level)
-- [ ] T057 Add model filter to Gallery in src/components/Gallery/GalleryFilters.tsx to isolate and compare outputs by model
+- [ ] T054 Update task orchestrator in src/services/task-orchestrator.ts to generate sub-tasks for all selected model combinations
+- [ ] T055 Add model-specific parameter configuration UI in src/components/Studio/ModelParams.tsx for per-model settings (inference steps, quality level)
+- [ ] T056 Add model filter to Gallery in src/components/Gallery/GalleryFilters.tsx to isolate and compare outputs by model
 
-**Checkpoint**: Multi-model comparison is functional - admin can generate across models and compare results side-by-side
+**Checkpoint**: Multi-model comparison is functional - admin can generate across image models and compare results side-by-side
 
 ---
 
@@ -187,11 +186,11 @@ Based on plan.md structure:
 
 ### Implementation for User Story 7
 
-- [ ] T058 Create Dashboard custom admin view in src/components/Dashboard/index.tsx with overview metrics layout
-- [ ] T059 [P] Create DailyStats component in src/components/Dashboard/DailyStats.tsx showing today's generation count and total images
-- [ ] T060 [P] Create RecentActivity component in src/components/Dashboard/RecentActivity.tsx showing recent task completions
-- [ ] T061 [P] Create UsageStats component in src/components/Dashboard/UsageStats.tsx showing most used styles and models
-- [ ] T062 Add Dashboard to Payload admin panel as default landing page in payload.config.ts admin configuration
+- [ ] T057 Create Dashboard custom admin view in src/components/Dashboard/index.tsx with overview metrics layout
+- [ ] T058 [P] Create DailyStats component in src/components/Dashboard/DailyStats.tsx showing today's generation count and total images
+- [ ] T059 [P] Create RecentActivity component in src/components/Dashboard/RecentActivity.tsx showing recent task completions
+- [ ] T060 [P] Create UsageStats component in src/components/Dashboard/UsageStats.tsx showing most used styles and models
+- [ ] T061 Add Dashboard to Payload admin panel as default landing page in payload.config.ts admin configuration
 
 **Checkpoint**: Dashboard is functional - admin has visibility into system activity and usage patterns
 
@@ -203,14 +202,14 @@ Based on plan.md structure:
 
 ### Implementation for Studio Workspace
 
-- [ ] T063 Create Studio custom admin view in src/components/Studio/index.tsx as the main generation workspace
-- [ ] T064 [P] Create ThemeInput component in src/components/Studio/ThemeInput.tsx with multi-line text input and character counter
-- [ ] T065 [P] Create StyleSelector component in src/components/Studio/StyleSelector.tsx with multi-select grid and preview thumbnails
-- [ ] T066 [P] Create ModelSelector component in src/components/Studio/ModelSelector.tsx with provider grouping and feature badges
-- [ ] T067 [P] Create BatchConfig component in src/components/Studio/BatchConfig.tsx with countPerPrompt input and total calculation display
-- [ ] T068 Create PromptPreview component in src/components/Studio/PromptPreview.tsx showing expanded prompts with edit capability
-- [ ] T069 Implement task submission flow in src/components/Studio/index.tsx with confirmation dialog when total > 500
-- [ ] T070 Add Studio to Payload admin panel navigation in payload.config.ts admin.components configuration
+- [ ] T062 Create Studio custom admin view in src/components/Studio/index.tsx as the main generation workspace
+- [ ] T063 [P] Create ThemeInput component in src/components/Studio/ThemeInput.tsx with multi-line text input and character counter
+- [ ] T064 [P] Create StyleSelector component in src/components/Studio/StyleSelector.tsx with multi-select grid and preview thumbnails
+- [ ] T065 [P] Create ModelSelector component in src/components/Studio/ModelSelector.tsx with provider grouping and feature badges
+- [ ] T066 [P] Create BatchConfig component in src/components/Studio/BatchConfig.tsx with countPerPrompt input and total calculation display
+- [ ] T067 Create PromptPreview component in src/components/Studio/PromptPreview.tsx showing expanded prompts with edit capability
+- [ ] T068 Implement task submission flow in src/components/Studio/index.tsx with confirmation dialog when total > 500
+- [ ] T069 Add Studio to Payload admin panel navigation in payload.config.ts admin.components configuration
 
 **Checkpoint**: Studio workspace is complete - admin has a unified interface for the entire generation workflow
 
@@ -220,12 +219,27 @@ Based on plan.md structure:
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T071 Add admin panel left navigation with Dashboard, Studio, Task Manager, Gallery, and Configuration Center in payload.config.ts
-- [ ] T072 [P] Create MongoDB indexes per data-model.md specifications in src/seed/indexes.ts
-- [ ] T073 [P] Add input validation across all collections using Payload field validation
-- [ ] T074 Implement configurable warning threshold (default 500) for large batch submissions
-- [ ] T075 Add error boundary and loading states to all custom admin components
-- [ ] T076 Run quickstart.md validation to ensure all documented workflows function correctly
+- [ ] T070 Add admin panel left navigation with Dashboard, Studio, Task Manager, Gallery, and Configuration Center in payload.config.ts
+- [ ] T071 [P] Create MongoDB indexes per data-model.md specifications in src/seed/indexes.ts
+- [ ] T072 [P] Add input validation across all collections using Payload field validation
+- [ ] T073 Implement configurable warning threshold (default 500) for large batch submissions
+- [ ] T074 Add error boundary and loading states to all custom admin components
+- [ ] T075 Run quickstart.md validation to ensure all documented workflows function correctly
+
+---
+
+## Phase 12: Video Generation - Veo (DEFERRED - Lowest Priority)
+
+**Purpose**: Video generation capability using Google Veo - explicitly deferred per clarification
+
+**⚠️ DEFERRED**: Video generation is not required for initial release. Focus on image generation first.
+
+- [ ] T076 Implement Veo video adapter in src/adapters/veo.ts for Google Veo integration with long-running operation polling
+- [ ] T077 Add video-specific UI components in src/components/Studio/VideoConfig.tsx for video generation parameters
+- [ ] T078 Update Media collection in src/collections/Media.ts to handle video assets with duration metadata
+- [ ] T079 Add video playback support in src/components/Gallery/VideoPlayer.tsx
+
+**Checkpoint**: Video generation is functional - admin can generate videos using Google Veo (future enhancement)
 
 ---
 
@@ -240,6 +254,7 @@ Based on plan.md structure:
 - **User Stories 3-7 (Phases 5-9)**: All depend on Phase 3 completion but can proceed in parallel
 - **Studio UI (Phase 10)**: Depends on Phases 3-5 for full functionality
 - **Polish (Phase 11)**: Depends on all desired user stories being complete
+- **Video/Veo (Phase 12)**: DEFERRED - Lowest priority, implement only after all image generation features are complete
 
 ### User Story Dependencies
 
@@ -248,8 +263,9 @@ Based on plan.md structure:
 - **User Story 3 (P2)**: Can start after Foundational - StyleTemplates are independent
 - **User Story 4 (P2)**: Can start after US1 - Task monitoring requires Tasks/SubTasks
 - **User Story 5 (P2)**: Can start after US1 - Gallery requires Media collection
-- **User Story 6 (P3)**: Can start after US1 - Multi-model requires adapter infrastructure
+- **User Story 6 (P3)**: Can start after US1 - Multi-model (image) comparison requires adapter infrastructure
 - **User Story 7 (P3)**: Can start after US1 - Dashboard requires Task data
+- **Video Generation (Deferred)**: Requires all core image generation infrastructure complete
 
 ### Within Each User Story
 
@@ -342,3 +358,4 @@ With multiple developers:
 - Jobs Queue is configured in payload.config.ts, no external queue systems
 - All UI components are React components integrated into PayloadCMS admin
 - TailwindCSS classes must use `.twp` prefix scope
+- **Video generation (Veo) is DEFERRED** - Phase 12 is lowest priority; focus on image generation first
