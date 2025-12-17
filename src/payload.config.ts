@@ -7,6 +7,11 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { StyleTemplates } from './collections/StyleTemplates'
+import { ModelConfigs } from './collections/ModelConfigs'
+
+import { expandPromptHandler } from './jobs/expand-prompt'
+import { generateImageHandler } from './jobs/generate-image'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +29,7 @@ export default buildConfig({
     avatar: 'default',
     dateFormat: 'MMMM do yyyy, h:mm a',
   },
-  collections: [Users, Media],
+  collections: [Users, Media, StyleTemplates, ModelConfigs],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -50,4 +55,24 @@ export default buildConfig({
   csrf: [
     process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
   ].filter(Boolean),
+
+  // Jobs Queue Configuration
+  // See: https://payloadcms.com/docs/jobs-queue/overview
+  // Note: Jobs configuration uses inline handlers for development
+  // In production, consider using workflow definitions
+  jobs: {
+    // Task definitions
+    tasks: [
+      {
+        slug: 'expand-prompt',
+        handler: expandPromptHandler as unknown as string,
+        retries: 3,
+      },
+      {
+        slug: 'generate-image',
+        handler: generateImageHandler as unknown as string,
+        retries: 3,
+      },
+    ],
+  },
 })

@@ -49,18 +49,18 @@ Based on plan.md structure:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 Define common TypeScript types and enums in src/lib/types.ts based on contracts/types.ts
-- [ ] T010 [P] Create error normalization utility in src/lib/error-normalizer.ts with ErrorCategory enum mapping
-- [ ] T011 [P] Create rate limiter utility in src/lib/rate-limiter.ts for per-provider rate limiting
-- [ ] T012 Create base adapter interface in src/adapters/types.ts (ImageGenerationAdapter, GenerationResult, NormalizedError)
-- [ ] T013 [P] Implement Flux adapter in src/adapters/flux.ts with Fal.ai client integration
-- [ ] T014 [P] Implement DALL-E 3 adapter in src/adapters/dalle.ts with OpenAI client integration
-- [ ] T015 [P] Implement Imagen adapter in src/adapters/imagen.ts with Google Cloud client integration
-- [ ] T016 Create adapter registry in src/adapters/index.ts to resolve adapters by modelId
-- [ ] T017 Create StyleTemplates collection in src/collections/StyleTemplates.ts with validation (positivePrompt must contain {prompt})
-- [ ] T018 [P] Create ModelConfigs collection in src/collections/ModelConfigs.ts with provider enum and rate limit settings
-- [ ] T019 Create seed script for default Base style and model configurations in src/seed/index.ts
-- [ ] T020 Configure PayloadCMS Jobs Queue in payload.config.ts with expand-prompt and generate-image task definitions and ai-generation queue
+- [X] T009 Define common TypeScript types and enums in src/lib/types.ts based on contracts/types.ts
+- [X] T010 [P] Create error normalization utility in src/lib/error-normalizer.ts with ErrorCategory enum mapping
+- [X] T011 [P] Create rate limiter utility in src/lib/rate-limiter.ts for per-provider rate limiting
+- [X] T012 Create base adapter interface in src/adapters/types.ts (ImageGenerationAdapter, GenerationResult, NormalizedError)
+- [X] T013 [P] Implement Flux adapter in src/adapters/flux.ts with Fal.ai client integration
+- [X] T014 [P] Implement DALL-E 3 adapter in src/adapters/dalle.ts with OpenAI client integration
+- [X] T015 [P] Implement Imagen adapter in src/adapters/imagen.ts with Google Cloud client integration
+- [X] T016 Create adapter registry in src/adapters/index.ts to resolve adapters by modelId
+- [X] T017 Create StyleTemplates collection in src/collections/StyleTemplates.ts with validation (positivePrompt must contain {prompt})
+- [X] T018 [P] Create ModelConfigs collection in src/collections/ModelConfigs.ts with provider enum and rate limit settings
+- [X] T019 Create seed script for default Base style and model configurations in src/seed/index.ts
+- [X] T020 Configure PayloadCMS Jobs Queue in payload.config.ts with expand-prompt and generate-image task definitions and ai-generation queue
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
