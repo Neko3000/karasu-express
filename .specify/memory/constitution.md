@@ -1,18 +1,17 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 (initial)
-Modified principles: N/A (first version)
+Version change: 1.0.0 → 1.1.0
+Modified principles:
+  - None renamed
 Added sections:
-  - Core Principles (5 principles)
-  - Technical Constraints
-  - Development Workflow
-  - Governance
-Removed sections: N/A
+  - Core Principle VI: Testing Discipline (测试纪律)
+  - Enhanced Code Quality Gates with testing requirements
+Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md: ✅ No updates needed (Constitution Check section exists)
-  - .specify/templates/spec-template.md: ✅ No updates needed (compatible structure)
-  - .specify/templates/tasks-template.md: ✅ No updates needed (compatible structure)
+  - .specify/templates/plan-template.md: ✅ No updates needed (Constitution Check section exists, testing in Technical Context)
+  - .specify/templates/spec-template.md: ✅ No updates needed (User Scenarios & Testing section exists)
+  - .specify/templates/tasks-template.md: ✅ No updates needed (test-first approach already documented)
 Follow-up TODOs: None
 -->
 
@@ -80,6 +79,23 @@ future provider additions without core logic changes.
 Rich observability enables rapid debugging, cost tracking, and system health monitoring. Users
 need visibility into generation progress for large batch operations.
 
+### VI. Testing Discipline (测试纪律)
+
+**Non-Negotiable Rules:**
+- Unit tests MUST be written for all utility functions, service methods, and adapter logic
+- Integration tests MUST be written for all Job task handlers and API endpoint flows
+- Tests MUST be run and pass before any code is committed to the repository
+- New features MUST include corresponding test coverage; PRs without tests for new logic MUST be rejected
+- Test failures MUST block progressive implementation; broken tests MUST be fixed before proceeding
+- Mock external dependencies (AI providers, database) in unit tests to ensure isolation
+- Test naming MUST follow pattern: `[module].test.ts` for unit tests, `[flow].integration.test.ts` for integration tests
+
+**Rationale:** Progressive implementation without proper testing leads to cascading errors that
+are expensive to debug. Unit tests catch logic errors early at the function level. Integration
+tests validate system behavior across component boundaries. Enforcing test-first or test-alongside
+development ensures that each implementation phase produces verifiable, working code before
+advancing to dependent phases.
+
 ## Technical Constraints
 
 ### Technology Stack
@@ -90,12 +106,14 @@ need visibility into generation progress for large batch operations.
 | Database | MongoDB | Document model suits heterogeneous payloads, native Jobs backend |
 | Styling | TailwindCSS (scoped with `.twp`) | Isolation from Payload Admin styles |
 | AI Providers | Flux, DALL-E 3, Nano Banana, Veo | Coverage of image/video generation use cases |
+| Testing | Vitest + Testing Library | Fast unit tests, React component testing, TypeScript native |
 
 ### Performance Requirements
 
 - SubTask queue processing: MUST support rate-limited execution (configurable per-provider)
 - Asset gallery: MUST use virtualization for 500+ items (Masonry + virtual scroll)
 - Task status polling: SHOULD update within 5 seconds of state change
+- Test suite execution: SHOULD complete in under 60 seconds for unit tests
 
 ### Security Requirements
 
@@ -108,19 +126,49 @@ need visibility into generation progress for large batch operations.
 ### Code Quality Gates
 
 1. **Type Safety:** TypeScript strict mode enabled; no `any` types without explicit justification
-2. **Testing:** Integration tests required for new Job task handlers; unit tests for utility functions
-3. **API Contracts:** New endpoints MUST have OpenAPI/TypeDoc documentation
+2. **Unit Testing:** MUST write unit tests for all service methods, utility functions, and adapter logic; tests MUST pass before commit
+3. **Integration Testing:** MUST write integration tests for Job task handlers and API endpoints; tests MUST verify end-to-end behavior
+4. **Test Coverage:** New code MUST have corresponding tests; PRs adding logic without tests MUST be rejected
+5. **Test-First Implementation:** When implementing features progressively, tests for the current phase MUST pass before advancing
+6. **API Contracts:** New endpoints MUST have OpenAPI/TypeDoc documentation
+
+### Testing Strategy
+
+1. **Unit Tests (`tests/unit/`):**
+   - Test individual functions and methods in isolation
+   - Mock all external dependencies (database, APIs, file system)
+   - Focus on edge cases, error handling, and boundary conditions
+   - MUST run fast (< 100ms per test)
+
+2. **Integration Tests (`tests/integration/`):**
+   - Test component interactions and data flow
+   - Use test database instances (MongoDB Memory Server or dedicated test DB)
+   - Verify Job task handlers execute correctly
+   - Test API endpoint request/response cycles
+
+3. **Contract Tests (`tests/contract/`):**
+   - Validate API response schemas match documented contracts
+   - Ensure AI provider adapters conform to common interface
+
+### Progressive Implementation Testing
+
+When implementing features in phases:
+1. Phase N tests MUST be written before or during Phase N implementation
+2. All Phase N tests MUST pass before Phase N+1 begins
+3. Regression: All previous phase tests MUST continue passing
+4. If tests fail during implementation, STOP and fix before proceeding
 
 ### Change Process
 
 1. Feature changes MUST reference a spec document
 2. Schema changes to `Tasks`, `SubTasks`, or `Assets` collections MUST include migration plan
-3. New AI provider integrations MUST include adapter, rate limit configuration, and error mapping
+3. New AI provider integrations MUST include adapter, rate limit configuration, error mapping, AND unit tests for adapter logic
 
 ### Commit Conventions
 
 - Commits MUST follow Conventional Commits format
 - Breaking changes MUST be marked with `BREAKING CHANGE:` footer
+- Test-only commits SHOULD use `test:` prefix
 
 ## Governance
 
@@ -143,5 +191,6 @@ MUST be documented in the Complexity Tracking section of the relevant plan docum
 - All PRs MUST verify compliance with Core Principles
 - Constitution Check in plan-template.md MUST be completed before implementation
 - Violations MUST be justified in Complexity Tracking or rejected
+- PRs without adequate test coverage MUST be rejected per Principle VI
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2025-12-15
+**Version**: 1.1.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2025-12-17
