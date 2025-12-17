@@ -65,9 +65,9 @@ Per plan.md Testing Requirements:
 - [X] T006 [P] Install UI dependencies: masonic (virtual masonry), react-hook-form
 - [X] T007 Create environment configuration template (.env.example) with all required variables per quickstart.md
 - [X] T008 Configure payload.config.ts with MongoDB adapter, admin panel settings, and upload configuration
-- [ ] T008a [P] Install testing dependencies: vitest, @testing-library/react, mongodb-memory-server per plan.md
-- [ ] T008b [P] Configure vitest in vitest.config.ts with globals, node environment, coverage settings per plan.md
-- [ ] T008c Create test setup file in tests/setup.ts with common test utilities and mocks
+- [X] T008a [P] Install testing dependencies: vitest, @testing-library/react, mongodb-memory-server per plan.md
+- [X] T008b [P] Configure vitest in vitest.config.ts with globals, node environment, coverage settings per plan.md
+- [X] T008c Create test setup file in tests/setup.ts with common test utilities and mocks
 
 **Checkpoint**: Setup complete - project builds, linting passes, test infrastructure ready
 
@@ -87,21 +87,21 @@ Per plan.md Testing Requirements:
 
 - [X] T009 Define common TypeScript types and enums in src/lib/types.ts based on contracts/types.ts
 - [X] T010 [P] Create error normalization utility in src/lib/error-normalizer.ts with ErrorCategory enum mapping
-- [ ] T010a [P] Write unit tests for error-normalizer in tests/unit/lib/error-normalizer.test.ts (test all error category mappings and retryable flags)
+- [X] T010a [P] Write unit tests for error-normalizer in tests/unit/lib/error-normalizer.test.ts (test all error category mappings and retryable flags)
 - [X] T011 [P] Create rate limiter utility in src/lib/rate-limiter.ts for per-provider rate limiting
-- [ ] T011a [P] Write unit tests for rate-limiter in tests/unit/lib/rate-limiter.test.ts (test rate limiting logic, cooldown, concurrent limits)
+- [X] T011a [P] Write unit tests for rate-limiter in tests/unit/lib/rate-limiter.test.ts (test rate limiting logic, cooldown, concurrent limits)
 
 ### Adapter Implementation & Tests
 
 - [X] T012 Create base adapter interface in src/adapters/types.ts (ImageGenerationAdapter, GenerationResult, NormalizedError)
 - [X] T013 [P] Implement Flux adapter in src/adapters/flux.ts with Fal.ai client integration
-- [ ] T013a [P] Write unit tests for Flux adapter in tests/unit/adapters/flux.adapter.test.ts (mock Fal.ai client, test generate, normalizeError, getDefaultOptions)
+- [X] T013a [P] Write unit tests for Flux adapter in tests/unit/adapters/flux.adapter.test.ts (mock Fal.ai client, test generate, normalizeError, getDefaultOptions)
 - [X] T014 [P] Implement DALL-E 3 adapter in src/adapters/dalle.ts with OpenAI client integration
-- [ ] T014a [P] Write unit tests for DALL-E adapter in tests/unit/adapters/dalle.adapter.test.ts (mock OpenAI client, test generate, normalizeError, getDefaultOptions)
+- [X] T014a [P] Write unit tests for DALL-E adapter in tests/unit/adapters/dalle.adapter.test.ts (mock OpenAI client, test generate, normalizeError, getDefaultOptions)
 - [X] T015 [P] Implement Imagen adapter in src/adapters/imagen.ts with Google Cloud client integration
-- [ ] T015a [P] Write unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts (mock Google client, test generate, normalizeError, getDefaultOptions)
+- [X] T015a [P] Write unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts (mock Google client, test generate, normalizeError, getDefaultOptions)
 - [X] T016 Create adapter registry in src/adapters/index.ts to resolve adapters by modelId
-- [ ] T016a Write contract tests for all adapters in tests/contract/adapters.contract.test.ts verifying interface compliance (providerId, generate, normalizeError, getDefaultOptions exist and return correct types)
+- [X] T016a Write contract tests for all adapters in tests/contract/adapters.contract.test.ts verifying interface compliance (providerId, generate, normalizeError, getDefaultOptions exist and return correct types)
 
 ### Collection & Configuration
 
