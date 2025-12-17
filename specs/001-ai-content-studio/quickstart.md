@@ -277,27 +277,179 @@ export const myProviderAdapter: ImageGenerationAdapter = {
 2. Register in `src/adapters/index.ts`
 3. Add model config to database
 
-## 7. Testing
+## 7. Testing (Constitution Principle VI)
+
+Testing is mandatory per Constitution Principle VI. All tests must pass before code is committed.
+
+### Test Structure
+
+```text
+tests/
+├── unit/                # Fast, isolated tests (< 100ms each)
+│   ├── adapters/        # AI provider adapter tests
+│   ├── lib/             # Utility function tests
+│   └── services/        # Service method tests
+├── integration/         # Component interaction tests
+│   ├── jobs/            # Job handler tests
+│   └── endpoints/       # API endpoint tests
+├── contract/            # API schema validation
+│   └── adapters.contract.test.ts
+└── e2e/                 # Full workflow tests
+    └── studio-workflow.e2e.test.ts
+```
 
 ### Run Unit Tests
 
 ```bash
-pnpm test
+# Run all unit tests (should complete in < 60 seconds)
+pnpm test:unit
+
+# Run specific test file
+pnpm test:unit tests/unit/lib/prompt-merger.test.ts
+
+# Watch mode during development
+pnpm test:unit --watch
 ```
 
 ### Run Integration Tests
 
 ```bash
-# Requires running MongoDB
+# Requires MongoDB Memory Server (auto-started)
 pnpm test:integration
+
+# Run specific integration test
+pnpm test:integration tests/integration/jobs/generate-image.integration.test.ts
+```
+
+### Run Contract Tests
+
+```bash
+# Verify adapter contracts
+pnpm test:contract
+```
+
+### Run All Tests
+
+```bash
+# Run complete test suite
+pnpm test
+
+# Run with coverage report
+pnpm test:coverage
 ```
 
 ### Run E2E Tests
 
 ```bash
-# Requires running dev server
-pnpm test:e2e
+# Requires running dev server in another terminal
+pnpm dev  # Terminal 1
+pnpm test:e2e  # Terminal 2
 ```
+
+### Test Commands Summary
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `pnpm test` | Run all tests | Before commit, CI |
+| `pnpm test:unit` | Unit tests only | During development |
+| `pnpm test:integration` | Integration tests | After implementing features |
+| `pnpm test:contract` | Contract tests | After modifying adapters |
+| `pnpm test:e2e` | E2E tests | Before release |
+| `pnpm test:coverage` | Tests with coverage | Periodic check |
+| `pnpm test:watch` | Watch mode | Active development |
+
+### Writing Tests
+
+**Unit Test Example** (for utility functions):
+
+```typescript
+// tests/unit/lib/task-fission.test.ts
+import { describe, it, expect } from 'vitest';
+import { calculateFission } from '../../../src/lib/task-fission';
+
+describe('calculateFission', () => {
+  it('should calculate correct total for simple config', () => {
+    const result = calculateFission({
+      expandedPrompts: [{ variantId: 'v1' }, { variantId: 'v2' }],
+      selectedStyles: ['base', 'ghibli'],
+      selectedModels: ['flux-pro'],
+      batchSize: 5,
+      includeBaseStyle: false,
+    });
+
+    // 2 prompts * 2 styles * 1 model * 5 batch = 20
+    expect(result).toHaveLength(20);
+  });
+
+  it('should add base style when includeBaseStyle is true', () => {
+    const result = calculateFission({
+      expandedPrompts: [{ variantId: 'v1' }],
+      selectedStyles: ['ghibli'],
+      selectedModels: ['flux-pro'],
+      batchSize: 1,
+      includeBaseStyle: true,
+    });
+
+    // 1 prompt * 2 styles (base + ghibli) * 1 model * 1 batch = 2
+    expect(result).toHaveLength(2);
+    expect(result.some(t => t.styleId === 'base')).toBe(true);
+  });
+});
+```
+
+**Integration Test Example** (for job handlers):
+
+```typescript
+// tests/integration/jobs/expand-prompt.integration.test.ts
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+
+describe('expand-prompt job', () => {
+  let mongod: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongod = await MongoMemoryServer.create();
+    process.env.MONGODB_URI = mongod.getUri();
+  });
+
+  afterAll(async () => {
+    await mongod.stop();
+  });
+
+  it('should expand a simple theme into multiple variants', async () => {
+    // Mock LLM response
+    vi.mock('../../../src/lib/llm-client', () => ({
+      expandPrompt: vi.fn().mockResolvedValue({
+        variants: [
+          { variantId: 'realistic', expandedPrompt: 'detailed prompt...' },
+          { variantId: 'abstract', expandedPrompt: 'abstract prompt...' },
+        ],
+      }),
+    }));
+
+    const result = await expandPromptHandler({
+      input: { subject: 'a cat in rain', variantCount: 2 },
+    });
+
+    expect(result.variants).toHaveLength(2);
+  });
+});
+```
+
+### Progressive Testing Protocol
+
+Per Constitution Principle VI, tests must pass before advancing phases:
+
+1. **Phase 2 (Foundational)**: All unit tests for `lib/` utilities must pass
+2. **Phase 3+ (User Stories)**: All unit + integration tests for the story must pass
+3. **Final (Polish)**: Full test suite including E2E must pass
+
+**If tests fail:**
+1. STOP implementation immediately
+2. Analyze failure root cause
+3. Fix implementation or test
+4. Verify all tests pass
+5. Resume implementation
 
 ## 8. Production Deployment
 

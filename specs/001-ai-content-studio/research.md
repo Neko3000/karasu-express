@@ -371,6 +371,8 @@ db.tasks.createIndex({ status: 1 });  // Admin filtering
 | Progress updates | 5-second polling (WebSocket future option) |
 | Error handling | Normalized error categories with retry flags |
 | Asset naming | Timestamp + subject + style + model + index convention |
+| **Testing strategy** | **Vitest + Testing Library + MongoDB Memory Server** |
+| **Progressive testing** | **Phase-gated testing with mandatory passage before advancement** |
 
 ## Dependencies Identified
 
@@ -384,3 +386,188 @@ db.tasks.createIndex({ status: 1 });  // Admin filtering
 | @google-cloud/aiplatform | Imagen/Veo via Vertex AI | ^3.0.0 |
 | masonic | Virtual masonry layout | ^4.0.0 |
 | tailwindcss | Styling (scoped) | ^3.4.0 |
+| vitest | Unit/integration testing | ^2.0.0 |
+| @testing-library/react | React component testing | ^16.0.0 |
+| mongodb-memory-server | In-memory MongoDB for tests | ^10.0.0 |
+
+---
+
+### 11. Testing Strategy (Constitution Principle VI)
+
+**Context**: Ensure proper unit testing during progressive implementation per Constitution v1.1.0.
+
+**Decision**: Use Vitest + Testing Library with MongoDB Memory Server for isolated testing
+
+**Rationale**:
+- Vitest is TypeScript-native, fast, and compatible with Vite/Next.js
+- Testing Library provides React component testing with user-centric approach
+- MongoDB Memory Server enables integration tests without external database
+- Supports mocking of AI providers for isolated unit tests
+
+**Alternatives Considered**:
+| Alternative | Rejected Because |
+|------------|------------------|
+| Jest | Slower, requires more configuration for ESM/TypeScript |
+| Mocha + Chai | Less integrated TypeScript support |
+| Real MongoDB for tests | Requires running database, slower, flaky |
+
+**Test Structure**:
+```typescript
+// tests/unit/lib/prompt-merger.test.ts
+import { describe, it, expect } from 'vitest';
+import { mergeStyle } from '../../../src/lib/prompt-merger';
+
+describe('mergeStyle', () => {
+  it('should replace {prompt} placeholder with base prompt', () => {
+    const result = mergeStyle('a cat', {
+      styleId: 'ghibli',
+      name: 'Ghibli',
+      positivePrompt: '{prompt}, studio ghibli style',
+      negativePrompt: 'realistic',
+    });
+
+    expect(result.finalPrompt).toBe('a cat, studio ghibli style');
+    expect(result.negativePrompt).toBe('realistic');
+  });
+
+  it('should handle base style with no modifications', () => {
+    const result = mergeStyle('a cat', {
+      styleId: 'base',
+      name: 'Base',
+      positivePrompt: '{prompt}',
+      negativePrompt: '',
+    });
+
+    expect(result.finalPrompt).toBe('a cat');
+    expect(result.negativePrompt).toBe('');
+  });
+});
+```
+
+**Integration Test Pattern**:
+```typescript
+// tests/integration/jobs/generate-image.integration.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { getPayload } from 'payload';
+
+describe('generate-image job', () => {
+  let mongod: MongoMemoryServer;
+  let payload: Payload;
+
+  beforeAll(async () => {
+    mongod = await MongoMemoryServer.create();
+    process.env.MONGODB_URI = mongod.getUri();
+    payload = await getPayload({ config });
+  });
+
+  afterAll(async () => {
+    await payload.db.destroy();
+    await mongod.stop();
+  });
+
+  it('should create asset record on successful generation', async () => {
+    // Mock the AI provider
+    vi.mock('../../../src/adapters/flux.adapter', () => ({
+      fluxAdapter: {
+        generate: vi.fn().mockResolvedValue({
+          images: [{ url: 'https://example.com/image.png', width: 1024, height: 1024 }],
+          seed: 12345,
+        }),
+      },
+    }));
+
+    // Create test subtask
+    const subTask = await payload.create({
+      collection: 'sub-tasks',
+      data: { /* ... */ },
+    });
+
+    // Execute job
+    await generateImageHandler({ input: { subTaskId: subTask.id } });
+
+    // Verify asset created
+    const assets = await payload.find({
+      collection: 'media',
+      where: { relatedSubtask: { equals: subTask.id } },
+    });
+
+    expect(assets.docs).toHaveLength(1);
+  });
+});
+```
+
+**Adapter Contract Test Pattern**:
+```typescript
+// tests/contract/adapters.contract.test.ts
+import { describe, it, expect } from 'vitest';
+import type { ImageGenerationAdapter, GenerationResult } from '../../src/adapters/types';
+
+// Contract: All adapters must conform to this interface
+const adapterContractTests = (adapterName: string, adapter: ImageGenerationAdapter) => {
+  describe(`${adapterName} adapter contract`, () => {
+    it('should have required providerId', () => {
+      expect(adapter.providerId).toBeDefined();
+      expect(typeof adapter.providerId).toBe('string');
+    });
+
+    it('should have generate method that returns GenerationResult', async () => {
+      expect(typeof adapter.generate).toBe('function');
+    });
+
+    it('should have normalizeError method', () => {
+      expect(typeof adapter.normalizeError).toBe('function');
+    });
+
+    it('should have getDefaultOptions method', () => {
+      expect(typeof adapter.getDefaultOptions).toBe('function');
+      const options = adapter.getDefaultOptions();
+      expect(typeof options).toBe('object');
+    });
+  });
+};
+
+// Run contract tests for all adapters
+import { fluxAdapter } from '../../src/adapters/flux.adapter';
+import { dalleAdapter } from '../../src/adapters/dalle.adapter';
+import { nanoBananaAdapter } from '../../src/adapters/nano-banana.adapter';
+
+adapterContractTests('Flux', fluxAdapter);
+adapterContractTests('DALL-E', dalleAdapter);
+adapterContractTests('Nano Banana', nanoBananaAdapter);
+```
+
+---
+
+### 12. Progressive Implementation Testing Protocol
+
+**Context**: Ensure each implementation phase produces verifiable, working code before advancing.
+
+**Decision**: Phase-gated testing with mandatory test passage before phase advancement
+
+**Protocol**:
+
+| Phase | Test Requirements | Gate Criteria |
+|-------|-------------------|---------------|
+| Phase 1: Setup | N/A (infrastructure only) | Project builds, linting passes |
+| Phase 2: Foundational | Unit tests for lib utilities | All unit tests pass |
+| Phase 3+: User Stories | Unit + Integration tests | All tests pass, no regressions |
+| Final: Polish | E2E tests | Full test suite passes |
+
+**Implementation Rules**:
+1. Write tests before or during implementation (TDD encouraged but not mandatory)
+2. Tests must fail first to verify they're testing the right thing
+3. No advancing to Phase N+1 until all Phase N tests pass
+4. If a test fails during implementation, stop and fix immediately
+5. Commit frequently with passing tests
+
+**Test Failure Response Protocol**:
+```
+IF test fails THEN
+  1. Do NOT proceed to next task
+  2. Analyze failure root cause
+  3. Fix implementation OR fix test if test is wrong
+  4. Verify all related tests pass
+  5. Resume implementation
+END IF
+```
