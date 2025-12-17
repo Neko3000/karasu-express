@@ -69,7 +69,10 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'style-templates': StyleTemplate;
+    'model-configs': ModelConfig;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -78,7 +81,10 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'style-templates': StyleTemplatesSelect<false> | StyleTemplatesSelect<true>;
+    'model-configs': ModelConfigsSelect<false> | ModelConfigsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -94,7 +100,14 @@ export interface Config {
     collection: 'users';
   };
   jobs: {
-    tasks: unknown;
+    tasks: {
+      'expand-prompt': TaskExpandPrompt;
+      'generate-image': TaskGenerateImage;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -160,6 +173,108 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * Reusable style templates for AI image generation
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "style-templates".
+ */
+export interface StyleTemplate {
+  id: string;
+  /**
+   * Unique identifier (lowercase, hyphens only)
+   */
+  styleId: string;
+  /**
+   * Display name for the style
+   */
+  name: string;
+  /**
+   * Brief description of the style effect
+   */
+  description?: string | null;
+  /**
+   * Positive prompt template. Must contain {prompt} placeholder.
+   */
+  positivePrompt: string;
+  /**
+   * Negative prompt additions (appended to any user negative prompt)
+   */
+  negativePrompt?: string | null;
+  /**
+   * Preview thumbnail showing the style effect
+   */
+  previewImage?: (string | null) | Media;
+  /**
+   * System styles cannot be deleted
+   */
+  isSystem?: boolean | null;
+  /**
+   * Display order in UI (lower = first)
+   */
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * AI model configurations and rate limits
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "model-configs".
+ */
+export interface ModelConfig {
+  id: string;
+  /**
+   * Unique identifier (e.g., flux-pro, dalle-3)
+   */
+  modelId: string;
+  /**
+   * Human-readable name
+   */
+  displayName: string;
+  /**
+   * AI provider for this model
+   */
+  provider: 'fal' | 'openai' | 'google';
+  /**
+   * Whether this model is available for selection
+   */
+  isEnabled?: boolean | null;
+  /**
+   * Maximum concurrent requests
+   */
+  rateLimit: number;
+  /**
+   * Default generation parameters (JSON)
+   */
+  defaultParams:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Supported aspect ratios for this model
+   */
+  supportedAspectRatios: ('1:1' | '16:9' | '9:16' | '4:3' | '3:4')[];
+  /**
+   * Features supported by this model
+   */
+  supportedFeatures?: ('batch' | 'seed' | 'negativePrompt')[] | null;
+  /**
+   * Display order in UI
+   */
+  sortOrder?: number | null;
+  /**
+   * Internal notes about this model
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -178,6 +293,98 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'expand-prompt' | 'generate-image';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'expand-prompt' | 'generate-image') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -190,6 +397,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'style-templates';
+        value: string | StyleTemplate;
+      } | null)
+    | ({
+        relationTo: 'model-configs';
+        value: string | ModelConfig;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -275,11 +490,76 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "style-templates_select".
+ */
+export interface StyleTemplatesSelect<T extends boolean = true> {
+  styleId?: T;
+  name?: T;
+  description?: T;
+  positivePrompt?: T;
+  negativePrompt?: T;
+  previewImage?: T;
+  isSystem?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "model-configs_select".
+ */
+export interface ModelConfigsSelect<T extends boolean = true> {
+  modelId?: T;
+  displayName?: T;
+  provider?: T;
+  isEnabled?: T;
+  rateLimit?: T;
+  defaultParams?: T;
+  supportedAspectRatios?: T;
+  supportedFeatures?: T;
+  sortOrder?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -312,6 +592,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskExpand-prompt".
+ */
+export interface TaskExpandPrompt {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskGenerate-image".
+ */
+export interface TaskGenerateImage {
+  input?: unknown;
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

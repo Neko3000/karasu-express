@@ -84,15 +84,33 @@ export class DalleAdapter implements ImageGenerationAdapter {
   readonly modelId = 'dalle-3'
   readonly displayName = 'DALL-E 3'
 
-  private readonly client: OpenAI
+  private client: OpenAI | null = null
   private readonly config: DalleConfig
 
   constructor(config?: DalleConfig) {
     this.config = { ...DEFAULT_DALLE_CONFIG, ...config }
+    // Note: OpenAI client is lazily initialized in getClient() to avoid
+    // throwing errors when OPENAI_API_KEY is not set at module load time
+  }
 
-    this.client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
+  /**
+   * Get or create the OpenAI client (lazy initialization)
+   * @throws Error if OPENAI_API_KEY is not set
+   */
+  private getClient(): OpenAI {
+    if (!this.client) {
+      const apiKey = process.env.OPENAI_API_KEY
+      if (!apiKey) {
+        throw createNormalizedError(
+          ErrorCategory.ProviderError,
+          'DALL-E adapter requires OPENAI_API_KEY environment variable to be set. Please configure your OpenAI API key.',
+          null,
+          'MISSING_API_KEY'
+        )
+      }
+      this.client = new OpenAI({ apiKey })
+    }
+    return this.client
   }
 
   /**
@@ -127,11 +145,14 @@ export class DalleAdapter implements ImageGenerationAdapter {
       }
     }
 
+    // Get the client (lazy initialization with API key validation)
+    const client = this.getClient()
+
     // Execute with rate limiting
     const response = await withRateLimit(
       this.providerId,
       async () => {
-        return this.client.images.generate(requestPayload)
+        return client.images.generate(requestPayload)
       },
       30000
     )
