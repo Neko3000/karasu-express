@@ -388,9 +388,13 @@ export interface Task {
       }[]
     | null;
   /**
-   * Selected style templates
+   * Selected style templates from database (legacy - use importedStyleIds for JSON styles)
    */
-  styles: (string | StyleTemplate)[];
+  styles?: (string | StyleTemplate)[] | null;
+  /**
+   * Selected style IDs from imported JSON styles (e.g., "base", "cyberpunk", "anime")
+   */
+  importedStyleIds?: string[] | null;
   /**
    * Selected AI model IDs
    */
@@ -841,6 +845,7 @@ export interface TasksSelect<T extends boolean = true> {
         id?: T;
       };
   styles?: T;
+  importedStyleIds?: T;
   models?: T;
   batchConfig?:
     | T

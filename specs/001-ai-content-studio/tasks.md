@@ -163,18 +163,18 @@ Per plan.md Testing Requirements:
 
 #### Unit Tests (Style Loader)
 
-- [ ] T033b [P] [US1] Write unit tests for style-loader service in tests/unit/services/style-loader.test.ts (test loadStylesFromJson, parseStyleTemplate, getDefaultStyle returns "base")
+- [X] T033b [P] [US1] Write unit tests for style-loader service in tests/unit/services/style-loader.test.ts (test loadStylesFromJson, parseStyleTemplate, getDefaultStyle returns "base")
 
 #### Implementation for Imported Styles
 
-- [ ] T033c [US1] Create style types in src/lib/style-types.ts for ImportedStyle interface matching JSON schema (name, prompt, negative_prompt)
-- [ ] T033d [US1] Implement style-loader service in src/services/style-loader.ts with loadStylesFromJson() function to read src/resources/style-list/sdxl_styles_exp.json
-- [ ] T033e [US1] Add getDefaultStyle() function in src/services/style-loader.ts that returns "base" style as default selection
-- [ ] T033f [US1] Add getAllStyles() function in src/services/style-loader.ts to return all styles sorted alphabetically with "base" first
-- [ ] T033g [US1] Create GET /api/studio/styles endpoint in src/endpoints/get-styles.ts to return imported styles for frontend consumption
-- [ ] T033h [P] [US1] Write integration tests for get-styles endpoint in tests/integration/endpoints/styles.integration.test.ts (test returns all styles, base is first, correct format)
-- [ ] T033i [US1] Update style-merger service in src/services/style-merger.ts to accept ImportedStyle in addition to database StyleTemplate
-- [ ] T033j [US1] Integrate imported styles with task creation - update Tasks collection to support imported style IDs alongside database style relationships
+- [X] T033c [US1] Create style types in src/lib/style-types.ts for ImportedStyle interface matching JSON schema (name, prompt, negative_prompt)
+- [X] T033d [US1] Implement style-loader service in src/services/style-loader.ts with loadStylesFromJson() function to read src/resources/style-list/sdxl_styles_exp.json
+- [X] T033e [US1] Add getDefaultStyle() function in src/services/style-loader.ts that returns "base" style as default selection
+- [X] T033f [US1] Add getAllStyles() function in src/services/style-loader.ts to return all styles sorted alphabetically with "base" first
+- [X] T033g [US1] Create GET /api/studio/styles endpoint in src/endpoints/get-styles.ts to return imported styles for frontend consumption
+- [X] T033h [P] [US1] Write integration tests for get-styles endpoint in tests/integration/endpoints/styles.integration.test.ts (test returns all styles, base is first, correct format)
+- [X] T033i [US1] Update style-merger service in src/services/style-merger.ts to accept ImportedStyle in addition to database StyleTemplate
+- [X] T033j [US1] Integrate imported styles with task creation - update Tasks collection to support imported style IDs alongside database style relationships
 
 **Checkpoint**: User Story 1 complete - all unit tests pass for services, all integration tests pass for jobs/endpoints. Admin can create a task, submit it, and receive generated images.
 

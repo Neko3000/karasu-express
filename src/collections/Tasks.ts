@@ -11,7 +11,6 @@ import type { CollectionConfig } from 'payload'
 import {
   TaskStatus,
   TASK_STATUS_OPTIONS,
-  BATCH_WARNING_THRESHOLD,
   MAX_BATCH_SIZE,
   DEFAULT_BATCH_SIZE,
   DEFAULT_VARIANT_COUNT,
@@ -95,16 +94,18 @@ export const Tasks: CollectionConfig = {
       type: 'relationship',
       relationTo: 'style-templates',
       hasMany: true,
-      required: true,
       admin: {
-        description: 'Selected style templates',
+        description: 'Selected style templates from database (legacy - use importedStyleIds for JSON styles)',
       },
-      validate: (value: string[] | null | undefined) => {
-        if (!value || value.length === 0) {
-          return 'At least one style must be selected'
-        }
-        return true
+    },
+    {
+      name: 'importedStyleIds',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        description: 'Selected style IDs from imported JSON styles (e.g., "base", "cyberpunk", "anime")',
       },
+      defaultValue: ['base'],
     },
     {
       name: 'models',
@@ -241,13 +242,21 @@ export const Tasks: CollectionConfig = {
         if (operation === 'create' || operation === 'update') {
           // Calculate total expected if we have the necessary data
           const expandedPromptsCount = data?.expandedPrompts?.length || data?.batchConfig?.variantCount || DEFAULT_VARIANT_COUNT
-          const stylesCount = data?.styles?.length || 0
+
+          // Count styles from both sources: database styles and imported styles
+          const dbStylesCount = data?.styles?.length || 0
+          const importedStylesCount = data?.importedStyleIds?.length || 0
+          const stylesCount = dbStylesCount + importedStylesCount
+
           const modelsCount = data?.models?.length || 0
           const countPerPrompt = data?.batchConfig?.countPerPrompt || DEFAULT_BATCH_SIZE
           const includeBaseStyle = data?.batchConfig?.includeBaseStyle ?? true
 
-          // Add 1 for base style if included and not already in styles
-          const effectiveStylesCount = includeBaseStyle ? stylesCount + 1 : stylesCount
+          // Check if base style is already in importedStyleIds
+          const hasBaseStyle = data?.importedStyleIds?.includes('base') || false
+
+          // Add 1 for base style if includeBaseStyle is true and not already selected
+          const effectiveStylesCount = (includeBaseStyle && !hasBaseStyle) ? stylesCount + 1 : stylesCount
 
           const totalExpected = expandedPromptsCount * effectiveStylesCount * modelsCount * countPerPrompt
 
@@ -259,6 +268,22 @@ export const Tasks: CollectionConfig = {
 
           return data
         }
+      },
+    ],
+    beforeValidate: [
+      // Ensure at least one style is selected (from either source)
+      async ({ data }) => {
+        if (!data) return data
+
+        const dbStylesCount = data.styles?.length || 0
+        const importedStylesCount = data.importedStyleIds?.length || 0
+
+        if (dbStylesCount === 0 && importedStylesCount === 0) {
+          // Set default to base if no styles selected
+          data.importedStyleIds = ['base']
+        }
+
+        return data
       },
     ],
   },
