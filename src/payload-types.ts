@@ -71,6 +71,8 @@ export interface Config {
     media: Media;
     'style-templates': StyleTemplate;
     'model-configs': ModelConfig;
+    tasks: Task;
+    'sub-tasks': SubTask;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +85,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'style-templates': StyleTemplatesSelect<false> | StyleTemplatesSelect<true>;
     'model-configs': ModelConfigsSelect<false> | ModelConfigsSelect<true>;
+    tasks: TasksSelect<false> | TasksSelect<true>;
+    'sub-tasks': SubTasksSelect<false> | SubTasksSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -154,12 +158,53 @@ export interface User {
   password?: string | null;
 }
 /**
+ * Generated images and videos
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: string;
+  /**
+   * Alt text for accessibility
+   */
   alt: string;
+  /**
+   * Source SubTask reference
+   */
+  relatedSubtask?: (string | null) | SubTask;
+  /**
+   * Asset type (image or video)
+   */
+  assetType?: ('image' | 'video') | null;
+  /**
+   * Generation parameters snapshot
+   */
+  generationMeta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Parent task ID for quick filtering
+   */
+  taskId?: string | null;
+  /**
+   * Style ID for quick filtering
+   */
+  styleId?: string | null;
+  /**
+   * Model ID for quick filtering
+   */
+  modelId?: string | null;
+  /**
+   * Subject slug for quick filtering
+   */
+  subjectSlug?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -171,6 +216,224 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Individual image generation sub-tasks
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sub-tasks".
+ */
+export interface SubTask {
+  id: string;
+  /**
+   * Reference to parent Task
+   */
+  parentTask: string | Task;
+  /**
+   * Execution status
+   */
+  status: 'pending' | 'processing' | 'success' | 'failed';
+  /**
+   * Current worker ID (lock mechanism)
+   */
+  lockedBy?: string | null;
+  /**
+   * Lock expiration time
+   */
+  lockExpiresAt?: string | null;
+  /**
+   * Applied style template ID
+   */
+  styleId: string;
+  /**
+   * Target AI model ID
+   */
+  modelId: string;
+  /**
+   * Prompt variant details (variantId, variantName, expandedPrompt, subjectSlug)
+   */
+  expandedPrompt:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Merged prompt (expanded prompt + style modifiers)
+   */
+  finalPrompt: string;
+  /**
+   * Negative prompt from style template
+   */
+  negativePrompt?: string | null;
+  /**
+   * Index within batch (0-based)
+   */
+  batchIndex: number;
+  /**
+   * Aspect ratio for generation
+   */
+  aspectRatio?: ('1:1' | '16:9' | '9:16' | '4:3' | '3:4') | null;
+  /**
+   * Optional seed for reproducibility
+   */
+  seed?: number | null;
+  /**
+   * Raw API request body (schema-less)
+   */
+  requestPayload?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Raw API response (schema-less)
+   */
+  responseData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Error message/stack trace
+   */
+  errorLog?: string | null;
+  /**
+   * Normalized error type
+   */
+  errorCategory?:
+    | (
+        | 'RATE_LIMITED'
+        | 'CONTENT_FILTERED'
+        | 'INVALID_INPUT'
+        | 'PROVIDER_ERROR'
+        | 'NETWORK_ERROR'
+        | 'TIMEOUT'
+        | 'UNKNOWN'
+      )
+    | null;
+  /**
+   * Number of retry attempts (max: 3)
+   */
+  retryCount: number;
+  /**
+   * Processing start time
+   */
+  startedAt?: string | null;
+  /**
+   * Processing completion time
+   */
+  completedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * AI image generation tasks
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tasks".
+ */
+export interface Task {
+  id: string;
+  /**
+   * User's original creative theme input
+   */
+  subject: string;
+  /**
+   * LLM-optimized prompt variants
+   */
+  expandedPrompts?:
+    | {
+        variantId: string;
+        /**
+         * e.g., "Realistic", "Abstract", "Artistic"
+         */
+        variantName: string;
+        originalPrompt: string;
+        expandedPrompt: string;
+        /**
+         * English slug for file naming
+         */
+        subjectSlug: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Selected style templates
+   */
+  styles: (string | StyleTemplate)[];
+  /**
+   * Selected AI model IDs
+   */
+  models: ('flux-pro' | 'flux-dev' | 'flux-schnell' | 'dalle-3' | 'imagen-3')[];
+  /**
+   * Batch generation settings
+   */
+  batchConfig: {
+    /**
+     * Images per prompt variant (1-50)
+     */
+    countPerPrompt: number;
+    /**
+     * Computed: prompts × styles × models × countPerPrompt
+     */
+    totalExpected?: number | null;
+    /**
+     * Number of prompt variants to generate (1-10)
+     */
+    variantCount?: number | null;
+    /**
+     * Include Base style (no modifications) in generation
+     */
+    includeBaseStyle?: boolean | null;
+  };
+  /**
+   * Current task status
+   */
+  status: 'draft' | 'queued' | 'expanding' | 'processing' | 'completed' | 'partial_failed' | 'failed';
+  /**
+   * Completion percentage (0-100)
+   */
+  progress: number;
+  /**
+   * Enable web search (RAG) for prompt optimization
+   */
+  webSearchEnabled?: boolean | null;
+  /**
+   * Aspect ratio for generated images
+   */
+  aspectRatio?: ('1:1' | '16:9' | '9:16' | '4:3' | '3:4') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Reusable style templates for AI image generation
@@ -405,6 +668,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'model-configs';
         value: string | ModelConfig;
+      } | null)
+    | ({
+        relationTo: 'tasks';
+        value: string | Task;
+      } | null)
+    | ({
+        relationTo: 'sub-tasks';
+        value: string | SubTask;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -476,6 +747,13 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  relatedSubtask?: T;
+  assetType?: T;
+  generationMeta?: T;
+  taskId?: T;
+  styleId?: T;
+  modelId?: T;
+  subjectSlug?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -487,6 +765,30 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -519,6 +821,66 @@ export interface ModelConfigsSelect<T extends boolean = true> {
   supportedFeatures?: T;
   sortOrder?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tasks_select".
+ */
+export interface TasksSelect<T extends boolean = true> {
+  subject?: T;
+  expandedPrompts?:
+    | T
+    | {
+        variantId?: T;
+        variantName?: T;
+        originalPrompt?: T;
+        expandedPrompt?: T;
+        subjectSlug?: T;
+        id?: T;
+      };
+  styles?: T;
+  models?: T;
+  batchConfig?:
+    | T
+    | {
+        countPerPrompt?: T;
+        totalExpected?: T;
+        variantCount?: T;
+        includeBaseStyle?: T;
+      };
+  status?: T;
+  progress?: T;
+  webSearchEnabled?: T;
+  aspectRatio?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sub-tasks_select".
+ */
+export interface SubTasksSelect<T extends boolean = true> {
+  parentTask?: T;
+  status?: T;
+  lockedBy?: T;
+  lockExpiresAt?: T;
+  styleId?: T;
+  modelId?: T;
+  expandedPrompt?: T;
+  finalPrompt?: T;
+  negativePrompt?: T;
+  batchIndex?: T;
+  aspectRatio?: T;
+  seed?: T;
+  requestPayload?: T;
+  responseData?: T;
+  errorLog?: T;
+  errorCategory?: T;
+  retryCount?: T;
+  startedAt?: T;
+  completedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
