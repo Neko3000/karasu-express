@@ -15,6 +15,25 @@ import {
   DEFAULT_BATCH_SIZE,
   DEFAULT_VARIANT_COUNT,
 } from '../lib/types'
+import { getAllStyles } from '../services/style-loader'
+
+/**
+ * Generate select options for imported styles
+ * Loads all styles from the JSON file and converts them to PayloadCMS select options
+ */
+function getImportedStyleOptions(): { label: string; value: string }[] {
+  try {
+    const styles = getAllStyles()
+    return styles.map((style) => ({
+      label: style.name,
+      value: style.styleId,
+    }))
+  } catch (error) {
+    console.error('[Tasks] Failed to load imported style options:', error)
+    // Return base style as fallback
+    return [{ label: 'base', value: 'base' }]
+  }
+}
 
 export const Tasks: CollectionConfig = {
   slug: 'tasks',
@@ -100,10 +119,12 @@ export const Tasks: CollectionConfig = {
     },
     {
       name: 'importedStyleIds',
-      type: 'text',
+      type: 'select',
       hasMany: true,
+      options: getImportedStyleOptions(),
       admin: {
-        description: 'Selected style IDs from imported JSON styles (e.g., "base", "cyberpunk", "anime")',
+        description: 'Select style templates from imported JSON styles',
+        isSortable: true,
       },
       defaultValue: ['base'],
     },
