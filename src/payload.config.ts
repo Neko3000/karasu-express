@@ -9,6 +9,8 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { StyleTemplates } from './collections/StyleTemplates'
 import { ModelConfigs } from './collections/ModelConfigs'
+import { Tasks } from './collections/Tasks'
+import { SubTasks } from './collections/SubTasks'
 
 import { expandPromptHandler } from './jobs/expand-prompt'
 import { generateImageHandler } from './jobs/generate-image'
@@ -29,7 +31,7 @@ export default buildConfig({
     avatar: 'default',
     dateFormat: 'MMMM do yyyy, h:mm a',
   },
-  collections: [Users, Media, StyleTemplates, ModelConfigs],
+  collections: [Users, Media, StyleTemplates, ModelConfigs, Tasks, SubTasks],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
