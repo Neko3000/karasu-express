@@ -157,6 +157,25 @@ Per plan.md Testing Requirements:
 - [X] T032 [US1] Create POST /api/tasks/{id}/retry-failed custom endpoint in src/endpoints/retry-failed.ts to re-queue failed sub-tasks
 - [X] T033 [P] [US1] Create POST /api/studio/calculate-fission custom endpoint in src/endpoints/calculate-fission.ts for preview calculation
 
+### Imported Style Prompts (New Feature)
+
+> **Purpose**: Load style prompts from external JSON file and display them on the task creation page with "base" as default
+
+#### Unit Tests (Style Loader)
+
+- [ ] T033b [P] [US1] Write unit tests for style-loader service in tests/unit/services/style-loader.test.ts (test loadStylesFromJson, parseStyleTemplate, getDefaultStyle returns "base")
+
+#### Implementation for Imported Styles
+
+- [ ] T033c [US1] Create style types in src/lib/style-types.ts for ImportedStyle interface matching JSON schema (name, prompt, negative_prompt)
+- [ ] T033d [US1] Implement style-loader service in src/services/style-loader.ts with loadStylesFromJson() function to read src/resources/style-list/sdxl_styles_exp.json
+- [ ] T033e [US1] Add getDefaultStyle() function in src/services/style-loader.ts that returns "base" style as default selection
+- [ ] T033f [US1] Add getAllStyles() function in src/services/style-loader.ts to return all styles sorted alphabetically with "base" first
+- [ ] T033g [US1] Create GET /api/studio/styles endpoint in src/endpoints/get-styles.ts to return imported styles for frontend consumption
+- [ ] T033h [P] [US1] Write integration tests for get-styles endpoint in tests/integration/endpoints/styles.integration.test.ts (test returns all styles, base is first, correct format)
+- [ ] T033i [US1] Update style-merger service in src/services/style-merger.ts to accept ImportedStyle in addition to database StyleTemplate
+- [ ] T033j [US1] Integrate imported styles with task creation - update Tasks collection to support imported style IDs alongside database style relationships
+
 **Checkpoint**: User Story 1 complete - all unit tests pass for services, all integration tests pass for jobs/endpoints. Admin can create a task, submit it, and receive generated images.
 
 ---
@@ -426,7 +445,7 @@ Per plan.md Testing Requirements:
 |-------|------------|-------------------|----------------|---------------|
 | Phase 1: Setup | - | - | - | Project builds, test infra ready |
 | Phase 2: Foundational | T010a, T011a, T013a, T014a, T015a | - | T016a | All unit + contract tests pass |
-| Phase 3: US1 | T020a, T020b, T020c | T020d, T020e, T020f | - | All tests pass |
+| Phase 3: US1 | T020a, T020b, T020c, T033b | T020d, T020e, T020f, T033h | - | All tests pass |
 | Phase 4: US2 | T033a | T037a | - | All tests pass |
 | Phase 5: US3 | - | T038a | - | Integration tests pass |
 | Phase 6: US4 | - | - | - | Manual testing |
@@ -437,7 +456,7 @@ Per plan.md Testing Requirements:
 | Phase 11: Polish | - | - | - | Full suite passes |
 | Phase 12: Veo | T076a | - | - | (Deferred) |
 
-**Total Test Tasks**: 16 (8 unit, 7 integration, 1 contract)
+**Total Test Tasks**: 18 (9 unit, 8 integration, 1 contract)
 
 ---
 
