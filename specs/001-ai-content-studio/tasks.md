@@ -131,31 +131,31 @@ Per plan.md Testing Requirements:
 
 #### Unit Tests (Services)
 
-- [ ] T020a [P] [US1] Write unit tests for task-orchestrator service in tests/unit/services/task-orchestrator.test.ts (test calculateFission with various inputs, createSubTasks logic)
-- [ ] T020b [P] [US1] Write unit tests for style-merger utility in tests/unit/services/style-merger.test.ts (test mergeStyle with {prompt} placeholder, base style, negative prompts)
-- [ ] T020c [P] [US1] Write unit tests for asset-manager service in tests/unit/services/asset-manager.test.ts (test generateFilename follows naming convention, various params)
+- [X] T020a [P] [US1] Write unit tests for task-orchestrator service in tests/unit/services/task-orchestrator.test.ts (test calculateFission with various inputs, createSubTasks logic)
+- [X] T020b [P] [US1] Write unit tests for style-merger utility in tests/unit/services/style-merger.test.ts (test mergeStyle with {prompt} placeholder, base style, negative prompts)
+- [X] T020c [P] [US1] Write unit tests for asset-manager service in tests/unit/services/asset-manager.test.ts (test generateFilename follows naming convention, various params)
 
 #### Integration Tests (Jobs & Endpoints)
 
-- [ ] T020d [P] [US1] Write integration tests for expand-prompt job in tests/integration/jobs/expand-prompt.integration.test.ts (mock LLM, test task status transitions, expandedPrompts updates)
-- [ ] T020e [P] [US1] Write integration tests for generate-image job in tests/integration/jobs/generate-image.integration.test.ts (mock adapter, test subtask status, asset creation, progress updates)
-- [ ] T020f [P] [US1] Write integration tests for task endpoints in tests/integration/endpoints/tasks.integration.test.ts (test CRUD, submit, retry-failed endpoints)
+- [X] T020d [P] [US1] Write integration tests for expand-prompt job in tests/integration/jobs/expand-prompt.integration.test.ts (mock LLM, test task status transitions, expandedPrompts updates)
+- [X] T020e [P] [US1] Write integration tests for generate-image job in tests/integration/jobs/generate-image.integration.test.ts (mock adapter, test subtask status, asset creation, progress updates)
+- [X] T020f [P] [US1] Write integration tests for task endpoints in tests/integration/endpoints/tasks.integration.test.ts (test CRUD, submit, retry-failed endpoints)
 
 ### Implementation for User Story 1
 
-- [ ] T021 [US1] Create Tasks collection in src/collections/Tasks.ts with subject, expandedPrompts array, styles relationship, models selection, batchConfig group, status enum, and progress field
-- [ ] T022 [US1] Create SubTasks collection in src/collections/SubTasks.ts with parentTask relationship, status, styleId, modelId, finalPrompt, negativePrompt, requestPayload JSON, responseData JSON, errorLog, errorCategory, retryCount, and timestamps
-- [ ] T023 [US1] Create Media collection in src/collections/Media.ts as PayloadCMS Upload collection with relatedSubtask relationship, generationMeta JSON, and assetType enum
-- [ ] T024 [US1] Implement task orchestrator service in src/services/task-orchestrator.ts with calculateFission() and createSubTasks() functions
-- [ ] T025 [US1] Implement style merger utility in src/services/style-merger.ts with mergeStyle(prompt, style) function that handles {prompt} placeholder substitution
-- [ ] T026 [US1] Implement asset manager service in src/services/asset-manager.ts with generateFilename() and uploadToStorage() functions following naming convention
-- [ ] T027 [P] [US1] Create expand-prompt job handler in src/jobs/expand-prompt.ts that calls LLM and updates Task.expandedPrompts
-- [ ] T028 [P] [US1] Create generate-image job handler in src/jobs/generate-image.ts that calls adapter, uploads to storage, creates Media document
-- [ ] T029 [US1] Implement Task submission endpoint hook in src/collections/Tasks.ts afterChange hook to queue expand-prompt job when status changes to queued
-- [ ] T030 [US1] Implement progress aggregation logic in SubTasks collection afterChange hook to update parent Task.progress and Task.status
-- [ ] T031 [US1] Create POST /api/tasks/{id}/submit custom endpoint in src/endpoints/submit-task.ts to transition task from draft to queued
-- [ ] T032 [US1] Create POST /api/tasks/{id}/retry-failed custom endpoint in src/endpoints/retry-failed.ts to re-queue failed sub-tasks
-- [ ] T033 [P] [US1] Create POST /api/studio/calculate-fission custom endpoint in src/endpoints/calculate-fission.ts for preview calculation
+- [X] T021 [US1] Create Tasks collection in src/collections/Tasks.ts with subject, expandedPrompts array, styles relationship, models selection, batchConfig group, status enum, and progress field
+- [X] T022 [US1] Create SubTasks collection in src/collections/SubTasks.ts with parentTask relationship, status, styleId, modelId, finalPrompt, negativePrompt, requestPayload JSON, responseData JSON, errorLog, errorCategory, retryCount, and timestamps
+- [X] T023 [US1] Create Media collection in src/collections/Media.ts as PayloadCMS Upload collection with relatedSubtask relationship, generationMeta JSON, and assetType enum
+- [X] T024 [US1] Implement task orchestrator service in src/services/task-orchestrator.ts with calculateFission() and createSubTasks() functions
+- [X] T025 [US1] Implement style merger utility in src/services/style-merger.ts with mergeStyle(prompt, style) function that handles {prompt} placeholder substitution
+- [X] T026 [US1] Implement asset manager service in src/services/asset-manager.ts with generateFilename() and uploadToStorage() functions following naming convention
+- [X] T027 [P] [US1] Create expand-prompt job handler in src/jobs/expand-prompt.ts that calls LLM and updates Task.expandedPrompts
+- [X] T028 [P] [US1] Create generate-image job handler in src/jobs/generate-image.ts that calls adapter, uploads to storage, creates Media document
+- [X] T029 [US1] Implement Task submission endpoint hook in src/collections/Tasks.ts afterChange hook to queue expand-prompt job when status changes to queued
+- [X] T030 [US1] Implement progress aggregation logic in SubTasks collection afterChange hook to update parent Task.progress and Task.status
+- [X] T031 [US1] Create POST /api/tasks/{id}/submit custom endpoint in src/endpoints/submit-task.ts to transition task from draft to queued
+- [X] T032 [US1] Create POST /api/tasks/{id}/retry-failed custom endpoint in src/endpoints/retry-failed.ts to re-queue failed sub-tasks
+- [X] T033 [P] [US1] Create POST /api/studio/calculate-fission custom endpoint in src/endpoints/calculate-fission.ts for preview calculation
 
 **Checkpoint**: User Story 1 complete - all unit tests pass for services, all integration tests pass for jobs/endpoints. Admin can create a task, submit it, and receive generated images.
 
