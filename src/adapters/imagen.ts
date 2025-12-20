@@ -1,12 +1,13 @@
 /**
- * Imagen 3 Adapter (Google Cloud Vertex AI)
+ * Imagen Adapter (Google AI - Gemini 3 Pro Image)
  *
- * Implementation of the ImageGenerationAdapter for Google's Imagen 3
- * (also known as "Nano Banana" internally).
+ * Implementation of the ImageGenerationAdapter for Google's Gemini image generation
+ * using the @google/generative-ai SDK with API key authentication.
+ *
+ * Model: gemini-3-pro-image-preview
  */
 
-// Note: We use the REST API directly instead of the VertexAI SDK
-// because the SDK doesn't have full image generation support yet
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 import { AspectRatio, Provider } from '../lib/types'
 import {
@@ -25,30 +26,24 @@ import type {
 } from './types'
 
 /**
- * Imagen specific configuration
+ * Imagen specific configuration using Google AI API Key
  */
 export interface ImagenConfig {
-  /** Google Cloud project ID */
-  projectId?: string
-  /** Google Cloud location/region */
-  location?: string
-  /** Safety setting level */
-  safetySetting?: 'block_few' | 'block_some' | 'block_most'
+  /** Google AI API Key (from https://aistudio.google.com/apikey) */
+  apiKey?: string
 }
 
 /**
  * Default Imagen configuration
  */
 const DEFAULT_IMAGEN_CONFIG: ImagenConfig = {
-  projectId: process.env.GOOGLE_CLOUD_PROJECT,
-  location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
-  safetySetting: 'block_some',
+  apiKey: process.env.GOOGLE_AI_API_KEY,
 }
 
 /**
- * Map aspect ratio to Imagen format
+ * Map aspect ratio to Google AI format
  */
-const ASPECT_RATIO_TO_IMAGEN: Record<AspectRatio, string> = {
+const ASPECT_RATIO_TO_GOOGLE_AI: Record<AspectRatio, string> = {
   [AspectRatio.Square]: '1:1',
   [AspectRatio.Landscape]: '16:9',
   [AspectRatio.Portrait]: '9:16',
@@ -57,7 +52,7 @@ const ASPECT_RATIO_TO_IMAGEN: Record<AspectRatio, string> = {
 }
 
 /**
- * Approximate dimensions for aspect ratios (Imagen determines final size)
+ * Approximate dimensions for aspect ratios
  */
 const ASPECT_RATIO_DIMENSIONS: Record<
   AspectRatio,
@@ -71,7 +66,7 @@ const ASPECT_RATIO_DIMENSIONS: Record<
 }
 
 /**
- * Supported aspect ratios for Imagen 3
+ * Supported aspect ratios for Gemini image generation
  */
 const IMAGEN_SUPPORTED_ASPECT_RATIOS: AspectRatio[] = [
   AspectRatio.Square,
@@ -82,67 +77,92 @@ const IMAGEN_SUPPORTED_ASPECT_RATIOS: AspectRatio[] = [
 ]
 
 /**
- * Imagen 3 Adapter using Google Cloud Vertex AI
+ * Gemini 3 Pro Image Adapter using Google AI SDK
  */
 export class ImagenAdapter implements ImageGenerationAdapter {
   readonly providerId = Provider.Google
-  readonly modelId = 'imagen-3'
-  readonly displayName = 'Imagen 3 (Nano Banana)'
+  readonly modelId = 'gemini-3-pro-image-preview'
+  readonly displayName = 'Gemini 3 Pro Image'
 
   private readonly config: ImagenConfig
+  private genAI: GoogleGenerativeAI | null = null
 
   constructor(config?: ImagenConfig) {
     this.config = { ...DEFAULT_IMAGEN_CONFIG, ...config }
   }
 
   /**
-   * Generate images using Imagen 3
+   * Get or create the GoogleGenerativeAI client
+   */
+  private getClient(): GoogleGenerativeAI {
+    const apiKey = this.config.apiKey || process.env.GOOGLE_AI_API_KEY
+
+    if (!apiKey) {
+      throw createNormalizedError(
+        ErrorCategory.ProviderError,
+        'Google AI API key is required. Set GOOGLE_AI_API_KEY environment variable.',
+        null,
+        'API_KEY_MISSING'
+      )
+    }
+
+    if (!this.genAI) {
+      this.genAI = new GoogleGenerativeAI(apiKey)
+    }
+
+    return this.genAI
+  }
+
+  /**
+   * Generate images using Gemini 3 Pro Image
    *
-   * Note: Imagen 3 uses the Vertex AI REST API directly since the SDK
-   * doesn't have full image generation support yet.
+   * Uses the @google/generative-ai SDK with generateContent API
+   * that supports image generation through responseModalities configuration.
    */
   async generate(params: ImageGenerationParams): Promise<GenerationResult> {
-    const aspectRatio = ASPECT_RATIO_TO_IMAGEN[params.aspectRatio]
+    const aspectRatio = ASPECT_RATIO_TO_GOOGLE_AI[params.aspectRatio]
     const dimensions = ASPECT_RATIO_DIMENSIONS[params.aspectRatio]
-
-    // Build the request for Imagen 3
-    const requestBody = {
-      instances: [
-        {
-          prompt: params.prompt,
-        },
-      ],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio,
-        safetySetting: this.config.safetySetting,
-        ...(params.providerOptions || {}),
-      },
-    }
 
     // Execute with rate limiting
     const response = await withRateLimit(
       this.providerId,
       async () => {
-        return this.callImagenApi(requestBody)
+        return this.callGoogleAI(params.prompt, aspectRatio)
       },
-      60000 // Imagen can take longer
+      60000 // Gemini image generation can take longer
     )
 
-    if (!response.predictions || response.predictions.length === 0) {
+    // Extract image data from response
+    const candidates = response.response.candidates
+    if (!candidates || candidates.length === 0) {
       throw createNormalizedError(
         ErrorCategory.ProviderError,
-        'No images returned from Imagen',
+        'No image candidates returned from Gemini',
         response,
-        'NO_PREDICTIONS'
+        'NO_CANDIDATES'
       )
     }
 
-    // Convert base64 images to data URLs
-    const images = response.predictions.map(
-      (prediction: { bytesBase64Encoded: string; mimeType?: string }) => {
-        const mimeType = prediction.mimeType || 'image/png'
-        const dataUrl = `data:${mimeType};base64,${prediction.bytesBase64Encoded}`
+    // Find inline data parts (images) in the response
+    const imageParts = candidates[0].content.parts.filter(
+      (part: { inlineData?: { mimeType: string; data: string } }) =>
+        part.inlineData
+    )
+
+    if (imageParts.length === 0) {
+      throw createNormalizedError(
+        ErrorCategory.ProviderError,
+        'No image data returned from Gemini',
+        response,
+        'NO_IMAGE_DATA'
+      )
+    }
+
+    // Convert inline data to data URLs
+    const images = imageParts.map(
+      (part: { inlineData: { mimeType: string; data: string } }) => {
+        const { mimeType, data } = part.inlineData
+        const dataUrl = `data:${mimeType};base64,${data}`
 
         return {
           url: dataUrl,
@@ -153,7 +173,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
       }
     )
 
-    // Imagen doesn't provide seed - generate for consistency
+    // Gemini doesn't provide seed - generate for consistency
     const seed = Math.floor(Math.random() * 2147483647)
 
     return {
@@ -161,75 +181,59 @@ export class ImagenAdapter implements ImageGenerationAdapter {
       seed,
       metadata: {
         aspectRatio,
-        safetySetting: this.config.safetySetting,
+        model: this.modelId,
         ...response,
       },
     }
   }
 
   /**
-   * Call Imagen API via Vertex AI REST endpoint
+   * Call Google AI SDK for image generation
    */
-  private async callImagenApi(requestBody: {
-    instances: Array<{ prompt: string }>
-    parameters: Record<string, unknown>
-  }): Promise<{
-    predictions: Array<{ bytesBase64Encoded: string; mimeType?: string }>
+  private async callGoogleAI(
+    prompt: string,
+    aspectRatio: string
+  ): Promise<{
+    response: {
+      candidates: Array<{
+        content: {
+          parts: Array<{
+            text?: string
+            inlineData?: { mimeType: string; data: string }
+          }>
+        }
+      }>
+    }
   }> {
-    const projectId = this.config.projectId
-    const location = this.config.location || 'us-central1'
+    const client = this.getClient()
 
-    // Imagen 3 model endpoint
-    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/imagen-3.0-generate-001:predict`
-
-    // Get access token from Google Cloud credentials
-    const { GoogleAuth } = await import('google-auth-library') as typeof import('google-auth-library')
-    const auth = new GoogleAuth({
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-    })
-    const client = await auth.getClient()
-    const accessToken = await client.getAccessToken()
-
-    if (!accessToken.token) {
-      throw createNormalizedError(
-        ErrorCategory.ProviderError,
-        'Failed to obtain Google Cloud access token',
-        null,
-        'AUTH_FAILED'
-      )
-    }
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken.token}`,
-        'Content-Type': 'application/json',
+    // Get the generative model for image generation
+    const model = client.getGenerativeModel({
+      model: this.modelId,
+      generationConfig: {
+        // @ts-expect-error - responseModalities is a valid config for image generation models
+        responseModalities: ['TEXT', 'IMAGE'],
+        // @ts-expect-error - imageConfig is a valid config for image generation models
+        imageConfig: {
+          aspectRatio: aspectRatio,
+        },
       },
-      body: JSON.stringify(requestBody),
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      let errorData: unknown
-      try {
-        errorData = JSON.parse(errorText)
-      } catch {
-        errorData = { message: errorText }
-      }
-      throw { status: response.status, ...((errorData as object) || {}) }
-    }
+    // Generate content with the prompt
+    const result = await model.generateContent(prompt)
 
-    return response.json()
+    return result
   }
 
   /**
-   * Normalize Google Cloud errors
+   * Normalize Google AI errors
    */
   normalizeError(error: unknown): NormalizedError {
     if (typeof error === 'object' && error !== null) {
       const errorObj = error as Record<string, unknown>
 
-      // Google Cloud specific error shapes
+      // Google AI specific error shapes
       if (errorObj.status) {
         const status = errorObj.status as number
 
@@ -237,7 +241,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
         if (status === 429) {
           return createNormalizedError(
             ErrorCategory.RateLimited,
-            (errorObj.message as string) || 'Google Cloud rate limit exceeded',
+            (errorObj.message as string) || 'Google AI rate limit exceeded',
             error,
             'RATE_LIMITED'
           )
@@ -280,7 +284,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
         if (status >= 500) {
           return createNormalizedError(
             ErrorCategory.ProviderError,
-            (errorObj.message as string) || 'Google Cloud server error',
+            (errorObj.message as string) || 'Google AI server error',
             error,
             'SERVER_ERROR'
           )
@@ -310,17 +314,17 @@ export class ImagenAdapter implements ImageGenerationAdapter {
   }
 
   /**
-   * Get default options for Imagen
+   * Get default options for Gemini image generation
    */
   getDefaultOptions(): Record<string, unknown> {
     return {
-      safetySetting: this.config.safetySetting,
+      aspectRatio: '1:1',
     }
   }
 
   /**
    * Check if a feature is supported
-   * Note: Imagen 3 supports batch generation but not seed or negative prompts
+   * Note: Gemini image generation supports batch but not seed or negative prompts
    */
   supportsFeature(feature: AdapterFeature): boolean {
     const supportedFeatures: AdapterFeature[] = ['batch']

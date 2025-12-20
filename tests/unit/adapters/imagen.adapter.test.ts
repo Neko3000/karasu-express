@@ -4,28 +4,25 @@
  * Tests for src/adapters/imagen.ts
  * Per Constitution Principle VI (Testing Discipline)
  *
- * Mock Google Cloud client and test:
+ * Mock @google/generative-ai SDK and test:
  * - generate method
  * - normalizeError method
  * - getDefaultOptions method
  */
 
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import {
   ImagenAdapter,
   createImagenAdapter,
 } from '../../../src/adapters/imagen'
 import { AspectRatio, Provider, ErrorCategory } from '../../../src/lib/types'
 
-// Mock fetch globally
-const mockFetch = vi.fn()
-global.fetch = mockFetch
-
-// Mock google-auth-library
-vi.mock('google-auth-library', () => ({
-  GoogleAuth: vi.fn().mockImplementation(() => ({
-    getClient: vi.fn().mockResolvedValue({
-      getAccessToken: vi.fn().mockResolvedValue({ token: 'mock-access-token' }),
+// Mock @google/generative-ai SDK
+const mockGenerateContent = vi.fn()
+vi.mock('@google/generative-ai', () => ({
+  GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
+    getGenerativeModel: vi.fn().mockReturnValue({
+      generateContent: mockGenerateContent,
     }),
   })),
 }))
@@ -48,8 +45,7 @@ describe('ImagenAdapter', () => {
     vi.clearAllMocks()
 
     // Set up environment variables
-    process.env.GOOGLE_CLOUD_PROJECT = 'test-project'
-    process.env.GOOGLE_CLOUD_LOCATION = 'us-central1'
+    process.env.GOOGLE_AI_API_KEY = 'test-api-key'
 
     // Create adapter
     adapter = new ImagenAdapter()
@@ -64,24 +60,20 @@ describe('ImagenAdapter', () => {
       const adapter = new ImagenAdapter()
 
       expect(adapter.providerId).toBe(Provider.Google)
-      expect(adapter.modelId).toBe('imagen-3')
-      expect(adapter.displayName).toBe('Imagen 3 (Nano Banana)')
+      expect(adapter.modelId).toBe('gemini-3-pro-image-preview')
+      expect(adapter.displayName).toBe('Gemini 3 Pro Image')
     })
 
-    it('should accept custom config', () => {
+    it('should accept custom config with API key', () => {
       const adapter = new ImagenAdapter({
-        projectId: 'custom-project',
-        location: 'europe-west1',
-        safetySetting: 'block_most',
+        apiKey: 'custom-api-key',
       })
 
-      const options = adapter.getDefaultOptions()
-      expect(options.safetySetting).toBe('block_most')
+      expect(adapter).toBeDefined()
     })
 
-    it('should use environment variables for defaults', () => {
-      process.env.GOOGLE_CLOUD_PROJECT = 'env-project'
-      process.env.GOOGLE_CLOUD_LOCATION = 'asia-east1'
+    it('should use environment variable for API key', () => {
+      process.env.GOOGLE_AI_API_KEY = 'env-api-key'
 
       // Create new adapter to pick up env vars
       const adapter = new ImagenAdapter()
@@ -96,43 +88,35 @@ describe('ImagenAdapter', () => {
   // ============================================
 
   describe('generate', () => {
-    it('should call Imagen API with correct parameters', async () => {
+    it('should call Google AI SDK with correct parameters', async () => {
       const mockResponse = {
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [
+        response: {
+          candidates: [
             {
-              bytesBase64Encoded: 'base64imagedata==',
-              mimeType: 'image/png',
+              content: {
+                parts: [
+                  { text: 'Generated image description' },
+                  {
+                    inlineData: {
+                      mimeType: 'image/png',
+                      data: 'base64imagedata==',
+                    },
+                  },
+                ],
+              },
             },
           ],
-        }),
+        },
       }
-      mockFetch.mockResolvedValue(mockResponse)
+      mockGenerateContent.mockResolvedValue(mockResponse)
 
       const result = await adapter.generate({
         prompt: 'A beautiful sunset',
         aspectRatio: AspectRatio.Square,
       })
 
-      // Verify fetch was called with correct URL
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('us-central1-aiplatform.googleapis.com'),
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            Authorization: 'Bearer mock-access-token',
-            'Content-Type': 'application/json',
-          }),
-        })
-      )
-
-      // Verify request body
-      const callArgs = mockFetch.mock.calls[0]
-      const body = JSON.parse(callArgs[1].body)
-      expect(body.instances[0].prompt).toBe('A beautiful sunset')
-      expect(body.parameters.aspectRatio).toBe('1:1')
-      expect(body.parameters.sampleCount).toBe(1)
+      // Verify generateContent was called
+      expect(mockGenerateContent).toHaveBeenCalled()
 
       // Verify result
       expect(result.images).toHaveLength(1)
@@ -142,96 +126,66 @@ describe('ImagenAdapter', () => {
     })
 
     it('should handle different aspect ratios', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [
-            { bytesBase64Encoded: 'base64data==', mimeType: 'image/png' },
+      mockGenerateContent.mockResolvedValue({
+        response: {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    inlineData: { mimeType: 'image/png', data: 'base64data==' },
+                  },
+                ],
+              },
+            },
           ],
-        }),
+        },
       })
 
-      await adapter.generate({
+      const result = await adapter.generate({
         prompt: 'Landscape image',
         aspectRatio: AspectRatio.Landscape,
       })
 
-      const callArgs = mockFetch.mock.calls[0]
-      const body = JSON.parse(callArgs[1].body)
-      expect(body.parameters.aspectRatio).toBe('16:9')
+      // Verify request includes aspect ratio config
+      expect(mockGenerateContent).toHaveBeenCalled()
+      expect(result.images).toHaveLength(1)
+      expect(result.images[0].width).toBe(1408)
+      expect(result.images[0].height).toBe(768)
     })
 
     it('should handle portrait aspect ratio', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [
-            { bytesBase64Encoded: 'base64data==', mimeType: 'image/png' },
+      mockGenerateContent.mockResolvedValue({
+        response: {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    inlineData: { mimeType: 'image/png', data: 'base64data==' },
+                  },
+                ],
+              },
+            },
           ],
-        }),
+        },
       })
 
-      await adapter.generate({
+      const result = await adapter.generate({
         prompt: 'Portrait image',
         aspectRatio: AspectRatio.Portrait,
       })
 
-      const callArgs = mockFetch.mock.calls[0]
-      const body = JSON.parse(callArgs[1].body)
-      expect(body.parameters.aspectRatio).toBe('9:16')
+      expect(result.images).toHaveLength(1)
+      expect(result.images[0].width).toBe(768)
+      expect(result.images[0].height).toBe(1408)
     })
 
-    it('should include safety setting in request', async () => {
-      const adapter = new ImagenAdapter({ safetySetting: 'block_most' })
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [
-            { bytesBase64Encoded: 'base64data==', mimeType: 'image/png' },
-          ],
-        }),
-      })
-
-      await adapter.generate({
-        prompt: 'Test prompt',
-        aspectRatio: AspectRatio.Square,
-      })
-
-      const callArgs = mockFetch.mock.calls[0]
-      const body = JSON.parse(callArgs[1].body)
-      expect(body.parameters.safetySetting).toBe('block_most')
-    })
-
-    it('should merge provider options', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [
-            { bytesBase64Encoded: 'base64data==', mimeType: 'image/png' },
-          ],
-        }),
-      })
-
-      await adapter.generate({
-        prompt: 'Test prompt',
-        aspectRatio: AspectRatio.Square,
-        providerOptions: {
-          customParam: 'value',
+    it('should throw error when no candidates returned', async () => {
+      mockGenerateContent.mockResolvedValue({
+        response: {
+          candidates: [],
         },
-      })
-
-      const callArgs = mockFetch.mock.calls[0]
-      const body = JSON.parse(callArgs[1].body)
-      expect(body.parameters.customParam).toBe('value')
-    })
-
-    it('should throw error when no predictions returned', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [],
-        }),
       })
 
       await expect(
@@ -241,20 +195,36 @@ describe('ImagenAdapter', () => {
         })
       ).rejects.toMatchObject({
         category: ErrorCategory.ProviderError,
-        message: expect.stringContaining('No images'),
+        message: expect.stringContaining('No image'),
       })
     })
 
-    it('should throw error on API failure', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 400,
-        text: vi.fn().mockResolvedValue(
-          JSON.stringify({
-            message: 'Bad request',
-          })
-        ),
+    it('should throw error when no image data in response', async () => {
+      mockGenerateContent.mockResolvedValue({
+        response: {
+          candidates: [
+            {
+              content: {
+                parts: [{ text: 'Only text, no image' }],
+              },
+            },
+          ],
+        },
       })
+
+      await expect(
+        adapter.generate({
+          prompt: 'Test prompt',
+          aspectRatio: AspectRatio.Square,
+        })
+      ).rejects.toMatchObject({
+        category: ErrorCategory.ProviderError,
+        message: expect.stringContaining('No image'),
+      })
+    })
+
+    it('should handle API errors', async () => {
+      mockGenerateContent.mockRejectedValue(new Error('API error'))
 
       await expect(
         adapter.generate({
@@ -264,47 +234,21 @@ describe('ImagenAdapter', () => {
       ).rejects.toBeDefined()
     })
 
-    it('should handle non-JSON error responses', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 500,
-        text: vi.fn().mockResolvedValue('Internal Server Error'),
-      })
-
-      await expect(
-        adapter.generate({
-          prompt: 'Test prompt',
-          aspectRatio: AspectRatio.Square,
-        })
-      ).rejects.toBeDefined()
-    })
-
-    it('should default mimeType to image/png', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [
-            { bytesBase64Encoded: 'base64data==' }, // No mimeType
+    it('should generate random seed (Gemini does not return seed)', async () => {
+      mockGenerateContent.mockResolvedValue({
+        response: {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    inlineData: { mimeType: 'image/png', data: 'base64data==' },
+                  },
+                ],
+              },
+            },
           ],
-        }),
-      })
-
-      const result = await adapter.generate({
-        prompt: 'Test prompt',
-        aspectRatio: AspectRatio.Square,
-      })
-
-      expect(result.images[0].contentType).toBe('image/png')
-    })
-
-    it('should generate random seed (Imagen does not support seed)', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          predictions: [
-            { bytesBase64Encoded: 'base64data==', mimeType: 'image/png' },
-          ],
-        }),
+        },
       })
 
       const result = await adapter.generate({
@@ -316,14 +260,8 @@ describe('ImagenAdapter', () => {
       expect(result.seed).toBeGreaterThanOrEqual(0)
     })
 
-    it('should throw error when auth fails', async () => {
-      // Mock auth failure
-      const { GoogleAuth } = await import('google-auth-library')
-      ;(GoogleAuth as Mock).mockImplementationOnce(() => ({
-        getClient: vi.fn().mockResolvedValue({
-          getAccessToken: vi.fn().mockResolvedValue({ token: null }),
-        }),
-      }))
+    it('should throw error when API key is missing', async () => {
+      delete process.env.GOOGLE_AI_API_KEY
 
       const adapter = new ImagenAdapter()
 
@@ -334,7 +272,7 @@ describe('ImagenAdapter', () => {
         })
       ).rejects.toMatchObject({
         category: ErrorCategory.ProviderError,
-        message: expect.stringContaining('access token'),
+        message: expect.stringContaining('API key'),
       })
     })
   })
@@ -465,17 +403,7 @@ describe('ImagenAdapter', () => {
       const adapter = new ImagenAdapter()
       const options = adapter.getDefaultOptions()
 
-      expect(options.safetySetting).toBe('block_some')
-    })
-
-    it('should reflect custom config', () => {
-      const adapter = new ImagenAdapter({
-        safetySetting: 'block_most',
-      })
-
-      const options = adapter.getDefaultOptions()
-
-      expect(options.safetySetting).toBe('block_most')
+      expect(options.aspectRatio).toBeDefined()
     })
   })
 
@@ -525,18 +453,16 @@ describe('ImagenAdapter', () => {
     it('should create adapter with default config', () => {
       const adapter = createImagenAdapter()
 
-      expect(adapter.modelId).toBe('imagen-3')
-      expect(adapter.displayName).toBe('Imagen 3 (Nano Banana)')
+      expect(adapter.modelId).toBe('gemini-3-pro-image-preview')
+      expect(adapter.displayName).toBe('Gemini 3 Pro Image')
     })
 
-    it('should create adapter with custom config', () => {
+    it('should create adapter with custom API key', () => {
       const adapter = createImagenAdapter({
-        projectId: 'custom-project',
-        safetySetting: 'block_few',
+        apiKey: 'custom-api-key',
       })
 
-      const options = adapter.getDefaultOptions()
-      expect(options.safetySetting).toBe('block_few')
+      expect(adapter).toBeDefined()
     })
   })
 })

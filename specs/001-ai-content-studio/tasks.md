@@ -163,15 +163,15 @@ Per plan.md Testing Requirements:
 
 #### Unit Tests (Imagen API Key)
 
-- [ ] T033k [P] [US1] Update unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts to mock @google/generative-ai SDK instead of google-auth-library
+- [X] T033k [P] [US1] Update unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts to mock @google/generative-ai SDK instead of google-auth-library
 
 #### Implementation for Imagen API Key
 
-- [ ] T033l [US1] Update ImagenConfig interface in src/adapters/imagen.ts to accept apiKey instead of projectId/location
-- [ ] T033m [US1] Refactor ImagenAdapter to use @google/generative-ai SDK with GOOGLE_AI_API_KEY environment variable instead of Vertex AI REST API
-- [ ] T033n [US1] Update callImagenApi method in src/adapters/imagen.ts to use Google AI generateImages endpoint instead of Vertex AI predict endpoint
-- [ ] T033o [US1] Update .env.example to clarify GOOGLE_AI_API_KEY usage for both Gemini LLM and Imagen image generation
-- [ ] T033p [P] [US1] Verify Imagen adapter works with real GOOGLE_AI_API_KEY by running manual test
+- [X] T033l [US1] Update ImagenConfig interface in src/adapters/imagen.ts to accept apiKey instead of projectId/location
+- [X] T033m [US1] Refactor ImagenAdapter to use @google/generative-ai SDK with GOOGLE_AI_API_KEY environment variable instead of Vertex AI REST API
+- [X] T033n [US1] Update callImagenApi method in src/adapters/imagen.ts to use Google AI generateImages endpoint instead of Vertex AI predict endpoint
+- [X] T033o [US1] Update .env.example to clarify GOOGLE_AI_API_KEY usage for both Gemini LLM and Imagen image generation
+- [X] T033p [P] [US1] Verify Imagen adapter works with real GOOGLE_AI_API_KEY by running manual test
 
 ### Imported Style Prompts (New Feature)
 

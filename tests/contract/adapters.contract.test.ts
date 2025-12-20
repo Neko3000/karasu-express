@@ -75,6 +75,32 @@ vi.mock('google-auth-library', () => ({
   })),
 }))
 
+// Mock @google/generative-ai for Imagen adapter
+vi.mock('@google/generative-ai', () => ({
+  GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
+    getGenerativeModel: vi.fn().mockReturnValue({
+      generateContent: vi.fn().mockResolvedValue({
+        response: {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: 'image/png',
+                      data: 'base64mockdata==',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }),
+    }),
+  })),
+}))
+
 vi.mock('../../src/lib/rate-limiter', () => ({
   withRateLimit: vi.fn(async <T>(_p: string, op: () => Promise<T>) => op()),
   rateLimiter: { acquire: vi.fn(), recordRequest: vi.fn() },
@@ -359,8 +385,7 @@ describe('Adapter Contracts', () => {
   beforeEach(() => {
     process.env.FAL_API_KEY = 'test-fal-key'
     process.env.OPENAI_API_KEY = 'test-openai-key'
-    process.env.GOOGLE_CLOUD_PROJECT = 'test-project'
-    process.env.GOOGLE_CLOUD_LOCATION = 'us-central1'
+    process.env.GOOGLE_AI_API_KEY = 'test-google-ai-key'
     resetRegistry()
   })
 
@@ -384,8 +409,7 @@ describe('Adapter Registry Contract', () => {
   beforeEach(() => {
     process.env.FAL_API_KEY = 'test-fal-key'
     process.env.OPENAI_API_KEY = 'test-openai-key'
-    process.env.GOOGLE_CLOUD_PROJECT = 'test-project'
-    process.env.GOOGLE_CLOUD_LOCATION = 'us-central1'
+    process.env.GOOGLE_AI_API_KEY = 'test-google-ai-key'
     resetRegistry()
   })
 
@@ -415,7 +439,7 @@ describe('Adapter Registry Contract', () => {
 
       expect(modelIds).toContain('flux-pro')
       expect(modelIds).toContain('dalle-3')
-      expect(modelIds).toContain('imagen-3')
+      expect(modelIds).toContain('gemini-3-pro-image-preview')
     })
   })
 
@@ -451,7 +475,7 @@ describe('Adapter Registry Contract', () => {
     it('should return true for registered models', () => {
       expect(isModelRegistered('flux-pro')).toBe(true)
       expect(isModelRegistered('dalle-3')).toBe(true)
-      expect(isModelRegistered('imagen-3')).toBe(true)
+      expect(isModelRegistered('gemini-3-pro-image-preview')).toBe(true)
     })
 
     it('should return false for unregistered models', () => {
@@ -468,8 +492,7 @@ describe('Type Compatibility', () => {
   beforeEach(() => {
     process.env.FAL_API_KEY = 'test-fal-key'
     process.env.OPENAI_API_KEY = 'test-openai-key'
-    process.env.GOOGLE_CLOUD_PROJECT = 'test-project'
-    process.env.GOOGLE_CLOUD_LOCATION = 'us-central1'
+    process.env.GOOGLE_AI_API_KEY = 'test-google-ai-key'
   })
 
   it('FluxAdapter should be assignable to ImageGenerationAdapter', () => {
