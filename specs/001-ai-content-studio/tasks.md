@@ -209,17 +209,17 @@ Per plan.md Testing Requirements:
 
 ### Tests for User Story 2
 
-- [ ] T033a [P] [US2] Write unit tests for prompt-optimizer service in tests/unit/services/prompt-optimizer.test.ts (mock Gemini client, test expandPrompt with various themes, test structured output parsing, test web search integration)
+- [X] T033a [P] [US2] Write unit tests for prompt-optimizer service in tests/unit/services/prompt-optimizer.test.ts (mock Gemini client, test expandPrompt with various themes, test structured output parsing, test web search integration)
 
 ### Implementation for User Story 2
 
-- [ ] T034 [US2] Implement prompt optimizer service in src/services/prompt-optimizer.ts with expandPrompt() function using Gemini Pro structured output (JSON mode)
-- [ ] T035 [US2] Create system prompt template in src/services/prompt-optimizer.ts for "prompt engineering expert" persona with composition/lighting/atmosphere instructions
-- [ ] T035a [P] [US2] Add LLM provider abstraction interface in src/services/prompt-optimizer.ts to support future ChatGPT/Claude expansion
-- [ ] T036 [US2] Implement web search enhancement in src/services/prompt-optimizer.ts with optional RAG context fetching
-- [ ] T037 [US2] Create POST /api/studio/expand-prompt custom endpoint in src/endpoints/expand-prompt-preview.ts for testing prompt expansion without creating task
-- [ ] T037a [P] [US2] Write integration tests for expand-prompt-preview endpoint in tests/integration/endpoints/studio.integration.test.ts
-- [ ] T038 [US2] Update expand-prompt job handler in src/jobs/expand-prompt.ts to use prompt-optimizer service and generate subjectSlug
+- [X] T034 [US2] Implement prompt optimizer service in src/services/prompt-optimizer.ts with expandPrompt() function using Gemini Pro structured output (JSON mode)
+- [X] T035 [US2] Create system prompt template in src/services/prompt-optimizer.ts for "prompt engineering expert" persona with composition/lighting/atmosphere instructions
+- [X] T035a [P] [US2] Add LLM provider abstraction interface in src/services/prompt-optimizer.ts to support future ChatGPT/Claude expansion
+- [X] T036 [US2] Implement web search enhancement in src/services/prompt-optimizer.ts with optional RAG context fetching
+- [X] T037 [US2] Create POST /api/studio/expand-prompt custom endpoint in src/app/api/studio/expand-prompt/route.ts for testing prompt expansion without creating task
+- [X] T037a [P] [US2] Write integration tests for expand-prompt-preview endpoint in tests/integration/endpoints/studio.integration.test.ts
+- [X] T038 [US2] Update expand-prompt job handler in src/jobs/expand-prompt.ts to use prompt-optimizer service and generate subjectSlug
 
 **Checkpoint**: User Story 2 complete - all unit tests pass for prompt-optimizer. Admin can submit themes and get AI-enhanced prompts before generation.
 

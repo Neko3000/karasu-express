@@ -12,7 +12,45 @@ import { TaskStatus } from '../../../src/lib/types'
 
 // Mock the prompt optimizer service (LLM)
 vi.mock('../../../src/services/prompt-optimizer', () => ({
-  expandPrompt: vi.fn(),
+  createPromptOptimizer: vi.fn(() => ({
+    expandPrompt: vi.fn().mockResolvedValue({
+      variants: [
+        {
+          variantId: 'variant-1',
+          variantName: 'Realistic',
+          expandedPrompt: 'mocked expanded prompt',
+          suggestedNegativePrompt: 'blurry',
+          keywords: ['test'],
+        },
+        {
+          variantId: 'variant-2',
+          variantName: 'Artistic',
+          expandedPrompt: 'mocked expanded prompt 2',
+          suggestedNegativePrompt: 'blurry',
+          keywords: ['test'],
+        },
+        {
+          variantId: 'variant-3',
+          variantName: 'Cinematic',
+          expandedPrompt: 'mocked expanded prompt 3',
+          suggestedNegativePrompt: 'blurry',
+          keywords: ['test'],
+        },
+      ],
+      subjectSlug: 'mocked-slug',
+    }),
+    getProviderId: vi.fn().mockReturnValue('mock'),
+  })),
+  generateSubjectSlug: vi.fn((subject: string) => {
+    return subject
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\x00-\x7F]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 50) || 'untitled'
+  }),
 }))
 
 // Import after mocks are set up
