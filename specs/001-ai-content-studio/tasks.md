@@ -157,6 +157,22 @@ Per plan.md Testing Requirements:
 - [X] T032 [US1] Create POST /api/tasks/{id}/retry-failed custom endpoint in src/endpoints/retry-failed.ts to re-queue failed sub-tasks
 - [X] T033 [P] [US1] Create POST /api/studio/calculate-fission custom endpoint in src/endpoints/calculate-fission.ts for preview calculation
 
+### Imagen API Key Migration (Authentication Simplification)
+
+> **Purpose**: Migrate Imagen adapter from Google Cloud Vertex AI (service account JSON) to Google AI Studio API Key (GOOGLE_AI_API_KEY) for simpler authentication
+
+#### Unit Tests (Imagen API Key)
+
+- [ ] T033k [P] [US1] Update unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts to mock @google/generative-ai SDK instead of google-auth-library
+
+#### Implementation for Imagen API Key
+
+- [ ] T033l [US1] Update ImagenConfig interface in src/adapters/imagen.ts to accept apiKey instead of projectId/location
+- [ ] T033m [US1] Refactor ImagenAdapter to use @google/generative-ai SDK with GOOGLE_AI_API_KEY environment variable instead of Vertex AI REST API
+- [ ] T033n [US1] Update callImagenApi method in src/adapters/imagen.ts to use Google AI generateImages endpoint instead of Vertex AI predict endpoint
+- [ ] T033o [US1] Update .env.example to clarify GOOGLE_AI_API_KEY usage for both Gemini LLM and Imagen image generation
+- [ ] T033p [P] [US1] Verify Imagen adapter works with real GOOGLE_AI_API_KEY by running manual test
+
 ### Imported Style Prompts (New Feature)
 
 > **Purpose**: Load style prompts from external JSON file and display them on the task creation page with "base" as default
@@ -445,7 +461,7 @@ Per plan.md Testing Requirements:
 |-------|------------|-------------------|----------------|---------------|
 | Phase 1: Setup | - | - | - | Project builds, test infra ready |
 | Phase 2: Foundational | T010a, T011a, T013a, T014a, T015a | - | T016a | All unit + contract tests pass |
-| Phase 3: US1 | T020a, T020b, T020c, T033b | T020d, T020e, T020f, T033h | - | All tests pass |
+| Phase 3: US1 | T020a, T020b, T020c, T033b, T033k | T020d, T020e, T020f, T033h | - | All tests pass |
 | Phase 4: US2 | T033a | T037a | - | All tests pass |
 | Phase 5: US3 | - | T038a | - | Integration tests pass |
 | Phase 6: US4 | - | - | - | Manual testing |
@@ -456,7 +472,7 @@ Per plan.md Testing Requirements:
 | Phase 11: Polish | - | - | - | Full suite passes |
 | Phase 12: Veo | T076a | - | - | (Deferred) |
 
-**Total Test Tasks**: 18 (9 unit, 8 integration, 1 contract)
+**Total Test Tasks**: 19 (10 unit, 8 integration, 1 contract)
 
 ---
 
