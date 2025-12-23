@@ -234,18 +234,58 @@ Per plan.md Testing Requirements:
 
 ### Prompt Optimization UI Components (Moved from Phase 10)
 
-> **Purpose**: UI components for prompt input, generation button, and editable prompt results on task creation page
+> **Purpose**: UI components for prompt input, "Extend" button with collapsible results section, and editable/selectable prompt variants on task creation page
+>
+> **Reference**: spec.md Session 2025-12-23 clarifications define:
+> - "Extend" button (not "Generate Extended Prompts")
+> - Collapsible section below text input that expands with optimization results
+> - Progress bar with stages: Analyzing → Enhancing → Formatting
+> - 3 (default), 5, or 7 variants with dropdown selector
+> - Each variant has checkbox for selection + inline text editor
+> - Inline error banner with "Retry" button on failure
+
+#### Subject Input & Configuration
 
 - [ ] T038f [P] [US2] Create SubjectInput component in src/components/Studio/SubjectInput.tsx with multi-line text input and character counter
-- [ ] T038g [US2] Create GeneratePromptsButton component in src/components/Studio/GeneratePromptsButton.tsx with "Generate Extended Prompts" button that calls /api/studio/expand-prompt endpoint
-- [ ] T038h [US2] Create PromptPreview component in src/components/Studio/PromptPreview.tsx showing expanded prompts in editable text areas
-- [ ] T038i [US2] Create PromptVariantCard component in src/components/Studio/PromptVariantCard.tsx with variant name, editable expanded prompt text area, and suggested negative prompt display
-- [ ] T038j [US2] Create usePromptExpansion hook in src/components/Studio/hooks/usePromptExpansion.ts to manage state for subject input, expanded prompts, and manual edits
-- [ ] T038k [US2] Integrate SubjectInput, GeneratePromptsButton, and PromptPreview into task creation page in src/components/Studio/index.tsx
-- [ ] T038l [US2] Add loading state and error handling to GeneratePromptsButton in src/components/Studio/GeneratePromptsButton.tsx (spinner during API call, error toast on failure)
-- [ ] T038m [US2] Implement prompt editing persistence in usePromptExpansion hook to track user modifications to generated prompts
+- [ ] T038f2 [P] [US2] Create VariantCountSelector component in src/components/Studio/VariantCountSelector.tsx as dropdown with options 3 (default), 5, or 7
 
-**Checkpoint**: User Story 2 complete - all unit tests pass for prompt-optimizer, UI components allow subject input, prompt generation, and manual editing. Admin can submit subjects, get AI-enhanced prompts, edit them manually, and proceed to generation.
+#### Extend Button & Collapsible Section
+
+- [ ] T038g [US2] Create ExtendButton component in src/components/Studio/ExtendButton.tsx with "Extend" label that triggers prompt optimization API call
+- [ ] T038g2 [US2] Create PromptOptimizationSection component in src/components/Studio/PromptOptimizationSection.tsx as collapsible container below SubjectInput that expands when ExtendButton is clicked
+- [ ] T038g3 [US2] Create OptimizationProgressBar component in src/components/Studio/OptimizationProgressBar.tsx with three stages: "Analyzing" → "Enhancing" → "Formatting" and visual progress indicator
+
+#### Prompt Variants Display
+
+- [ ] T038h [US2] Create PromptVariantsList component in src/components/Studio/PromptVariantsList.tsx to display generated variants inside the collapsible section after progress completes
+- [ ] T038i [US2] Create PromptVariantCard component in src/components/Studio/PromptVariantCard.tsx with:
+  - Checkbox for selection (allows multi-select of variants)
+  - Variant name/label (e.g., "Realistic", "Abstract", "Artistic")
+  - Inline editable text area for the expanded prompt
+  - Suggested negative prompt display (non-editable, for reference)
+
+#### Error Handling
+
+- [ ] T038i2 [US2] Create OptimizationErrorBanner component in src/components/Studio/OptimizationErrorBanner.tsx with inline error message display and "Retry" button inside the collapsible section
+
+#### State Management Hook
+
+- [ ] T038j [US2] Create usePromptExpansion hook in src/components/Studio/hooks/usePromptExpansion.ts to manage:
+  - Subject input state
+  - Variant count selection (3/5/7)
+  - Collapsible section open/closed state
+  - Progress stage tracking (idle/analyzing/enhancing/formatting/complete/error)
+  - Generated variants array with selection state
+  - User modifications to generated prompts
+  - Error state and retry logic
+
+#### Integration
+
+- [ ] T038k [US2] Integrate SubjectInput, VariantCountSelector, ExtendButton, and PromptOptimizationSection into task creation page in src/components/Studio/index.tsx
+- [ ] T038l [US2] Connect usePromptExpansion hook to /api/studio/expand-prompt endpoint with loading stages simulation (Analyzing → Enhancing → Formatting progress)
+- [ ] T038m [US2] Implement prompt editing persistence in usePromptExpansion hook to track user modifications to generated prompts (preserve edits across re-renders)
+
+**Checkpoint**: User Story 2 complete - all unit tests pass for prompt-optimizer, UI components allow subject input, "Extend" button triggers collapsible section with staged progress bar, displays selectable/editable prompt variants, handles errors with inline retry. Admin can submit subjects, get AI-enhanced prompts, select and edit variants, and proceed to generation.
 
 ---
 
