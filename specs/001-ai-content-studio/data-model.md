@@ -32,7 +32,7 @@
 | Field | Type | Required | Description | Validation |
 |-------|------|----------|-------------|------------|
 | id | UUID | Auto | Primary key | - |
-| subject | Text | Yes | User's original theme input | Min: 1, Max: 1000 chars |
+| subject | Text | Yes | User's original subject input | Min: 1, Max: 1000 chars |
 | expandedPrompts | Array\<ExpandedPrompt\> | No | LLM-optimized prompt variants | - |
 | styles | Relationship[] | Yes | Selected style templates | Min: 1 selection |
 | models | Select[] | Yes | Selected AI model IDs | Min: 1 selection |

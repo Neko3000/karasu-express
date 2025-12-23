@@ -58,7 +58,7 @@ export const Tasks: CollectionConfig = {
       type: 'textarea',
       required: true,
       admin: {
-        description: "User's original creative theme input",
+        description: "User's original subject input",
       },
       minLength: 1,
       maxLength: 1000,

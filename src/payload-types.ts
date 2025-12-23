@@ -365,7 +365,7 @@ export interface SubTask {
 export interface Task {
   id: string;
   /**
-   * User's original creative theme input
+   * User's original subject input
    */
   subject: string;
   /**

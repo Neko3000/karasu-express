@@ -7,7 +7,7 @@
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-**LLM for Prompt Expansion**: **Gemini Pro** (Google AI) is the primary LLM for prompt optimization. Future expansion will support ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet).
+**LLM for Prompt Expansion**: **Gemini 3 Flash Preview** (model: `gemini-3-flash-preview`) is the primary LLM for prompt optimization. This model offers Pro-level reasoning with Flash speed and pricing. Supports configurable thinking levels (minimal/low/medium/high) for latency vs reasoning depth tradeoffs. Future expansion will support ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet).
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -205,7 +205,9 @@ Per plan.md Testing Requirements:
 **Unit Tests**: REQUIRED for prompt-optimizer service
 **Integration Tests**: Already covered by Phase 3 expand-prompt job tests
 
-**Gate Criteria**: All unit tests pass for prompt-optimizer service
+**Gate Criteria**: All unit tests pass for prompt-optimizer service, UI components functional
+
+**Model**: `gemini-3-flash-preview` (Google AI) - High-speed thinking model with Pro-level reasoning, 1M token context, supports configurable thinking levels (minimal/low/medium/high)
 
 ### Tests for User Story 2
 
@@ -221,7 +223,29 @@ Per plan.md Testing Requirements:
 - [X] T037a [P] [US2] Write integration tests for expand-prompt-preview endpoint in tests/integration/endpoints/studio.integration.test.ts
 - [X] T038 [US2] Update expand-prompt job handler in src/jobs/expand-prompt.ts to use prompt-optimizer service and generate subjectSlug
 
-**Checkpoint**: User Story 2 complete - all unit tests pass for prompt-optimizer. Admin can submit themes and get AI-enhanced prompts before generation.
+### Gemini 3 Flash Preview Model Upgrade
+
+> **Purpose**: Upgrade prompt optimizer to use gemini-3-flash-preview model for improved reasoning performance
+
+- [ ] T038b [US2] Update GeminiProvider default model from 'gemini-1.5-flash' to 'gemini-3-flash-preview' in src/services/prompt-optimizer.ts
+- [ ] T038c [P] [US2] Add thinking_level parameter support to GeminiProvider in src/services/prompt-optimizer.ts (options: minimal/low/medium/high)
+- [ ] T038d [P] [US2] Update createPromptOptimizer factory function to accept optional model name parameter in src/services/prompt-optimizer.ts
+- [ ] T038e [US2] Update unit tests in tests/unit/services/prompt-optimizer.test.ts to verify gemini-3-flash-preview model usage
+
+### Prompt Optimization UI Components (Moved from Phase 10)
+
+> **Purpose**: UI components for prompt input, generation button, and editable prompt results on task creation page
+
+- [ ] T038f [P] [US2] Create SubjectInput component in src/components/Studio/SubjectInput.tsx with multi-line text input and character counter
+- [ ] T038g [US2] Create GeneratePromptsButton component in src/components/Studio/GeneratePromptsButton.tsx with "Generate Extended Prompts" button that calls /api/studio/expand-prompt endpoint
+- [ ] T038h [US2] Create PromptPreview component in src/components/Studio/PromptPreview.tsx showing expanded prompts in editable text areas
+- [ ] T038i [US2] Create PromptVariantCard component in src/components/Studio/PromptVariantCard.tsx with variant name, editable expanded prompt text area, and suggested negative prompt display
+- [ ] T038j [US2] Create usePromptExpansion hook in src/components/Studio/hooks/usePromptExpansion.ts to manage state for subject input, expanded prompts, and manual edits
+- [ ] T038k [US2] Integrate SubjectInput, GeneratePromptsButton, and PromptPreview into task creation page in src/components/Studio/index.tsx
+- [ ] T038l [US2] Add loading state and error handling to GeneratePromptsButton in src/components/Studio/GeneratePromptsButton.tsx (spinner during API call, error toast on failure)
+- [ ] T038m [US2] Implement prompt editing persistence in usePromptExpansion hook to track user modifications to generated prompts
+
+**Checkpoint**: User Story 2 complete - all unit tests pass for prompt-optimizer, UI components allow subject input, prompt generation, and manual editing. Admin can submit subjects, get AI-enhanced prompts, edit them manually, and proceed to generation.
 
 ---
 
@@ -351,14 +375,14 @@ Per plan.md Testing Requirements:
 
 **Gate Criteria**: Studio workflow functions end-to-end, manual testing passes
 
+**Note**: SubjectInput and PromptPreview components moved to Phase 4 (User Story 2) for prompt optimization workflow
+
 ### Implementation for Studio Workspace
 
-- [ ] T062 Create Studio custom admin view in src/components/Studio/index.tsx as the main generation workspace
-- [ ] T063 [P] Create ThemeInput component in src/components/Studio/ThemeInput.tsx with multi-line text input and character counter
+- [ ] T062 Create Studio custom admin view in src/components/Studio/index.tsx as the main generation workspace (integrates Phase 4 prompt components)
 - [ ] T064 [P] Create StyleSelector component in src/components/Studio/StyleSelector.tsx with multi-select grid and preview thumbnails
 - [ ] T065 [P] Create ModelSelector component in src/components/Studio/ModelSelector.tsx with provider grouping and feature badges
 - [ ] T066 [P] Create BatchConfig component in src/components/Studio/BatchConfig.tsx with countPerPrompt input and total calculation display
-- [ ] T067 Create PromptPreview component in src/components/Studio/PromptPreview.tsx showing expanded prompts with edit capability
 - [ ] T068 Implement task submission flow in src/components/Studio/index.tsx with confirmation dialog when total > 500
 - [ ] T069 Add Studio to Payload admin panel navigation in payload.config.ts admin.components configuration
 
@@ -462,7 +486,7 @@ Per plan.md Testing Requirements:
 | Phase 1: Setup | - | - | - | Project builds, test infra ready |
 | Phase 2: Foundational | T010a, T011a, T013a, T014a, T015a | - | T016a | All unit + contract tests pass |
 | Phase 3: US1 | T020a, T020b, T020c, T033b, T033k | T020d, T020e, T020f, T033h | - | All tests pass |
-| Phase 4: US2 | T033a | T037a | - | All tests pass |
+| Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
 | Phase 5: US3 | - | T038a | - | Integration tests pass |
 | Phase 6: US4 | - | - | - | Manual testing |
 | Phase 7: US5 | - | - | - | Manual testing |
@@ -472,7 +496,7 @@ Per plan.md Testing Requirements:
 | Phase 11: Polish | - | - | - | Full suite passes |
 | Phase 12: Veo | T076a | - | - | (Deferred) |
 
-**Total Test Tasks**: 19 (10 unit, 8 integration, 1 contract)
+**Total Test Tasks**: 20 (11 unit, 8 integration, 1 contract)
 
 ---
 
@@ -563,5 +587,5 @@ END IF
 - All UI components are React components integrated into PayloadCMS admin
 - TailwindCSS classes must use `.twp` prefix scope
 - **Video generation (Veo) is DEFERRED** - Phase 12 is lowest priority; focus on image generation first
-- **LLM Provider Strategy**: Start with Gemini Pro for prompt expansion; the abstraction layer (T035a) enables future expansion to ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet) without refactoring
+- **LLM Provider Strategy**: Start with Gemini 3 Flash Preview (`gemini-3-flash-preview`) for prompt expansion; the abstraction layer (T035a) enables future expansion to ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet) without refactoring. Supports configurable thinking levels for latency optimization.
 - **Testing Tools**: Vitest + Testing Library + MongoDB Memory Server per plan.md

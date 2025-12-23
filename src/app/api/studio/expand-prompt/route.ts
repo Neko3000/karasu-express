@@ -1,7 +1,7 @@
 /**
  * API Route: POST /api/studio/expand-prompt
  *
- * Expand a creative theme into detailed prompt variants using AI.
+ * Expand a subject description into detailed prompt variants using AI.
  * This is a preview endpoint for testing prompt expansion without creating a task.
  *
  * User Story 2: Intelligent Prompt Optimization
@@ -19,7 +19,7 @@ import {
  * Request body for expand-prompt endpoint
  */
 interface ExpandPromptRequest {
-  /** The user's original creative theme/subject */
+  /** The user's original subject description */
   subject: string
   /** Number of variants to generate (default: 3, max: 10) */
   variantCount?: number
@@ -109,7 +109,7 @@ function validateRequest(body: ExpandPromptRequest): { valid: boolean; error?: s
 /**
  * POST /api/studio/expand-prompt
  *
- * Expand a creative theme into detailed prompt variants.
+ * Expand a subject description into detailed prompt variants.
  */
 export async function POST(request: NextRequest): Promise<NextResponse<ExpandPromptResponse>> {
   try {
@@ -233,7 +233,7 @@ export async function GET(): Promise<NextResponse> {
   return NextResponse.json({
     endpoint: '/api/studio/expand-prompt',
     method: 'POST',
-    description: 'Expand a creative theme into detailed prompt variants using AI',
+    description: 'Expand a subject description into detailed prompt variants using AI',
     request: {
       subject: 'string (required, 2-1000 chars)',
       variantCount: `number (optional, 1-${MAX_VARIANT_COUNT}, default: ${DEFAULT_VARIANT_COUNT})`,

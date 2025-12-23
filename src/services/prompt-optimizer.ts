@@ -1,7 +1,7 @@
 /**
  * Prompt Optimizer Service
  *
- * Transforms brief creative themes into detailed, high-quality prompts using AI (LLM).
+ * Transforms brief subject descriptions into detailed, high-quality prompts using AI (LLM).
  * Implements the intelligent prompt optimization workflow for User Story 2.
  *
  * Features:
@@ -29,7 +29,7 @@ export const DEFAULT_VARIANT_COUNT = 3
  * System prompt for the prompt engineering expert persona
  * Instructs the LLM to act as a specialized prompt engineer for image generation
  */
-export const SYSTEM_PROMPT = `You are an expert prompt engineer specializing in AI image generation. Your task is to transform brief creative themes into detailed, high-quality prompts optimized for state-of-the-art image generation models like Flux, DALL-E 3, and Imagen.
+export const SYSTEM_PROMPT = `You are an expert prompt engineer specializing in AI image generation. Your task is to transform brief subject descriptions into detailed, high-quality prompts optimized for state-of-the-art image generation models like Flux, DALL-E 3, and Imagen.
 
 For each theme, you must generate multiple distinct prompt variants that explore different artistic interpretations while maintaining the core subject matter.
 
@@ -58,7 +58,7 @@ IMPORTANT: Always respond with valid JSON matching the specified schema. Do not 
  * Input for prompt expansion
  */
 export interface PromptExpansionInput {
-  /** The user's original creative theme/subject */
+  /** The user's original subject description */
   subject: string
   /** Number of variants to generate (default: 3) */
   variantCount?: number
@@ -334,7 +334,7 @@ export class PromptOptimizer {
   }
 
   /**
-   * Expand a brief creative theme into detailed prompt variants
+   * Expand a brief subject description into detailed prompt variants
    *
    * @param input - The expansion input containing subject and options
    * @returns The expansion result with variants and metadata
