@@ -14,6 +14,14 @@
 - Q: Should the system support multiple user roles with different permissions? → A: No, single Admin role only; no role-based access control needed
 - Q: Should video generation (Veo) be included in the initial implementation? → A: No, video generation is deferred to lowest priority; focus on image generation first
 
+### Session 2025-12-23
+
+- Q: What UI pattern should the "extend/optimize prompts" button use for displaying optimization results? → A: Collapsible section below the text input that expands with optimization results
+- Q: How should users interact with prompt variants before generation? → A: Selectable variants with inline editing capability for each
+- Q: What loading state should display during prompt optimization? → A: Progress bar showing optimization stages (analyzing, enhancing, formatting)
+- Q: What should happen in the UI if prompt optimization fails? → A: Inline error banner in the collapsible section with "Retry" button
+- Q: How many prompt variants should the "Extend" optimization generate? → A: Default 3 variants with dropdown to select 3, 5, or 7
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Batch Generation Task (Priority: P1)
@@ -44,11 +52,11 @@ As an **Admin**, I want the system to automatically enhance my brief creative th
 
 **Acceptance Scenarios**:
 
-1. **Given** I enter a simple theme like "a crying cat in the rain", **When** I request prompt optimization, **Then** the system returns multiple prompt variants (e.g., realistic, abstract, artistic versions) with enhanced details about composition, lighting, and atmosphere.
+1. **Given** I enter a simple theme like "a crying cat in the rain", **When** I click the "Extend" button below the text input, **Then** a collapsible section expands showing a progress bar with stages (Analyzing → Enhancing → Formatting), followed by multiple prompt variants (e.g., realistic, abstract, artistic versions) with enhanced details about composition, lighting, and atmosphere.
 
 2. **Given** I enable web search enhancement for a trending topic like "Black Myth Wukong style", **When** I request prompt optimization, **Then** the system incorporates current visual descriptions from web sources into the optimized prompts.
 
-3. **Given** the system generates optimized prompts, **When** I review them, **Then** each prompt is returned in a structured format that I can edit before generation.
+3. **Given** the system generates optimized prompts in the collapsible section, **When** I review them, **Then** each prompt variant has a checkbox for selection and an inline text editor allowing me to modify the prompt before generation.
 
 ---
 
@@ -154,6 +162,9 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - What happens when web search enhancement returns no relevant results?
   - System proceeds with LLM optimization without web context and informs the user that no trending information was found.
 
+- What happens when prompt optimization fails (LLM API error or timeout)?
+  - System displays an inline error banner within the collapsible section with the error message and a "Retry" button; the section remains expanded for user action.
+
 - What happens when a user submits a task while another large task is still processing?
   - System accepts the new task and queues it; both tasks run based on available capacity and rate limits.
 
@@ -163,7 +174,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 **Studio Workspace**
 - **FR-001**: System MUST accept multi-line text input as the generation theme/subject
-- **FR-002**: System MUST optimize user themes into multiple prompt variants using LLM
+- **FR-002**: System MUST optimize user themes into prompt variants using LLM, with a dropdown allowing users to select 3 (default), 5, or 7 variants
 - **FR-003**: System MUST support optional web search enhancement for prompt optimization
 - **FR-004**: System MUST display a real-time calculation of total expected outputs based on selected parameters (prompts x styles x models x batch size)
 - **FR-005**: System MUST warn users when calculated total exceeds a configurable threshold
