@@ -227,10 +227,10 @@ Per plan.md Testing Requirements:
 
 > **Purpose**: Upgrade prompt optimizer to use gemini-3-flash-preview model for improved reasoning performance
 
-- [ ] T038b [US2] Update GeminiProvider default model from 'gemini-1.5-flash' to 'gemini-3-flash-preview' in src/services/prompt-optimizer.ts
-- [ ] T038c [P] [US2] Add thinking_level parameter support to GeminiProvider in src/services/prompt-optimizer.ts (options: minimal/low/medium/high)
-- [ ] T038d [P] [US2] Update createPromptOptimizer factory function to accept optional model name parameter in src/services/prompt-optimizer.ts
-- [ ] T038e [US2] Update unit tests in tests/unit/services/prompt-optimizer.test.ts to verify gemini-3-flash-preview model usage
+- [X] T038b [US2] Update GeminiProvider default model from 'gemini-1.5-flash' to 'gemini-3-flash-preview' in src/services/prompt-optimizer.ts
+- [X] T038c [P] [US2] Add thinking_level parameter support to GeminiProvider in src/services/prompt-optimizer.ts (options: minimal/low/medium/high)
+- [X] T038d [P] [US2] Update createPromptOptimizer factory function to accept optional model name parameter in src/services/prompt-optimizer.ts
+- [X] T038e [US2] Update unit tests in tests/unit/services/prompt-optimizer.test.ts to verify gemini-3-flash-preview model usage
 
 ### Prompt Optimization UI Components (Moved from Phase 10)
 
@@ -246,19 +246,19 @@ Per plan.md Testing Requirements:
 
 #### Subject Input & Configuration
 
-- [ ] T038f [P] [US2] Create SubjectInput component in src/components/Studio/SubjectInput.tsx with multi-line text input and character counter
-- [ ] T038f2 [P] [US2] Create VariantCountSelector component in src/components/Studio/VariantCountSelector.tsx as dropdown with options 3 (default), 5, or 7
+- [X] T038f [P] [US2] Create SubjectInput component in src/components/Studio/SubjectInput.tsx with multi-line text input and character counter
+- [X] T038f2 [P] [US2] Create VariantCountSelector component in src/components/Studio/VariantCountSelector.tsx as dropdown with options 3 (default), 5, or 7
 
 #### Extend Button & Collapsible Section
 
-- [ ] T038g [US2] Create ExtendButton component in src/components/Studio/ExtendButton.tsx with "Extend" label that triggers prompt optimization API call
-- [ ] T038g2 [US2] Create PromptOptimizationSection component in src/components/Studio/PromptOptimizationSection.tsx as collapsible container below SubjectInput that expands when ExtendButton is clicked
-- [ ] T038g3 [US2] Create OptimizationProgressBar component in src/components/Studio/OptimizationProgressBar.tsx with three stages: "Analyzing" → "Enhancing" → "Formatting" and visual progress indicator
+- [X] T038g [US2] Create ExtendButton component in src/components/Studio/ExtendButton.tsx with "Extend" label that triggers prompt optimization API call
+- [X] T038g2 [US2] Create PromptOptimizationSection component in src/components/Studio/PromptOptimizationSection.tsx as collapsible container below SubjectInput that expands when ExtendButton is clicked
+- [X] T038g3 [US2] Create OptimizationProgressBar component in src/components/Studio/OptimizationProgressBar.tsx with three stages: "Analyzing" → "Enhancing" → "Formatting" and visual progress indicator
 
 #### Prompt Variants Display
 
-- [ ] T038h [US2] Create PromptVariantsList component in src/components/Studio/PromptVariantsList.tsx to display generated variants inside the collapsible section after progress completes
-- [ ] T038i [US2] Create PromptVariantCard component in src/components/Studio/PromptVariantCard.tsx with:
+- [X] T038h [US2] Create PromptVariantsList component in src/components/Studio/PromptVariantsList.tsx to display generated variants inside the collapsible section after progress completes
+- [X] T038i [US2] Create PromptVariantCard component in src/components/Studio/PromptVariantCard.tsx with:
   - Checkbox for selection (allows multi-select of variants)
   - Variant name/label (e.g., "Realistic", "Abstract", "Artistic")
   - Inline editable text area for the expanded prompt
@@ -266,11 +266,11 @@ Per plan.md Testing Requirements:
 
 #### Error Handling
 
-- [ ] T038i2 [US2] Create OptimizationErrorBanner component in src/components/Studio/OptimizationErrorBanner.tsx with inline error message display and "Retry" button inside the collapsible section
+- [X] T038i2 [US2] Create OptimizationErrorBanner component in src/components/Studio/OptimizationErrorBanner.tsx with inline error message display and "Retry" button inside the collapsible section
 
 #### State Management Hook
 
-- [ ] T038j [US2] Create usePromptExpansion hook in src/components/Studio/hooks/usePromptExpansion.ts to manage:
+- [X] T038j [US2] Create usePromptExpansion hook in src/components/Studio/hooks/usePromptExpansion.ts to manage:
   - Subject input state
   - Variant count selection (3/5/7)
   - Collapsible section open/closed state
@@ -281,9 +281,9 @@ Per plan.md Testing Requirements:
 
 #### Integration
 
-- [ ] T038k [US2] Integrate SubjectInput, VariantCountSelector, ExtendButton, and PromptOptimizationSection into task creation page in src/components/Studio/index.tsx
-- [ ] T038l [US2] Connect usePromptExpansion hook to /api/studio/expand-prompt endpoint with loading stages simulation (Analyzing → Enhancing → Formatting progress)
-- [ ] T038m [US2] Implement prompt editing persistence in usePromptExpansion hook to track user modifications to generated prompts (preserve edits across re-renders)
+- [X] T038k [US2] Integrate SubjectInput, VariantCountSelector, ExtendButton, and PromptOptimizationSection into task creation page in src/components/Studio/index.tsx
+- [X] T038l [US2] Connect usePromptExpansion hook to /api/studio/expand-prompt endpoint with loading stages simulation (Analyzing → Enhancing → Formatting progress)
+- [X] T038m [US2] Implement prompt editing persistence in usePromptExpansion hook to track user modifications to generated prompts (preserve edits across re-renders)
 
 **Checkpoint**: User Story 2 complete - all unit tests pass for prompt-optimizer, UI components allow subject input, "Extend" button triggers collapsible section with staged progress bar, displays selectable/editable prompt variants, handles errors with inline retry. Admin can submit subjects, get AI-enhanced prompts, select and edit variants, and proceed to generation.
 

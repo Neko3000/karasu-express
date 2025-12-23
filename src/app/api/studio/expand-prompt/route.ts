@@ -13,6 +13,8 @@ import {
   type PromptExpansionInput,
   type PromptExpansionResult,
   DEFAULT_VARIANT_COUNT,
+  DEFAULT_GEMINI_MODEL,
+  DEFAULT_THINKING_LEVEL,
 } from '../../../../services/prompt-optimizer'
 
 /**
@@ -234,6 +236,11 @@ export async function GET(): Promise<NextResponse> {
     endpoint: '/api/studio/expand-prompt',
     method: 'POST',
     description: 'Expand a subject description into detailed prompt variants using AI',
+    model: {
+      default: DEFAULT_GEMINI_MODEL,
+      thinkingLevel: DEFAULT_THINKING_LEVEL,
+      description: 'Gemini 3 Flash Preview with configurable thinking levels',
+    },
     request: {
       subject: 'string (required, 2-1000 chars)',
       variantCount: `number (optional, 1-${MAX_VARIANT_COUNT}, default: ${DEFAULT_VARIANT_COUNT})`,

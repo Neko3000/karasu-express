@@ -55,6 +55,22 @@ IMPORTANT: Always respond with valid JSON matching the specified schema. Do not 
 // ============================================
 
 /**
+ * Thinking level for Gemini 3 models
+ * Controls the depth of internal reasoning before producing a response
+ *
+ * - MINIMAL: Matches "no thinking" for most queries; minimizes latency
+ * - LOW: Minimizes latency and cost; best for simple tasks
+ * - MEDIUM: Mid-level reasoning depth
+ * - HIGH: Maximizes reasoning depth (default for Gemini 3)
+ */
+export type ThinkingLevel = 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH'
+
+/**
+ * Default thinking level for Gemini 3 models
+ */
+export const DEFAULT_THINKING_LEVEL: ThinkingLevel = 'LOW'
+
+/**
  * Input for prompt expansion
  */
 export interface PromptExpansionInput {
@@ -239,30 +255,76 @@ function parseExpansionResponse(responseText: string): PromptExpansionResult {
 // ============================================
 
 /**
- * Gemini Pro LLM Provider (Google AI)
+ * Default model for Gemini provider
+ * Using Gemini 3 Flash Preview for improved reasoning performance
+ */
+export const DEFAULT_GEMINI_MODEL = 'gemini-3-flash-preview'
+
+/**
+ * Gemini 3 Flash Preview LLM Provider (Google AI)
  *
  * Primary provider for prompt optimization.
- * Uses the Gemini Pro model with JSON output mode.
+ * Uses the Gemini 3 Flash Preview model with JSON output mode.
+ * Supports configurable thinking levels for latency vs reasoning depth tradeoffs.
  */
 export class GeminiProvider implements LLMProvider {
   private client: GoogleGenerativeAI
   private modelName: string
+  private thinkingLevel: ThinkingLevel
 
-  constructor(apiKey: string, modelName: string = 'gemini-1.5-flash') {
+  /**
+   * Create a new GeminiProvider instance
+   *
+   * @param apiKey - Google AI API key
+   * @param modelName - Model name (default: gemini-3-flash-preview)
+   * @param thinkingLevel - Thinking level for Gemini 3 models (default: LOW)
+   */
+  constructor(
+    apiKey: string,
+    modelName: string = DEFAULT_GEMINI_MODEL,
+    thinkingLevel: ThinkingLevel = DEFAULT_THINKING_LEVEL
+  ) {
     this.client = new GoogleGenerativeAI(apiKey)
     this.modelName = modelName
+    this.thinkingLevel = thinkingLevel
   }
 
   get providerId(): string {
     return 'gemini'
   }
 
+  /**
+   * Get the current model name
+   */
+  getModelName(): string {
+    return this.modelName
+  }
+
+  /**
+   * Get the current thinking level
+   */
+  getThinkingLevel(): ThinkingLevel {
+    return this.thinkingLevel
+  }
+
   async generate(prompt: string, systemPrompt: string): Promise<string> {
+    // Build generation config based on model type
+    const isGemini3 = this.modelName.includes('gemini-3')
+
+    const generationConfig: Record<string, unknown> = {
+      responseMimeType: 'application/json',
+    }
+
+    // Add thinkingConfig for Gemini 3 models
+    if (isGemini3) {
+      generationConfig.thinkingConfig = {
+        thinkingLevel: this.thinkingLevel,
+      }
+    }
+
     const model = this.client.getGenerativeModel({
       model: this.modelName,
-      generationConfig: {
-        responseMimeType: 'application/json',
-      },
+      generationConfig,
     })
 
     // Combine system prompt and user prompt
@@ -358,18 +420,46 @@ export class PromptOptimizer {
 // ============================================
 
 /**
- * Create a default PromptOptimizer using Gemini Pro
- *
- * @param apiKey - Google AI API key (defaults to GOOGLE_AI_API_KEY env var)
- * @returns A configured PromptOptimizer instance
+ * Options for creating a PromptOptimizer
  */
-export function createPromptOptimizer(apiKey?: string): PromptOptimizer {
-  const key = apiKey || process.env.GOOGLE_AI_API_KEY
+export interface CreatePromptOptimizerOptions {
+  /** Google AI API key (defaults to GOOGLE_AI_API_KEY env var) */
+  apiKey?: string
+  /** Model name (defaults to gemini-3-flash-preview) */
+  modelName?: string
+  /** Thinking level for Gemini 3 models (defaults to LOW) */
+  thinkingLevel?: ThinkingLevel
+}
+
+/**
+ * Create a default PromptOptimizer using Gemini 3 Flash Preview
+ *
+ * @param options - Configuration options
+ * @returns A configured PromptOptimizer instance
+ *
+ * @example
+ * ```ts
+ * // Using defaults (gemini-3-flash-preview with LOW thinking)
+ * const optimizer = createPromptOptimizer()
+ *
+ * // With custom model and thinking level
+ * const optimizer = createPromptOptimizer({
+ *   modelName: 'gemini-3-flash-preview',
+ *   thinkingLevel: 'MEDIUM'
+ * })
+ * ```
+ */
+export function createPromptOptimizer(options?: CreatePromptOptimizerOptions): PromptOptimizer {
+  const key = options?.apiKey || process.env.GOOGLE_AI_API_KEY
   if (!key) {
     throw new Error('GOOGLE_AI_API_KEY environment variable is required')
   }
 
-  const provider = new GeminiProvider(key)
+  const provider = new GeminiProvider(
+    key,
+    options?.modelName ?? DEFAULT_GEMINI_MODEL,
+    options?.thinkingLevel ?? DEFAULT_THINKING_LEVEL
+  )
   return new PromptOptimizer(provider)
 }
 

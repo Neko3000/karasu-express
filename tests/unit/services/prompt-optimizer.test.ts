@@ -14,17 +14,20 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest'
 
-// Import after mocking
 import {
   PromptOptimizer,
   type PromptExpansionInput,
   type PromptExpansionResult,
   type PromptVariant,
   type LLMProvider,
+  type ThinkingLevel,
   GeminiProvider,
   generateSubjectSlug,
   DEFAULT_VARIANT_COUNT,
+  DEFAULT_GEMINI_MODEL,
+  DEFAULT_THINKING_LEVEL,
   SYSTEM_PROMPT,
+  createPromptOptimizer,
 } from '../../../src/services/prompt-optimizer'
 
 describe('PromptOptimizer', () => {
@@ -550,6 +553,32 @@ describe('PromptOptimizer', () => {
       expect(provider.providerId).toBe('gemini')
     })
 
+    it('should use gemini-3-flash-preview as default model', () => {
+      const provider = new GeminiProvider('test-api-key')
+      expect(provider.getModelName()).toBe('gemini-3-flash-preview')
+      expect(provider.getModelName()).toBe(DEFAULT_GEMINI_MODEL)
+    })
+
+    it('should use LOW as default thinking level', () => {
+      const provider = new GeminiProvider('test-api-key')
+      expect(provider.getThinkingLevel()).toBe('LOW')
+      expect(provider.getThinkingLevel()).toBe(DEFAULT_THINKING_LEVEL)
+    })
+
+    it('should accept custom model name', () => {
+      const provider = new GeminiProvider('test-api-key', 'custom-model')
+      expect(provider.getModelName()).toBe('custom-model')
+    })
+
+    it('should accept custom thinking level', () => {
+      const thinkingLevels: ThinkingLevel[] = ['MINIMAL', 'LOW', 'MEDIUM', 'HIGH']
+
+      thinkingLevels.forEach((level) => {
+        const provider = new GeminiProvider('test-api-key', DEFAULT_GEMINI_MODEL, level)
+        expect(provider.getThinkingLevel()).toBe(level)
+      })
+    })
+
     it('should have a generate method', () => {
       const provider = new GeminiProvider('test-api-key')
       expect(typeof provider.generate).toBe('function')
@@ -571,6 +600,89 @@ describe('PromptOptimizer', () => {
       await expect(
         errorOptimizer.expandPrompt(createExpansionInput())
       ).rejects.toThrow('Gemini API error')
+    })
+  })
+
+  // ============================================
+  // DEFAULT_GEMINI_MODEL constant
+  // ============================================
+
+  describe('DEFAULT_GEMINI_MODEL', () => {
+    it('should be defined as gemini-3-flash-preview', () => {
+      expect(DEFAULT_GEMINI_MODEL).toBe('gemini-3-flash-preview')
+    })
+
+    it('should be a string', () => {
+      expect(typeof DEFAULT_GEMINI_MODEL).toBe('string')
+    })
+  })
+
+  // ============================================
+  // DEFAULT_THINKING_LEVEL constant
+  // ============================================
+
+  describe('DEFAULT_THINKING_LEVEL', () => {
+    it('should be defined as LOW', () => {
+      expect(DEFAULT_THINKING_LEVEL).toBe('LOW')
+    })
+
+    it('should be a valid thinking level', () => {
+      const validLevels = ['MINIMAL', 'LOW', 'MEDIUM', 'HIGH']
+      expect(validLevels).toContain(DEFAULT_THINKING_LEVEL)
+    })
+  })
+
+  // ============================================
+  // createPromptOptimizer factory
+  // ============================================
+
+  describe('createPromptOptimizer', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      process.env = { ...originalEnv }
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+    })
+
+    it('should throw when API key is not provided and not in env', () => {
+      delete process.env.GOOGLE_AI_API_KEY
+
+      expect(() => createPromptOptimizer()).toThrow('GOOGLE_AI_API_KEY environment variable is required')
+    })
+
+    it('should create optimizer with env API key', () => {
+      process.env.GOOGLE_AI_API_KEY = 'test-env-key'
+
+      const optimizer = createPromptOptimizer()
+      expect(optimizer).toBeDefined()
+      expect(optimizer.getProviderId()).toBe('gemini')
+    })
+
+    it('should create optimizer with provided API key', () => {
+      delete process.env.GOOGLE_AI_API_KEY
+
+      const optimizer = createPromptOptimizer({ apiKey: 'test-key' })
+      expect(optimizer).toBeDefined()
+      expect(optimizer.getProviderId()).toBe('gemini')
+    })
+
+    it('should accept custom model name', () => {
+      process.env.GOOGLE_AI_API_KEY = 'test-key'
+
+      // Verify no error is thrown when creating with custom model
+      const optimizer = createPromptOptimizer({ modelName: 'custom-model' })
+      expect(optimizer).toBeDefined()
+    })
+
+    it('should accept custom thinking level', () => {
+      process.env.GOOGLE_AI_API_KEY = 'test-key'
+
+      // Verify no error is thrown when creating with custom thinking level
+      const optimizer = createPromptOptimizer({ thinkingLevel: 'HIGH' })
+      expect(optimizer).toBeDefined()
     })
   })
 
