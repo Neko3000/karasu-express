@@ -14,7 +14,7 @@
  * Future expansion: ChatGPT (GPT-4o), Claude (Claude 3.5 Sonnet)
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenAI, type GenerateContentConfig } from '@google/genai'
 
 // ============================================
 // CONSTANTS
@@ -266,9 +266,11 @@ export const DEFAULT_GEMINI_MODEL = 'gemini-3-flash-preview'
  * Primary provider for prompt optimization.
  * Uses the Gemini 3 Flash Preview model with JSON output mode.
  * Supports configurable thinking levels for latency vs reasoning depth tradeoffs.
+ *
+ * Uses the new @google/genai package API.
  */
 export class GeminiProvider implements LLMProvider {
-  private client: GoogleGenerativeAI
+  private client: GoogleGenAI
   private modelName: string
   private thinkingLevel: ThinkingLevel
 
@@ -284,7 +286,7 @@ export class GeminiProvider implements LLMProvider {
     modelName: string = DEFAULT_GEMINI_MODEL,
     thinkingLevel: ThinkingLevel = DEFAULT_THINKING_LEVEL
   ) {
-    this.client = new GoogleGenerativeAI(apiKey)
+    this.client = new GoogleGenAI({ apiKey })
     this.modelName = modelName
     this.thinkingLevel = thinkingLevel
   }
@@ -311,30 +313,52 @@ export class GeminiProvider implements LLMProvider {
     // Build generation config based on model type
     const isGemini3 = this.modelName.includes('gemini-3')
 
-    const generationConfig: Record<string, unknown> = {
+    // Build config for the new @google/genai API
+    const config: GenerateContentConfig = {
       responseMimeType: 'application/json',
+      systemInstruction: systemPrompt,
     }
 
     // Add thinkingConfig for Gemini 3 models
     if (isGemini3) {
-      generationConfig.thinkingConfig = {
-        thinkingLevel: this.thinkingLevel,
+      config.thinkingConfig = {
+        thinkingBudget: this.getThinkingBudget(this.thinkingLevel),
       }
     }
 
-    const model = this.client.getGenerativeModel({
+    // Use the new @google/genai API: ai.models.generateContent()
+    const response = await this.client.models.generateContent({
       model: this.modelName,
-      generationConfig,
+      contents: "a cat",
+      config,
     })
 
-    // Combine system prompt and user prompt
-    const fullPrompt = `${systemPrompt}\n\n---\n\n${prompt}`
-
-    const result = await model.generateContent(fullPrompt)
-    const response = result.response
-    const text = response.text()
+    // Extract text from the response
+    const text = response.text
+    if (!text) {
+      throw new Error('No text response from Gemini API')
+    }
 
     return text
+  }
+
+  /**
+   * Convert thinking level to thinking budget for Gemini 3 models
+   * Based on the new API's thinkingBudget parameter
+   */
+  private getThinkingBudget(level: ThinkingLevel): number {
+    switch (level) {
+      case 'MINIMAL':
+        return 0
+      case 'LOW':
+        return 1024
+      case 'MEDIUM':
+        return 8192
+      case 'HIGH':
+        return 24576
+      default:
+        return 1024
+    }
   }
 }
 
