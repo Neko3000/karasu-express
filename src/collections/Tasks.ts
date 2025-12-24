@@ -51,6 +51,18 @@ export const Tasks: CollectionConfig = {
   },
   fields: [
     // ============================================
+    // Prompt Optimization UI (Custom Component)
+    // ============================================
+    {
+      name: 'promptOptimizer',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Studio/PromptOptimizerField#PromptOptimizerField',
+        },
+      },
+    },
+    // ============================================
     // Core Fields
     // ============================================
     {
@@ -59,6 +71,7 @@ export const Tasks: CollectionConfig = {
       required: true,
       admin: {
         description: "User's original subject input",
+        hidden: true, // Hidden because PromptOptimizerField manages this
       },
       minLength: 1,
       maxLength: 1000,
@@ -69,6 +82,10 @@ export const Tasks: CollectionConfig = {
       admin: {
         description: 'LLM-optimized prompt variants',
         readOnly: true,
+        condition: (data) => {
+          // Show only if there are expanded prompts (for viewing existing tasks)
+          return data?.expandedPrompts?.length > 0
+        },
       },
       fields: [
         {

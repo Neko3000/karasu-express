@@ -166,6 +166,7 @@ export { OptimizationProgressBar } from './OptimizationProgressBar'
 export { PromptVariantCard } from './PromptVariantCard'
 export { PromptVariantsList } from './PromptVariantsList'
 export { OptimizationErrorBanner } from './OptimizationErrorBanner'
+export { PromptOptimizerField } from './PromptOptimizerField'
 export { usePromptExpansion } from './hooks/usePromptExpansion'
 
 // Type exports
