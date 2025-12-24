@@ -5,6 +5,7 @@
  *
  * A dropdown selector for choosing the number of prompt variants to generate.
  * Options: 3 (default), 5, or 7 variants.
+ * Uses PayloadCMS styling patterns.
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
@@ -38,6 +39,7 @@ export interface VariantCountSelectorProps {
 
 /**
  * VariantCountSelector - Dropdown for selecting variant count
+ * Uses PayloadCMS styling patterns
  */
 export function VariantCountSelector({
   value,
@@ -55,11 +57,15 @@ export function VariantCountSelector({
   )
 
   return (
-    <div className={`twp inline-flex items-center gap-2 ${className}`}>
+    <div className={className} style={{ display: 'inline-flex', alignItems: 'center', gap: 'calc(var(--base) * 0.4)' }}>
       {label && (
         <label
           htmlFor="variant-count-selector"
-          className="twp text-sm font-medium text-gray-700 dark:text-gray-300"
+          style={{
+            fontSize: 'var(--base-body-size)',
+            fontWeight: 500,
+            color: 'var(--theme-text)',
+          }}
         >
           {label}
         </label>
@@ -69,17 +75,18 @@ export function VariantCountSelector({
         value={value}
         onChange={handleChange}
         disabled={disabled}
-        className={`
-          twp px-3 py-1.5
-          text-sm font-medium
-          border rounded-md
-          bg-white dark:bg-gray-800
-          text-gray-900 dark:text-gray-100
-          border-gray-300 dark:border-gray-600
-          transition-colors duration-200
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-          ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : 'cursor-pointer hover:border-gray-400 dark:hover:border-gray-500'}
-        `}
+        style={{
+          padding: 'calc(var(--base) * 0.3) calc(var(--base) * 0.5)',
+          fontSize: 'var(--base-body-size)',
+          fontWeight: 500,
+          border: '1px solid var(--theme-elevation-150)',
+          borderRadius: 'var(--style-radius-s)',
+          backgroundColor: disabled ? 'var(--theme-elevation-100)' : 'var(--theme-input-bg)',
+          color: 'var(--theme-text)',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.6 : 1,
+          transition: 'border-color 150ms',
+        }}
         aria-label="Number of prompt variants to generate"
       >
         {VARIANT_COUNT_OPTIONS.map((count) => (

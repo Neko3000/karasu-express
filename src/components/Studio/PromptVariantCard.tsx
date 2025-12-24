@@ -3,11 +3,13 @@
 /**
  * PromptVariantCard Component
  *
- * A card displaying a single prompt variant with:
+ * A compact card displaying a single prompt variant with:
  * - Checkbox for selection (multi-select)
  * - Variant name/label (e.g., "Realistic", "Artistic")
  * - Inline editable text area for the expanded prompt
  * - Suggested negative prompt display (non-editable, for reference)
+ *
+ * Uses PayloadCMS styling patterns for consistency.
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
@@ -44,6 +46,7 @@ export interface PromptVariantCardProps {
 
 /**
  * PromptVariantCard - Selectable and editable prompt variant card
+ * Uses PayloadCMS styling patterns for compact, consistent appearance
  */
 export function PromptVariantCard({
   variant,
@@ -60,7 +63,7 @@ export function PromptVariantCard({
     const textarea = textareaRef.current
     if (textarea) {
       textarea.style.height = 'auto'
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 300)}px`
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`
     }
   }, [])
 
@@ -85,51 +88,58 @@ export function PromptVariantCard({
 
   return (
     <div
-      className={`
-        twp p-4 rounded-lg border transition-all duration-200
-        ${
-          isSelected
-            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm'
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-        }
-        ${disabled ? 'opacity-60' : ''}
-        ${className}
-      `}
+      className={className}
+      style={{
+        padding: 'calc(var(--base) * 0.75)',
+        borderRadius: 'var(--style-radius-s)',
+        border: `1px solid ${isSelected ? 'var(--theme-success-500)' : 'var(--theme-elevation-150)'}`,
+        backgroundColor: isSelected ? 'var(--theme-success-50)' : 'var(--theme-elevation-50)',
+        opacity: disabled ? 0.6 : 1,
+        transition: 'border-color 150ms, background-color 150ms',
+      }}
     >
       {/* Header with checkbox and variant name */}
-      <div className="twp flex items-start gap-3 mb-3">
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'calc(var(--base) * 0.5)', marginBottom: 'calc(var(--base) * 0.5)' }}>
         <input
           type="checkbox"
           id={`variant-${variant.variantId}`}
           checked={isSelected}
           onChange={handleCheckboxChange}
           disabled={disabled}
-          className={`
-            twp w-5 h-5 mt-0.5
-            rounded border-gray-300 dark:border-gray-600
-            text-blue-600 focus:ring-blue-500 focus:ring-2
-            transition-colors duration-200
-            ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-          `}
+          style={{
+            width: '16px',
+            height: '16px',
+            marginTop: '2px',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            accentColor: 'var(--theme-success-500)',
+          }}
         />
-        <div className="twp flex-1">
+        <div style={{ flex: 1 }}>
           <label
             htmlFor={`variant-${variant.variantId}`}
-            className={`
-              twp block text-sm font-semibold
-              text-gray-900 dark:text-gray-100
-              ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-            `}
+            style={{
+              display: 'block',
+              fontSize: 'var(--base-body-size)',
+              fontWeight: 500,
+              color: 'var(--theme-text)',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+            }}
           >
             {variant.variantName}
           </label>
           {/* Keywords */}
           {variant.keywords && variant.keywords.length > 0 && (
-            <div className="twp flex flex-wrap gap-1 mt-1">
-              {variant.keywords.map((keyword, index) => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'calc(var(--base) * 0.25)', marginTop: 'calc(var(--base) * 0.25)' }}>
+              {variant.keywords.slice(0, 4).map((keyword, index) => (
                 <span
                   key={index}
-                  className="twp px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                  style={{
+                    padding: '0 calc(var(--base) * 0.4)',
+                    fontSize: 'calc(var(--base-body-size) * 0.75)',
+                    borderRadius: 'var(--style-radius-s)',
+                    backgroundColor: 'var(--theme-elevation-150)',
+                    color: 'var(--theme-elevation-650)',
+                  }}
                 >
                   {keyword}
                 </span>
@@ -140,8 +150,16 @@ export function PromptVariantCard({
       </div>
 
       {/* Editable prompt textarea */}
-      <div className="twp mb-3">
-        <label className="twp block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+      <div style={{ marginBottom: 'calc(var(--base) * 0.5)' }}>
+        <label
+          style={{
+            display: 'block',
+            fontSize: 'calc(var(--base-body-size) * 0.8)',
+            fontWeight: 500,
+            color: 'var(--theme-elevation-500)',
+            marginBottom: 'calc(var(--base) * 0.25)',
+          }}
+        >
           Expanded Prompt
         </label>
         <textarea
@@ -149,37 +167,49 @@ export function PromptVariantCard({
           value={variant.expandedPrompt}
           onChange={handlePromptChange}
           disabled={disabled}
-          rows={3}
-          className={`
-            twp w-full p-2
-            text-sm leading-relaxed
-            border rounded-md resize-none
-            bg-white dark:bg-gray-900
-            text-gray-900 dark:text-gray-100
-            border-gray-200 dark:border-gray-600
-            transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            ${disabled ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-800' : ''}
-          `}
+          rows={2}
+          style={{
+            width: '100%',
+            padding: 'calc(var(--base) * 0.4)',
+            fontSize: 'calc(var(--base-body-size) * 0.9)',
+            lineHeight: 1.4,
+            border: '1px solid var(--theme-elevation-150)',
+            borderRadius: 'var(--style-radius-s)',
+            backgroundColor: 'var(--theme-input-bg)',
+            color: 'var(--theme-text)',
+            resize: 'none',
+            minHeight: '48px',
+            maxHeight: '150px',
+            cursor: disabled ? 'not-allowed' : 'text',
+          }}
           aria-label={`Edit ${variant.variantName} prompt`}
         />
       </div>
 
       {/* Negative prompt (non-editable reference) */}
       {variant.suggestedNegativePrompt && (
-        <div className="twp">
-          <label className="twp block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+        <div>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 'calc(var(--base-body-size) * 0.8)',
+              fontWeight: 500,
+              color: 'var(--theme-elevation-500)',
+              marginBottom: 'calc(var(--base) * 0.25)',
+            }}
+          >
             Suggested Negative Prompt
           </label>
           <div
-            className={`
-              twp p-2
-              text-sm leading-relaxed
-              rounded-md
-              bg-gray-100 dark:bg-gray-700/50
-              text-gray-600 dark:text-gray-400
-              border border-gray-200 dark:border-gray-600
-            `}
+            style={{
+              padding: 'calc(var(--base) * 0.4)',
+              fontSize: 'calc(var(--base-body-size) * 0.85)',
+              lineHeight: 1.4,
+              borderRadius: 'var(--style-radius-s)',
+              backgroundColor: 'var(--theme-elevation-100)',
+              color: 'var(--theme-elevation-600)',
+              border: '1px solid var(--theme-elevation-100)',
+            }}
           >
             {variant.suggestedNegativePrompt}
           </div>

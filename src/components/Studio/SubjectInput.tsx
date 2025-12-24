@@ -8,7 +8,7 @@
  * - Multi-line textarea with auto-resize
  * - Character counter showing current/max length
  * - Placeholder text guiding the user
- * - TailwindCSS styling with `.twp` scope
+ * - PayloadCMS styling patterns
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
@@ -42,6 +42,7 @@ export interface SubjectInputProps {
 
 /**
  * SubjectInput - Multi-line text input with character counter
+ * Uses PayloadCMS styling patterns
  */
 export function SubjectInput({
   value,
@@ -58,7 +59,7 @@ export function SubjectInput({
     const textarea = textareaRef.current
     if (textarea) {
       textarea.style.height = 'auto'
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`
     }
   }, [])
 
@@ -83,8 +84,8 @@ export function SubjectInput({
   const isUnderMin = characterCount > 0 && characterCount < MIN_SUBJECT_LENGTH
 
   return (
-    <div className={`twp ${className}`}>
-      <div className="twp relative">
+    <div className={className}>
+      <div style={{ position: 'relative' }}>
         <textarea
           ref={textareaRef}
           value={value}
@@ -92,47 +93,54 @@ export function SubjectInput({
           placeholder={placeholder}
           disabled={disabled}
           aria-label={ariaLabel}
-          rows={3}
-          className={`
-            twp w-full min-h-[80px] max-h-[200px] p-3
-            text-sm leading-relaxed
-            border rounded-lg resize-none
-            bg-white dark:bg-gray-800
-            text-gray-900 dark:text-gray-100
-            placeholder-gray-400 dark:placeholder-gray-500
-            transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-offset-1
-            ${
-              isOverLimit || isUnderMin
-                ? 'border-red-400 focus:ring-red-400 focus:border-red-400'
-                : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
-            }
-            ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}
-          `}
+          rows={2}
+          style={{
+            width: '100%',
+            minHeight: '56px',
+            maxHeight: '120px',
+            padding: 'calc(var(--base) * 0.5)',
+            fontSize: 'var(--base-body-size)',
+            lineHeight: 1.4,
+            border: `1px solid ${isOverLimit || isUnderMin ? 'var(--theme-error-400)' : 'var(--theme-elevation-150)'}`,
+            borderRadius: 'var(--style-radius-s)',
+            backgroundColor: disabled ? 'var(--theme-elevation-100)' : 'var(--theme-input-bg)',
+            color: 'var(--theme-text)',
+            resize: 'none',
+            opacity: disabled ? 0.6 : 1,
+            cursor: disabled ? 'not-allowed' : 'text',
+            transition: 'border-color 150ms',
+          }}
         />
       </div>
 
       {/* Character counter */}
-      <div className="twp flex justify-between items-center mt-1 text-xs">
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 'calc(var(--base) * 0.25)',
+          fontSize: 'calc(var(--base-body-size) * 0.8)',
+        }}
+      >
         <span
-          className={`
-            twp transition-colors duration-200
-            ${isUnderMin ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}
-          `}
+          style={{
+            color: isUnderMin ? 'var(--theme-warning-500)' : 'var(--theme-elevation-500)',
+            transition: 'color 150ms',
+          }}
         >
           {isUnderMin && `Minimum ${MIN_SUBJECT_LENGTH} characters required`}
         </span>
         <span
-          className={`
-            twp transition-colors duration-200
-            ${
-              isOverLimit
-                ? 'text-red-600 dark:text-red-400 font-medium'
-                : characterCount > MAX_SUBJECT_LENGTH * 0.9
-                  ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-gray-500 dark:text-gray-400'
-            }
-          `}
+          style={{
+            color: isOverLimit
+              ? 'var(--theme-error-500)'
+              : characterCount > MAX_SUBJECT_LENGTH * 0.9
+                ? 'var(--theme-warning-500)'
+                : 'var(--theme-elevation-500)',
+            fontWeight: isOverLimit ? 500 : 400,
+            transition: 'color 150ms',
+          }}
         >
           {characterCount}/{MAX_SUBJECT_LENGTH}
         </span>

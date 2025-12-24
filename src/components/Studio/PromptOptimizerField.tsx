@@ -14,11 +14,13 @@
  * - Selectable/editable prompt variants
  * - Error handling with retry
  *
+ * Uses PayloadCMS styling patterns for consistent appearance.
+ *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
 
 import React, { useEffect, useCallback } from 'react'
-import { useField, useForm } from '@payloadcms/ui'
+import { useField, useForm, Button } from '@payloadcms/ui'
 import { SubjectInput, MIN_SUBJECT_LENGTH } from './SubjectInput'
 import { VariantCountSelector } from './VariantCountSelector'
 import { ExtendButton } from './ExtendButton'
@@ -97,14 +99,28 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
   const showError = state.stage === 'error' && state.error
 
   return (
-    <div className="twp space-y-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--base) * 0.75)' }}>
       {/* Field Label */}
-      <div className="twp">
-        <label className="twp block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      <div>
+        <label
+          style={{
+            display: 'block',
+            fontSize: 'var(--base-body-size)',
+            fontWeight: 500,
+            color: 'var(--theme-text)',
+            marginBottom: 'calc(var(--base) * 0.25)',
+          }}
+        >
           Creative Theme / Subject
-          <span className="twp text-red-500 ml-1">*</span>
+          <span style={{ color: 'var(--theme-error-500)', marginLeft: '4px' }}>*</span>
         </label>
-        <p className="twp text-xs text-gray-500 dark:text-gray-400 mb-2">
+        <p
+          style={{
+            fontSize: 'calc(var(--base-body-size) * 0.85)',
+            color: 'var(--theme-elevation-500)',
+            margin: 0,
+          }}
+        >
           Enter your creative theme, then click &quot;Optimize Prompt&quot; to generate AI-enhanced variants
         </p>
       </div>
@@ -118,7 +134,14 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
       />
 
       {/* Controls Row */}
-      <div className="twp flex items-center justify-between gap-4 pt-2">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 'calc(var(--base) * 0.5)',
+        }}
+      >
         <VariantCountSelector
           value={state.variantCount}
           onChange={actions.setVariantCount}
@@ -138,7 +161,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
         {showProgress && (
           <OptimizationProgressBar
             stage={state.stage}
-            className="twp mb-4"
+            style={{ marginBottom: 'calc(var(--base) * 0.5)' }}
           />
         )}
 
@@ -148,7 +171,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
             message={state.error!}
             onRetry={actions.retry}
             retrying={isLoading}
-            className="twp mb-4"
+            style={{ marginBottom: 'calc(var(--base) * 0.5)' }}
           />
         )}
 
@@ -158,7 +181,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
             {/* Completion Progress Bar */}
             <OptimizationProgressBar
               stage={state.stage}
-              className="twp mb-4"
+              style={{ marginBottom: 'calc(var(--base) * 0.5)' }}
             />
 
             <PromptVariantsList
@@ -169,21 +192,31 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
             />
 
             {/* Selection Summary */}
-            <div className="twp flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <div className="twp text-sm text-gray-600 dark:text-gray-400">
-                <span className="twp font-medium text-purple-600 dark:text-purple-400">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 'calc(var(--base) * 0.5)',
+                paddingTop: 'calc(var(--base) * 0.5)',
+                borderTop: '1px solid var(--theme-elevation-150)',
+              }}
+            >
+              <div style={{ fontSize: 'calc(var(--base-body-size) * 0.9)', color: 'var(--theme-elevation-600)' }}>
+                <span style={{ fontWeight: 500, color: 'var(--theme-success-500)' }}>
                   {state.variants.filter((v) => v.isSelected).length}
                 </span>
                 {' '}of {state.variants.length} variant(s) selected for generation
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={actions.reset}
-                className="twp text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline"
+                buttonStyle="pill"
+                size="small"
               >
                 Clear & Start Over
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -191,14 +224,22 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
 
       {/* Hidden field info for PayloadCMS integration */}
       {state.stage === 'complete' && state.variants.filter((v) => v.isSelected).length > 0 && (
-        <div className="twp bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3 text-sm">
-          <div className="twp flex items-center gap-2 text-green-700 dark:text-green-400">
-            <svg className="twp h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+        <div
+          style={{
+            backgroundColor: 'var(--theme-success-50)',
+            border: '1px solid var(--theme-success-200)',
+            borderRadius: 'var(--style-radius-s)',
+            padding: 'calc(var(--base) * 0.5)',
+            fontSize: 'calc(var(--base-body-size) * 0.9)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'calc(var(--base) * 0.4)', color: 'var(--theme-success-600)' }}>
+            <svg style={{ width: '14px', height: '14px' }} fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <span>
               <strong>{state.variants.filter((v) => v.isSelected).length}</strong> optimized prompt variant(s) ready.
-              Continue configuring styles and models below to generate images.
+              Continue configuring styles and models below.
             </span>
           </div>
         </div>

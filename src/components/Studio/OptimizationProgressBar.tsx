@@ -3,10 +3,12 @@
 /**
  * OptimizationProgressBar Component
  *
- * A progress indicator with three stages for prompt optimization:
+ * A compact progress indicator with three stages for prompt optimization:
  * 1. Analyzing - Understanding the subject
  * 2. Enhancing - Generating detailed prompts
  * 3. Formatting - Structuring the output
+ *
+ * Uses PayloadCMS styling patterns.
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
@@ -54,42 +56,60 @@ export interface OptimizationProgressBarProps {
   stage: OptimizationStage
   /** Additional CSS classes */
   className?: string
+  /** Additional inline styles */
+  style?: React.CSSProperties
 }
 
 /**
- * OptimizationProgressBar - Visual progress indicator for prompt optimization
+ * OptimizationProgressBar - Compact visual progress indicator for prompt optimization
+ * Uses PayloadCMS styling patterns
  */
-export function OptimizationProgressBar({ stage, className = '' }: OptimizationProgressBarProps) {
+export function OptimizationProgressBar({ stage, className = '', style }: OptimizationProgressBarProps) {
   const progress = getStageProgress(stage)
-  const isActive = stage !== 'idle' && stage !== 'complete' && stage !== 'error'
 
   if (stage === 'idle') {
     return null
   }
 
   return (
-    <div className={`twp ${className}`}>
+    <div className={className} style={style}>
       {/* Progress bar container */}
-      <div className="twp relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div
+        style={{
+          position: 'relative',
+          height: '4px',
+          backgroundColor: 'var(--theme-elevation-150)',
+          borderRadius: '2px',
+          overflow: 'hidden',
+        }}
+      >
         <div
-          className={`
-            twp absolute left-0 top-0 h-full rounded-full
-            transition-all duration-500 ease-out
-            ${stage === 'error' ? 'bg-red-500' : stage === 'complete' ? 'bg-green-500' : 'bg-blue-500'}
-          `}
-          style={{ width: `${progress}%` }}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            height: '100%',
+            borderRadius: '2px',
+            transition: 'width 500ms ease-out',
+            width: `${progress}%`,
+            backgroundColor:
+              stage === 'error'
+                ? 'var(--theme-error-500)'
+                : stage === 'complete'
+                  ? 'var(--theme-success-500)'
+                  : 'var(--theme-elevation-800)',
+          }}
         />
-        {/* Animated pulse effect when active */}
-        {isActive && (
-          <div
-            className="twp absolute left-0 top-0 h-full bg-blue-400 rounded-full animate-pulse"
-            style={{ width: `${progress}%` }}
-          />
-        )}
       </div>
 
       {/* Stage labels */}
-      <div className="twp flex justify-between mt-2">
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginTop: 'calc(var(--base) * 0.4)',
+        }}
+      >
         {Object.entries(STAGE_CONFIG).map(([key, config]) => {
           const stageKey = key as keyof typeof STAGE_CONFIG
           const isCurrent = stage === stageKey
@@ -101,47 +121,55 @@ export function OptimizationProgressBar({ stage, className = '' }: OptimizationP
           return (
             <div
               key={key}
-              className={`
-                twp flex flex-col items-center text-xs transition-colors duration-200
-                ${
-                  isCurrent
-                    ? 'text-blue-600 dark:text-blue-400 font-medium'
-                    : isCompleted
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-gray-400 dark:text-gray-500'
-                }
-              `}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                fontSize: 'calc(var(--base-body-size) * 0.75)',
+                color: isCurrent
+                  ? 'var(--theme-text)'
+                  : isCompleted
+                    ? 'var(--theme-success-500)'
+                    : 'var(--theme-elevation-450)',
+                fontWeight: isCurrent ? 500 : 400,
+                transition: 'color 150ms',
+              }}
             >
               {/* Stage indicator dot */}
               <div
-                className={`
-                  twp w-2 h-2 rounded-full mb-1 transition-colors duration-200
-                  ${
-                    isCurrent
-                      ? 'bg-blue-500 animate-pulse'
-                      : isCompleted
-                        ? 'bg-green-500'
-                        : 'bg-gray-300 dark:bg-gray-600'
-                  }
-                `}
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  marginBottom: '4px',
+                  backgroundColor: isCurrent
+                    ? 'var(--theme-elevation-800)'
+                    : isCompleted
+                      ? 'var(--theme-success-500)'
+                      : 'var(--theme-elevation-200)',
+                  transition: 'background-color 150ms',
+                }}
               />
               <span>{config.label}</span>
-              {isCurrent && (
-                <div className="twp flex items-center gap-1 mt-0.5">
-                  <div className="twp w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="twp w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="twp w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              )}
             </div>
           )
         })}
       </div>
 
-      {/* Completion/Error message */}
+      {/* Completion message */}
       {stage === 'complete' && (
-        <div className="twp flex items-center justify-center gap-2 mt-2 text-sm text-green-600 dark:text-green-400">
-          <svg className="twp w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 'calc(var(--base) * 0.3)',
+            marginTop: 'calc(var(--base) * 0.4)',
+            fontSize: 'calc(var(--base-body-size) * 0.85)',
+            color: 'var(--theme-success-500)',
+          }}
+        >
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           <span>Optimization complete</span>

@@ -5,11 +5,13 @@
  *
  * Displays generated prompt variants inside the collapsible section
  * after the optimization progress completes.
+ * Uses PayloadCMS styling patterns for consistency.
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
 
 import React from 'react'
+import { Button } from '@payloadcms/ui'
 import { PromptVariantCard, type PromptVariant } from './PromptVariantCard'
 
 export interface VariantWithSelection extends PromptVariant {
@@ -32,6 +34,7 @@ export interface PromptVariantsListProps {
 
 /**
  * PromptVariantsList - Container for displaying prompt variant cards
+ * Uses PayloadCMS styling patterns
  */
 export function PromptVariantsList({
   variants,
@@ -47,55 +50,59 @@ export function PromptVariantsList({
   }
 
   return (
-    <div className={`twp ${className}`}>
+    <div className={className} style={{ marginTop: 'calc(var(--base) * 0.5)' }}>
       {/* Header with selection info */}
-      <div className="twp flex items-center justify-between mb-3">
-        <h3 className="twp text-sm font-semibold text-gray-900 dark:text-gray-100">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 'calc(var(--base) * 0.5)',
+        }}
+      >
+        <span
+          style={{
+            fontSize: 'var(--base-body-size)',
+            fontWeight: 500,
+            color: 'var(--theme-text)',
+          }}
+        >
           Generated Variants
-        </h3>
-        <span className="twp text-xs text-gray-500 dark:text-gray-400">
+        </span>
+        <span
+          style={{
+            fontSize: 'calc(var(--base-body-size) * 0.85)',
+            color: 'var(--theme-elevation-500)',
+          }}
+        >
           {selectedCount} of {variants.length} selected
         </span>
       </div>
 
       {/* Select/Deselect all buttons */}
-      <div className="twp flex gap-2 mb-3">
-        <button
+      <div style={{ display: 'flex', gap: 'calc(var(--base) * 0.5)', marginBottom: 'calc(var(--base) * 0.5)' }}>
+        <Button
           type="button"
           onClick={() => variants.forEach((v) => onSelectionChange(v.variantId, true))}
           disabled={disabled || selectedCount === variants.length}
-          className={`
-            twp px-2 py-1 text-xs rounded
-            transition-colors duration-200
-            ${
-              disabled || selectedCount === variants.length
-                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-            }
-          `}
+          buttonStyle="secondary"
+          size="small"
         >
           Select All
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => variants.forEach((v) => onSelectionChange(v.variantId, false))}
           disabled={disabled || selectedCount === 0}
-          className={`
-            twp px-2 py-1 text-xs rounded
-            transition-colors duration-200
-            ${
-              disabled || selectedCount === 0
-                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
-            }
-          `}
+          buttonStyle="secondary"
+          size="small"
         >
           Deselect All
-        </button>
+        </Button>
       </div>
 
       {/* Variant cards */}
-      <div className="twp space-y-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--base) * 0.5)' }}>
         {variants.map((variant) => (
           <PromptVariantCard
             key={variant.variantId}
