@@ -228,7 +228,6 @@ export const Tasks: CollectionConfig = {
       defaultValue: TaskStatus.Draft,
       options: TASK_STATUS_OPTIONS,
       admin: {
-        position: 'sidebar',
         description: 'Current task status',
       },
       index: true,
@@ -241,7 +240,6 @@ export const Tasks: CollectionConfig = {
       min: 0,
       max: 100,
       admin: {
-        position: 'sidebar',
         description: 'Completion percentage (0-100)',
       },
     },
