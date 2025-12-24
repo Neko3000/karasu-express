@@ -329,7 +329,7 @@ export class GeminiProvider implements LLMProvider {
     // Use the new @google/genai API: ai.models.generateContent()
     const response = await this.client.models.generateContent({
       model: this.modelName,
-      contents: "a cat",
+      contents: prompt,
       config,
     })
 
