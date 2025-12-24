@@ -2,12 +2,12 @@
  * Imagen Adapter (Google AI - Gemini 3 Pro Image)
  *
  * Implementation of the ImageGenerationAdapter for Google's Gemini image generation
- * using the @google/generative-ai SDK with API key authentication.
+ * using the @google/genai SDK with API key authentication.
  *
  * Model: gemini-3-pro-image-preview
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenAI, Modality } from '@google/genai'
 
 import { AspectRatio, Provider } from '../lib/types'
 import {
@@ -85,16 +85,16 @@ export class ImagenAdapter implements ImageGenerationAdapter {
   readonly displayName = 'Gemini 3 Pro Image'
 
   private readonly config: ImagenConfig
-  private genAI: GoogleGenerativeAI | null = null
+  private genAI: GoogleGenAI | null = null
 
   constructor(config?: ImagenConfig) {
     this.config = { ...DEFAULT_IMAGEN_CONFIG, ...config }
   }
 
   /**
-   * Get or create the GoogleGenerativeAI client
+   * Get or create the GoogleGenAI client
    */
-  private getClient(): GoogleGenerativeAI {
+  private getClient(): GoogleGenAI {
     const apiKey = this.config.apiKey || process.env.GOOGLE_AI_API_KEY
 
     if (!apiKey) {
@@ -107,7 +107,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
     }
 
     if (!this.genAI) {
-      this.genAI = new GoogleGenerativeAI(apiKey)
+      this.genAI = new GoogleGenAI({ apiKey })
     }
 
     return this.genAI
@@ -116,7 +116,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
   /**
    * Generate images using Gemini 3 Pro Image
    *
-   * Uses the @google/generative-ai SDK with generateContent API
+   * Uses the @google/genai SDK with models.generateContent API
    * that supports image generation through responseModalities configuration.
    */
   async generate(params: ImageGenerationParams): Promise<GenerationResult> {
@@ -133,7 +133,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
     )
 
     // Extract image data from response
-    const candidates = response.response.candidates
+    const candidates = response.candidates
     if (!candidates || candidates.length === 0) {
       throw createNormalizedError(
         ErrorCategory.ProviderError,
@@ -144,10 +144,10 @@ export class ImagenAdapter implements ImageGenerationAdapter {
     }
 
     // Find inline data parts (images) in the response
-    const imageParts = candidates[0].content.parts.filter(
+    const imageParts = candidates[0].content?.parts?.filter(
       (part: { inlineData?: { mimeType: string; data: string } }) =>
         part.inlineData
-    )
+    ) || []
 
     if (imageParts.length === 0) {
       throw createNormalizedError(
@@ -188,31 +188,30 @@ export class ImagenAdapter implements ImageGenerationAdapter {
   }
 
   /**
-   * Call Google AI SDK for image generation
+   * Call Google AI SDK for image generation using the new @google/genai API
    */
   private async callGoogleAI(
     prompt: string,
     aspectRatio: string
   ): Promise<{
-    response: {
-      candidates: Array<{
-        content: {
-          parts: Array<{
-            text?: string
-            inlineData?: { mimeType: string; data: string }
-          }>
-        }
-      }>
-    }
+    candidates: Array<{
+      content?: {
+        parts?: Array<{
+          text?: string
+          inlineData?: { mimeType: string; data: string }
+        }>
+      }
+    }>
+    text?: string
   }> {
     const client = this.getClient()
 
-    // Get the generative model for image generation
-    const model = client.getGenerativeModel({
+    // Use the new @google/genai API: client.models.generateContent()
+    const response = await client.models.generateContent({
       model: this.modelId,
-      generationConfig: {
-        // @ts-expect-error - responseModalities is a valid config for image generation models
-        responseModalities: ['TEXT', 'IMAGE'],
+      contents: prompt,
+      config: {
+        responseModalities: [Modality.TEXT, Modality.IMAGE],
         // @ts-expect-error - imageConfig is a valid config for image generation models
         imageConfig: {
           aspectRatio: aspectRatio,
@@ -220,10 +219,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
       },
     })
 
-    // Generate content with the prompt
-    const result = await model.generateContent(prompt)
-
-    return result
+    return response
   }
 
   /**

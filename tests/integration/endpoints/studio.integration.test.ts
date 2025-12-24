@@ -13,6 +13,8 @@ import type { PromptExpansionResult } from '../../../src/services/prompt-optimiz
 // Mock the prompt optimizer module
 vi.mock('../../../src/services/prompt-optimizer', () => ({
   DEFAULT_VARIANT_COUNT: 3,
+  DEFAULT_GEMINI_MODEL: 'gemini-3-flash-preview',
+  DEFAULT_THINKING_LEVEL: 'LOW',
   createPromptOptimizer: vi.fn(),
 }))
 

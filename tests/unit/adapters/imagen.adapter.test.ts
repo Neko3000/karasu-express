@@ -4,7 +4,7 @@
  * Tests for src/adapters/imagen.ts
  * Per Constitution Principle VI (Testing Discipline)
  *
- * Mock @google/generative-ai SDK and test:
+ * Mock @google/genai SDK and test:
  * - generate method
  * - normalizeError method
  * - getDefaultOptions method
@@ -17,14 +17,18 @@ import {
 } from '../../../src/adapters/imagen'
 import { AspectRatio, Provider, ErrorCategory } from '../../../src/lib/types'
 
-// Mock @google/generative-ai SDK
+// Mock @google/genai SDK
 const mockGenerateContent = vi.fn()
-vi.mock('@google/generative-ai', () => ({
-  GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
-    getGenerativeModel: vi.fn().mockReturnValue({
+vi.mock('@google/genai', () => ({
+  GoogleGenAI: vi.fn().mockImplementation(() => ({
+    models: {
       generateContent: mockGenerateContent,
-    }),
+    },
   })),
+  Modality: {
+    TEXT: 'TEXT',
+    IMAGE: 'IMAGE',
+  },
 }))
 
 // Mock the rate limiter
@@ -90,23 +94,21 @@ describe('ImagenAdapter', () => {
   describe('generate', () => {
     it('should call Google AI SDK with correct parameters', async () => {
       const mockResponse = {
-        response: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  { text: 'Generated image description' },
-                  {
-                    inlineData: {
-                      mimeType: 'image/png',
-                      data: 'base64imagedata==',
-                    },
+        candidates: [
+          {
+            content: {
+              parts: [
+                { text: 'Generated image description' },
+                {
+                  inlineData: {
+                    mimeType: 'image/png',
+                    data: 'base64imagedata==',
                   },
-                ],
-              },
+                },
+              ],
             },
-          ],
-        },
+          },
+        ],
       }
       mockGenerateContent.mockResolvedValue(mockResponse)
 
@@ -127,19 +129,17 @@ describe('ImagenAdapter', () => {
 
     it('should handle different aspect ratios', async () => {
       mockGenerateContent.mockResolvedValue({
-        response: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    inlineData: { mimeType: 'image/png', data: 'base64data==' },
-                  },
-                ],
-              },
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  inlineData: { mimeType: 'image/png', data: 'base64data==' },
+                },
+              ],
             },
-          ],
-        },
+          },
+        ],
       })
 
       const result = await adapter.generate({
@@ -156,19 +156,17 @@ describe('ImagenAdapter', () => {
 
     it('should handle portrait aspect ratio', async () => {
       mockGenerateContent.mockResolvedValue({
-        response: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    inlineData: { mimeType: 'image/png', data: 'base64data==' },
-                  },
-                ],
-              },
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  inlineData: { mimeType: 'image/png', data: 'base64data==' },
+                },
+              ],
             },
-          ],
-        },
+          },
+        ],
       })
 
       const result = await adapter.generate({
@@ -183,9 +181,7 @@ describe('ImagenAdapter', () => {
 
     it('should throw error when no candidates returned', async () => {
       mockGenerateContent.mockResolvedValue({
-        response: {
-          candidates: [],
-        },
+        candidates: [],
       })
 
       await expect(
@@ -201,15 +197,13 @@ describe('ImagenAdapter', () => {
 
     it('should throw error when no image data in response', async () => {
       mockGenerateContent.mockResolvedValue({
-        response: {
-          candidates: [
-            {
-              content: {
-                parts: [{ text: 'Only text, no image' }],
-              },
+        candidates: [
+          {
+            content: {
+              parts: [{ text: 'Only text, no image' }],
             },
-          ],
-        },
+          },
+        ],
       })
 
       await expect(
@@ -236,19 +230,17 @@ describe('ImagenAdapter', () => {
 
     it('should generate random seed (Gemini does not return seed)', async () => {
       mockGenerateContent.mockResolvedValue({
-        response: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    inlineData: { mimeType: 'image/png', data: 'base64data==' },
-                  },
-                ],
-              },
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  inlineData: { mimeType: 'image/png', data: 'base64data==' },
+                },
+              ],
             },
-          ],
-        },
+          },
+        ],
       })
 
       const result = await adapter.generate({

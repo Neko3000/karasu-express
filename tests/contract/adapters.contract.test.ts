@@ -75,30 +75,32 @@ vi.mock('google-auth-library', () => ({
   })),
 }))
 
-// Mock @google/generative-ai for Imagen adapter
-vi.mock('@google/generative-ai', () => ({
-  GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
-    getGenerativeModel: vi.fn().mockReturnValue({
+// Mock @google/genai for Imagen adapter
+vi.mock('@google/genai', () => ({
+  GoogleGenAI: vi.fn().mockImplementation(() => ({
+    models: {
       generateContent: vi.fn().mockResolvedValue({
-        response: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    inlineData: {
-                      mimeType: 'image/png',
-                      data: 'base64mockdata==',
-                    },
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: 'image/png',
+                    data: 'base64mockdata==',
                   },
-                ],
-              },
+                },
+              ],
             },
-          ],
-        },
+          },
+        ],
       }),
-    }),
+    },
   })),
+  Modality: {
+    TEXT: 'TEXT',
+    IMAGE: 'IMAGE',
+  },
 }))
 
 vi.mock('../../src/lib/rate-limiter', () => ({
