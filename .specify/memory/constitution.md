@@ -1,17 +1,19 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 1.1.0
+Version change: 1.1.0 → 1.2.0
 Modified principles:
   - None renamed
 Added sections:
-  - Core Principle VI: Testing Discipline (测试纪律)
-  - Enhanced Code Quality Gates with testing requirements
+  - Core Principle VII: Admin Panel UI Standards (管理面板UI标准)
+  - Heading Hierarchy specifications (H1-H4)
+  - Section divider rules
+  - Form field organization guidelines
 Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md: ✅ No updates needed (Constitution Check section exists, testing in Technical Context)
-  - .specify/templates/spec-template.md: ✅ No updates needed (User Scenarios & Testing section exists)
-  - .specify/templates/tasks-template.md: ✅ No updates needed (test-first approach already documented)
+  - .specify/templates/plan-template.md: ✅ No updates needed (Constitution Check section exists)
+  - .specify/templates/spec-template.md: ✅ No updates needed (UI requirements can reference this principle)
+  - .specify/templates/tasks-template.md: ✅ No updates needed (task structure unchanged)
 Follow-up TODOs: None
 -->
 
@@ -96,6 +98,65 @@ tests validate system behavior across component boundaries. Enforcing test-first
 development ensures that each implementation phase produces verifiable, working code before
 advancing to dependent phases.
 
+### VII. Admin Panel UI Standards (管理面板UI标准)
+
+**Non-Negotiable Rules:**
+
+#### Heading Hierarchy
+
+All admin panel sections MUST follow this heading hierarchy with consistent styling:
+
+| Level | Element | Font Size | Font Weight | Use Case |
+|-------|---------|-----------|-------------|----------|
+| H1 | `<h1>` | `text-2xl` (1.5rem/24px) | `font-bold` (700) | Page title, main view header |
+| H2 | `<h2>` | `text-xl` (1.25rem/20px) | `font-semibold` (600) | Major section headers |
+| H3 | `<h3>` | `text-lg` (1.125rem/18px) | `font-medium` (500) | Subsection headers |
+| H4 | `<h4>` | `text-base` (1rem/16px) | `font-medium` (500) | Minor groupings, field group labels |
+
+- Heading levels MUST NOT be skipped (e.g., H1 → H3 without H2 is forbidden)
+- Each heading MUST include appropriate margin: H1 (`mb-6`), H2 (`mb-4`), H3 (`mb-3`), H4 (`mb-2`)
+- Dark mode variants MUST use `text-gray-100` for H1/H2, `text-gray-200` for H3/H4
+
+#### Section Dividers
+
+- Dividers MUST only appear between major sections (H2-level sections)
+- Dividers MUST NOT appear between subsections (H3/H4) or between individual fields
+- Divider styling: `border-t border-gray-200 dark:border-gray-700` with `my-6` spacing
+- Dividers MUST have equal spacing above and below
+
+#### Section Organization
+
+- Each major section (H2) MUST be a logical grouping of related functionality
+- Subsections (H3) MUST group related fields or controls within a section
+- Field groups (H4) MAY be used for closely related field clusters (e.g., "Address" grouping street, city, zip)
+- Empty sections MUST be hidden, not displayed with placeholder text
+
+#### Form Fields
+
+- Labels MUST use `text-sm font-medium text-gray-700 dark:text-gray-300`
+- Labels MUST appear above their associated input with `mb-2` spacing
+- Required field indicators MUST use red asterisk: `<span className="text-red-500">*</span>`
+- Help text MUST appear below inputs with `text-sm text-gray-500 dark:text-gray-400 mt-1`
+- Field groups MUST have consistent vertical spacing: `space-y-4` between fields
+
+#### Spacing Standards
+
+| Context | Spacing |
+|---------|---------|
+| After H1 (page header) | `mb-6` |
+| After H2 (section header) | `mb-4` |
+| After H3 (subsection header) | `mb-3` |
+| After H4 (field group header) | `mb-2` |
+| Between major sections | `my-6` (with divider) |
+| Between subsections | `mt-6` |
+| Between fields | `space-y-4` |
+| Between label and input | `mb-2` |
+
+**Rationale:** Consistent UI standards across admin panels reduce cognitive load for users and
+development friction when creating new views. A clear heading hierarchy with predictable spacing
+creates visual rhythm that guides users through complex forms. Limiting dividers to major
+sections prevents visual clutter while maintaining clear content separation.
+
 ## Technical Constraints
 
 ### Technology Stack
@@ -131,6 +192,7 @@ advancing to dependent phases.
 4. **Test Coverage:** New code MUST have corresponding tests; PRs adding logic without tests MUST be rejected
 5. **Test-First Implementation:** When implementing features progressively, tests for the current phase MUST pass before advancing
 6. **API Contracts:** New endpoints MUST have OpenAPI/TypeDoc documentation
+7. **UI Consistency:** Admin panel views MUST comply with Principle VII heading hierarchy and spacing standards
 
 ### Testing Strategy
 
@@ -163,12 +225,14 @@ When implementing features in phases:
 1. Feature changes MUST reference a spec document
 2. Schema changes to `Tasks`, `SubTasks`, or `Assets` collections MUST include migration plan
 3. New AI provider integrations MUST include adapter, rate limit configuration, error mapping, AND unit tests for adapter logic
+4. Admin panel views MUST be reviewed for Principle VII compliance before merge
 
 ### Commit Conventions
 
 - Commits MUST follow Conventional Commits format
 - Breaking changes MUST be marked with `BREAKING CHANGE:` footer
 - Test-only commits SHOULD use `test:` prefix
+- UI-only commits SHOULD use `style:` prefix when only styling changes are made
 
 ## Governance
 
@@ -192,5 +256,6 @@ MUST be documented in the Complexity Tracking section of the relevant plan docum
 - Constitution Check in plan-template.md MUST be completed before implementation
 - Violations MUST be justified in Complexity Tracking or rejected
 - PRs without adequate test coverage MUST be rejected per Principle VI
+- Admin panel PRs MUST verify UI Standards compliance per Principle VII
 
-**Version**: 1.1.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2025-12-17
+**Version**: 1.2.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2025-12-30
