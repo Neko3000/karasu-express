@@ -22,8 +22,9 @@ export const SectionDivider: UIFieldClientComponent = () => {
   return (
     <div
       style={{
-        marginTop: '1.5rem', // my-6
-        marginBottom: '1.5rem', // my-6
+        marginTop: '2.5rem',
+        marginBottom: '2rem',
+        paddingTop: '0.5rem',
         borderTop: '1px solid var(--theme-elevation-150)',
       }}
       aria-hidden="true"
