@@ -52,10 +52,8 @@ describe('Task Endpoints Integration', () => {
     expandedPrompts: [],
     styles: ['ghibli', 'cyberpunk'],
     models: ['flux-pro', 'dalle-3'],
-    batchConfig: {
-      countPerPrompt: 2,
-      totalExpected: 24,
-    },
+    countPerPrompt: 2,
+    totalExpected: 24,
     status: TaskStatus.Draft,
     progress: 0,
     webSearchEnabled: false,

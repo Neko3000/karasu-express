@@ -600,24 +600,22 @@ export interface Task {
    * Select one or more AI models for image generation
    */
   models: ('flux-pro' | 'flux-dev' | 'flux-schnell' | 'dalle-3' | 'imagen-3')[];
-  batchConfig: {
-    /**
-     * Number of images to generate per prompt variant (1-50)
-     */
-    countPerPrompt: number;
-    /**
-     * Number of prompt variants to generate (1-10)
-     */
-    variantCount?: number | null;
-    /**
-     * Include Base style (unmodified prompt) in generation
-     */
-    includeBaseStyle?: boolean | null;
-    /**
-     * Total images to generate (prompts × styles × models × count)
-     */
-    totalExpected?: number | null;
-  };
+  /**
+   * Number of images to generate per prompt variant (1-50)
+   */
+  countPerPrompt: number;
+  /**
+   * Number of prompt variants to generate (1-10)
+   */
+  variantCount?: number | null;
+  /**
+   * Include Base style (unmodified prompt) in generation
+   */
+  includeBaseStyle?: boolean | null;
+  /**
+   * Total images to generate (prompts × styles × models × count)
+   */
+  totalExpected?: number | null;
   /**
    * Current task status
    */
@@ -1039,14 +1037,10 @@ export interface TasksSelect<T extends boolean = true> {
   styles?: T;
   aspectRatio?: T;
   models?: T;
-  batchConfig?:
-    | T
-    | {
-        countPerPrompt?: T;
-        variantCount?: T;
-        includeBaseStyle?: T;
-        totalExpected?: T;
-      };
+  countPerPrompt?: T;
+  variantCount?: T;
+  includeBaseStyle?: T;
+  totalExpected?: T;
   status?: T;
   progress?: T;
   updatedAt?: T;

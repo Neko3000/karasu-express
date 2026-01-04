@@ -88,9 +88,8 @@ export async function POST(
       },
     })
 
-    // Get batch config
-    const batchConfig = task.batchConfig as { variantCount?: number } || {}
-    const variantCount = batchConfig.variantCount || DEFAULT_VARIANT_COUNT
+    // Get variant count
+    const variantCount = (task as { variantCount?: number }).variantCount || DEFAULT_VARIANT_COUNT
     const webSearchEnabled = (task as { webSearchEnabled?: boolean }).webSearchEnabled || false
 
     // Queue the expand-prompt job

@@ -253,51 +253,42 @@ export const Tasks: CollectionConfig = {
       },
     },
     {
-      name: 'batchConfig',
-      type: 'group',
+      name: 'countPerPrompt',
+      type: 'number',
+      required: true,
+      defaultValue: DEFAULT_BATCH_SIZE,
+      min: 1,
+      max: MAX_BATCH_SIZE,
       admin: {
-        hideGutter: true,
+        description: `Number of images to generate per prompt variant (1-${MAX_BATCH_SIZE})`,
       },
-      fields: [
-        {
-          name: 'countPerPrompt',
-          type: 'number',
-          required: true,
-          defaultValue: DEFAULT_BATCH_SIZE,
-          min: 1,
-          max: MAX_BATCH_SIZE,
-          admin: {
-            description: `Number of images to generate per prompt variant (1-${MAX_BATCH_SIZE})`,
-          },
-        },
-        {
-          name: 'variantCount',
-          type: 'number',
-          defaultValue: DEFAULT_VARIANT_COUNT,
-          min: 1,
-          max: 10,
-          admin: {
-            description: 'Number of prompt variants to generate (1-10)',
-            hidden: true, // Managed by PromptOptimizerField
-          },
-        },
-        {
-          name: 'includeBaseStyle',
-          type: 'checkbox',
-          defaultValue: true,
-          admin: {
-            description: 'Include Base style (unmodified prompt) in generation',
-          },
-        },
-        {
-          name: 'totalExpected',
-          type: 'number',
-          admin: {
-            description: 'Total images to generate (prompts × styles × models × count)',
-            readOnly: true,
-          },
-        },
-      ],
+    },
+    {
+      name: 'variantCount',
+      type: 'number',
+      defaultValue: DEFAULT_VARIANT_COUNT,
+      min: 1,
+      max: 10,
+      admin: {
+        description: 'Number of prompt variants to generate (1-10)',
+        hidden: true, // Managed by PromptOptimizerField
+      },
+    },
+    {
+      name: 'includeBaseStyle',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        description: 'Include Base style (unmodified prompt) in generation',
+      },
+    },
+    {
+      name: 'totalExpected',
+      type: 'number',
+      admin: {
+        description: 'Total images to generate (prompts × styles × models × count)',
+        readOnly: true,
+      },
     },
 
     // ============================================
@@ -342,7 +333,7 @@ export const Tasks: CollectionConfig = {
       async ({ data, operation }) => {
         if (operation === 'create' || operation === 'update') {
           // Calculate total expected if we have the necessary data
-          const expandedPromptsCount = data?.expandedPrompts?.length || data?.batchConfig?.variantCount || DEFAULT_VARIANT_COUNT
+          const expandedPromptsCount = data?.expandedPrompts?.length || data?.variantCount || DEFAULT_VARIANT_COUNT
 
           // Count styles from both sources: database styles and imported styles
           const dbStylesCount = data?.styles?.length || 0
@@ -350,8 +341,8 @@ export const Tasks: CollectionConfig = {
           const stylesCount = dbStylesCount + importedStylesCount
 
           const modelsCount = data?.models?.length || 0
-          const countPerPrompt = data?.batchConfig?.countPerPrompt || DEFAULT_BATCH_SIZE
-          const includeBaseStyle = data?.batchConfig?.includeBaseStyle ?? true
+          const countPerPrompt = data?.countPerPrompt || DEFAULT_BATCH_SIZE
+          const includeBaseStyle = data?.includeBaseStyle ?? true
 
           // Check if base style is already in importedStyleIds
           const hasBaseStyle = data?.importedStyleIds?.includes('base') || false
@@ -362,10 +353,7 @@ export const Tasks: CollectionConfig = {
           const totalExpected = expandedPromptsCount * effectiveStylesCount * modelsCount * countPerPrompt
 
           // Update the data
-          if (!data.batchConfig) {
-            data.batchConfig = {}
-          }
-          data.batchConfig.totalExpected = totalExpected
+          data.totalExpected = totalExpected
 
           return data
         }

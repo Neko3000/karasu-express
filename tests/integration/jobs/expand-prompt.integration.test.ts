@@ -109,10 +109,8 @@ describe('Expand Prompt Job Integration', () => {
     status: TaskStatus.Queued,
     styles: ['ghibli', 'cyberpunk'],
     models: ['flux-pro', 'dalle-3'],
-    batchConfig: {
-      countPerPrompt: 2,
-      totalExpected: 24,
-    },
+    countPerPrompt: 2,
+    totalExpected: 24,
     progress: 0,
     ...overrides,
   })

@@ -86,7 +86,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
 
       dispatchFields({
         type: 'UPDATE',
-        path: 'batchConfig.variantCount',
+        path: 'variantCount',
         value: selectedVariants.length,
       })
     }

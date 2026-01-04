@@ -221,10 +221,8 @@ export async function expandPromptHandler({
 
     const modelIds = Array.isArray(task.models) ? task.models : []
 
-    const batchConfig =
-      (task.batchConfig as { countPerPrompt?: number; includeBaseStyle?: boolean }) || {}
-    const batchSize = batchConfig.countPerPrompt || 1
-    const includeBaseStyle = batchConfig.includeBaseStyle ?? true
+    const batchSize = (task as { countPerPrompt?: number }).countPerPrompt || 1
+    const includeBaseStyle = (task as { includeBaseStyle?: boolean }).includeBaseStyle ?? true
     const aspectRatio = (task as { aspectRatio?: string }).aspectRatio || '1:1'
 
     // Fetch style templates for merging
