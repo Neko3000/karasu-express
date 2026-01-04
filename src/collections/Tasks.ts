@@ -311,6 +311,7 @@ export const Tasks: CollectionConfig = {
       options: TASK_STATUS_OPTIONS,
       admin: {
         description: 'Current task status',
+        readOnly: true,
       },
       index: true,
     },
