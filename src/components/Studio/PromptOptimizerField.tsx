@@ -19,7 +19,7 @@
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
 
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useMemo } from 'react'
 import { useField, useForm, Button } from '@payloadcms/ui'
 import { SubjectInput, MIN_SUBJECT_LENGTH } from './SubjectInput'
 import { VariantCountSelector } from './VariantCountSelector'
@@ -64,11 +64,17 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
     [actions, subjectField]
   )
 
+  // Memoize selected variants to avoid recalculating on every render
+  const selectedVariants = useMemo(
+    () => state.variants.filter((v) => v.isSelected),
+    [state.variants]
+  )
+
   // Update expandedPrompts in PayloadCMS form when variants change
+  // Batch both field updates together for better performance
   useEffect(() => {
     if (state.stage === 'complete' && state.variants.length > 0) {
       // Convert variants to the expandedPrompts format expected by PayloadCMS
-      const selectedVariants = state.variants.filter((v) => v.isSelected)
       const expandedPrompts = selectedVariants.map((variant: VariantWithSelection) => ({
         variantId: variant.variantId,
         variantName: variant.variantName,
@@ -77,20 +83,24 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
         subjectSlug: state.subjectSlug,
       }))
 
-      // Dispatch field updates
-      dispatchFields({
-        type: 'UPDATE',
-        path: 'expandedPrompts',
-        value: expandedPrompts,
-      })
+      // Batch both field updates in a single render cycle using setTimeout
+      // This ensures React batches both state updates together
+      const timeoutId = setTimeout(() => {
+        dispatchFields({
+          type: 'UPDATE',
+          path: 'expandedPrompts',
+          value: expandedPrompts,
+        })
+        dispatchFields({
+          type: 'UPDATE',
+          path: 'variantCount',
+          value: selectedVariants.length,
+        })
+      }, 0)
 
-      dispatchFields({
-        type: 'UPDATE',
-        path: 'variantCount',
-        value: selectedVariants.length,
-      })
+      return () => clearTimeout(timeoutId)
     }
-  }, [state.stage, state.variants, state.subject, state.subjectSlug, dispatchFields])
+  }, [state.stage, state.variants.length, selectedVariants, state.subject, state.subjectSlug, dispatchFields])
 
   const isLoading = state.stage === 'analyzing' || state.stage === 'enhancing' || state.stage === 'formatting'
   const canExtend = state.subject.trim().length >= MIN_SUBJECT_LENGTH && !isLoading
@@ -204,7 +214,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
             >
               <div style={{ fontSize: 'calc(var(--base-body-size) * 0.9)', color: 'var(--theme-elevation-600)' }}>
                 <span style={{ fontWeight: 500, color: 'var(--theme-success-500)' }}>
-                  {state.variants.filter((v) => v.isSelected).length}
+                  {selectedVariants.length}
                 </span>
                 {' '}of {state.variants.length} variant(s) selected for generation
               </div>
@@ -223,7 +233,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
       </PromptOptimizationSection>
 
       {/* Hidden field info for PayloadCMS integration */}
-      {state.stage === 'complete' && state.variants.filter((v) => v.isSelected).length > 0 && (
+      {state.stage === 'complete' && selectedVariants.length > 0 && (
         <div
           style={{
             backgroundColor: 'var(--theme-success-50)',
@@ -238,7 +248,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <span>
-              <strong>{state.variants.filter((v) => v.isSelected).length}</strong> optimized prompt variant(s) ready.
+              <strong>{selectedVariants.length}</strong> optimized prompt variant(s) ready.
               Continue configuring styles and models below.
             </span>
           </div>

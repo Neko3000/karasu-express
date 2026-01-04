@@ -10,7 +10,7 @@
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
 
-import React from 'react'
+import React, { memo, useMemo, useCallback } from 'react'
 import { Button } from '@payloadcms/ui'
 import { PromptVariantCard, type PromptVariant } from './PromptVariantCard'
 
@@ -35,15 +35,27 @@ export interface PromptVariantsListProps {
 /**
  * PromptVariantsList - Container for displaying prompt variant cards
  * Uses PayloadCMS styling patterns
+ * Memoized to prevent unnecessary re-renders
  */
-export function PromptVariantsList({
+function PromptVariantsListComponent({
   variants,
   onSelectionChange,
   onPromptChange,
   disabled = false,
   className = '',
 }: PromptVariantsListProps) {
-  const selectedCount = variants.filter((v) => v.isSelected).length
+  // Memoize selected count calculation
+  const selectedCount = useMemo(() => variants.filter((v) => v.isSelected).length, [variants])
+
+  // Memoize select all handler
+  const handleSelectAll = useCallback(() => {
+    variants.forEach((v) => onSelectionChange(v.variantId, true))
+  }, [variants, onSelectionChange])
+
+  // Memoize deselect all handler
+  const handleDeselectAll = useCallback(() => {
+    variants.forEach((v) => onSelectionChange(v.variantId, false))
+  }, [variants, onSelectionChange])
 
   if (variants.length === 0) {
     return null
@@ -83,7 +95,7 @@ export function PromptVariantsList({
       <div style={{ display: 'flex', gap: 'calc(var(--base) * 0.5)', marginBottom: 'calc(var(--base) * 0.5)' }}>
         <Button
           type="button"
-          onClick={() => variants.forEach((v) => onSelectionChange(v.variantId, true))}
+          onClick={handleSelectAll}
           disabled={disabled || selectedCount === variants.length}
           buttonStyle="secondary"
           size="small"
@@ -92,7 +104,7 @@ export function PromptVariantsList({
         </Button>
         <Button
           type="button"
-          onClick={() => variants.forEach((v) => onSelectionChange(v.variantId, false))}
+          onClick={handleDeselectAll}
           disabled={disabled || selectedCount === 0}
           buttonStyle="secondary"
           size="small"
@@ -117,5 +129,10 @@ export function PromptVariantsList({
     </div>
   )
 }
+
+/**
+ * Memoized PromptVariantsList to prevent unnecessary re-renders
+ */
+export const PromptVariantsList = memo(PromptVariantsListComponent)
 
 export default PromptVariantsList

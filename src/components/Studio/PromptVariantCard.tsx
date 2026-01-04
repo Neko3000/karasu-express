@@ -14,7 +14,10 @@
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
 
-import React, { useCallback, useRef, useEffect } from 'react'
+import React, { useCallback, useRef, useEffect, useState, memo } from 'react'
+
+// Debounce delay for textarea changes (ms)
+const DEBOUNCE_DELAY = 300
 
 export interface PromptVariant {
   /** Unique identifier for this variant */
@@ -47,8 +50,9 @@ export interface PromptVariantCardProps {
 /**
  * PromptVariantCard - Selectable and editable prompt variant card
  * Uses PayloadCMS styling patterns for compact, consistent appearance
+ * Wrapped with React.memo to prevent unnecessary re-renders
  */
-export function PromptVariantCard({
+function PromptVariantCardComponent({
   variant,
   isSelected,
   onSelectionChange,
@@ -57,6 +61,10 @@ export function PromptVariantCard({
   className = '',
 }: PromptVariantCardProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Local state for immediate textarea feedback
+  const [localPrompt, setLocalPrompt] = useState(variant.expandedPrompt)
 
   // Auto-resize textarea to fit content
   const adjustHeight = useCallback(() => {
@@ -67,10 +75,24 @@ export function PromptVariantCard({
     }
   }, [])
 
-  // Adjust height when prompt changes
+  // Sync local state when variant prop changes (e.g., from external update)
+  useEffect(() => {
+    setLocalPrompt(variant.expandedPrompt)
+  }, [variant.expandedPrompt])
+
+  // Adjust height when local prompt changes
   useEffect(() => {
     adjustHeight()
-  }, [variant.expandedPrompt, adjustHeight])
+  }, [localPrompt, adjustHeight])
+
+  // Cleanup debounce timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleCheckboxChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +103,19 @@ export function PromptVariantCard({
 
   const handlePromptChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onPromptChange(variant.variantId, e.target.value)
+      const newValue = e.target.value
+      // Update local state immediately for responsive UI
+      setLocalPrompt(newValue)
+
+      // Clear existing timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+
+      // Debounce the parent callback to reduce re-renders
+      debounceTimeoutRef.current = setTimeout(() => {
+        onPromptChange(variant.variantId, newValue)
+      }, DEBOUNCE_DELAY)
     },
     [variant.variantId, onPromptChange]
   )
@@ -164,7 +198,7 @@ export function PromptVariantCard({
         </label>
         <textarea
           ref={textareaRef}
-          value={variant.expandedPrompt}
+          value={localPrompt}
           onChange={handlePromptChange}
           disabled={disabled}
           rows={2}
@@ -218,5 +252,21 @@ export function PromptVariantCard({
     </div>
   )
 }
+
+/**
+ * Memoized PromptVariantCard to prevent unnecessary re-renders
+ * Only re-renders when variant data, selection state, or disabled state changes
+ */
+export const PromptVariantCard = memo(PromptVariantCardComponent, (prevProps, nextProps) => {
+  // Custom comparison for better memoization
+  return (
+    prevProps.variant.variantId === nextProps.variant.variantId &&
+    prevProps.variant.expandedPrompt === nextProps.variant.expandedPrompt &&
+    prevProps.variant.variantName === nextProps.variant.variantName &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.disabled === nextProps.disabled &&
+    prevProps.className === nextProps.className
+  )
+})
 
 export default PromptVariantCard

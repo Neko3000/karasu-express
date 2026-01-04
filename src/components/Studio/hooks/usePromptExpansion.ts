@@ -15,7 +15,7 @@
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
  */
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { OptimizationStage } from '../OptimizationProgressBar'
 import type { VariantWithSelection } from '../PromptVariantsList'
 import type { PromptVariant } from '../PromptVariantCard'
@@ -112,6 +112,22 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
   // Track user edits to prompts (persisted across re-renders)
   const editedPromptsRef = useRef<Map<string, string>>(new Map())
 
+  // AbortController for cancelling in-flight requests
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  // Track current state for use in callbacks (avoids stale closures)
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
+
   /**
    * Set subject input
    */
@@ -186,10 +202,10 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
   }, [])
 
   /**
-   * Call the expand-prompt API
+   * Call the expand-prompt API with abort signal support
    */
   const callExpandApi = useCallback(
-    async (subject: string, variantCount: VariantCount): Promise<ExpandPromptResponse> => {
+    async (subject: string, variantCount: VariantCount, signal: AbortSignal): Promise<ExpandPromptResponse> => {
       const response = await fetch('/api/studio/expand-prompt', {
         method: 'POST',
         headers: {
@@ -200,6 +216,7 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
           variantCount,
           webSearchEnabled: false,
         }),
+        signal,
       })
 
       return response.json()
@@ -209,9 +226,11 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
 
   /**
    * Start prompt expansion
+   * Uses stateRef to avoid stale closure issues with subject/variantCount
    */
   const expand = useCallback(async () => {
-    const { subject, variantCount } = state
+    // Use ref to get current state (avoids stale closures)
+    const { subject, variantCount } = stateRef.current
 
     // Validate subject
     if (!subject.trim() || subject.trim().length < 2) {
@@ -223,6 +242,15 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
       }))
       return
     }
+
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    // Create new abort controller for this request
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
 
     // Open section and start stages
     setState((prev) => ({
@@ -237,8 +265,13 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
       // Start stage simulation and API call in parallel
       const [, apiResponse] = await Promise.all([
         simulateStages(),
-        callExpandApi(subject.trim(), variantCount),
+        callExpandApi(subject.trim(), variantCount, abortController.signal),
       ])
+
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return
+      }
 
       if (!apiResponse.success || !apiResponse.data) {
         throw new Error(apiResponse.message || apiResponse.error || 'Failed to expand prompt')
@@ -264,6 +297,11 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
         error: null,
       }))
     } catch (err) {
+      // Ignore abort errors
+      if (err instanceof Error && err.name === 'AbortError') {
+        return
+      }
+
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred'
       setState((prev) => ({
         ...prev,
@@ -271,7 +309,7 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
         error: errorMessage,
       }))
     }
-  }, [state, simulateStages, callExpandApi])
+  }, [simulateStages, callExpandApi])
 
   /**
    * Retry after error
