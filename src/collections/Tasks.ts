@@ -51,8 +51,22 @@ export const Tasks: CollectionConfig = {
   },
   fields: [
     // ============================================
-    // Prompt Optimization UI (Custom Component)
+    // SECTION 1: PROMPTS (Subject, Optimize, Style)
     // ============================================
+    {
+      name: 'promptsSection',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionHeader#SectionHeader',
+        },
+        custom: {
+          heading: 'Prompts',
+          description: 'Enter your creative theme and configure prompt optimization settings',
+          level: 'h2',
+        },
+      },
+    },
     {
       name: 'promptOptimizer',
       type: 'ui',
@@ -62,9 +76,6 @@ export const Tasks: CollectionConfig = {
         },
       },
     },
-    // ============================================
-    // Core Fields
-    // ============================================
     {
       name: 'subject',
       type: 'textarea',
@@ -121,17 +132,12 @@ export const Tasks: CollectionConfig = {
         },
       ],
     },
-
-    // ============================================
-    // Relationships
-    // ============================================
     {
-      name: 'styles',
-      type: 'relationship',
-      relationTo: 'style-templates',
-      hasMany: true,
+      name: 'webSearchEnabled',
+      type: 'checkbox',
+      defaultValue: false,
       admin: {
-        description: 'Selected style templates from database (legacy - use importedStyleIds for JSON styles)',
+        description: 'Enable web search (RAG) for prompt optimization',
       },
     },
     {
@@ -140,10 +146,62 @@ export const Tasks: CollectionConfig = {
       hasMany: true,
       options: getImportedStyleOptions(),
       admin: {
-        description: 'Select style templates from imported JSON styles',
+        description: 'Select style templates to apply to generated prompts',
         isSortable: true,
       },
       defaultValue: ['base'],
+    },
+    {
+      name: 'styles',
+      type: 'relationship',
+      relationTo: 'style-templates',
+      hasMany: true,
+      admin: {
+        description: 'Select custom style templates from database',
+        condition: () => false, // Hidden - legacy field
+      },
+    },
+
+    // ============================================
+    // SECTION 2: IMAGE (Aspect Ratio, Model)
+    // ============================================
+    {
+      name: 'imageSection',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionDivider#SectionDivider',
+        },
+      },
+    },
+    {
+      name: 'imageSectionHeader',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionHeader#SectionHeader',
+        },
+        custom: {
+          heading: 'Image Settings',
+          description: 'Configure image output format and AI model selection',
+          level: 'h2',
+        },
+      },
+    },
+    {
+      name: 'aspectRatio',
+      type: 'select',
+      defaultValue: '1:1',
+      options: [
+        { label: 'Square (1:1)', value: '1:1' },
+        { label: 'Landscape (16:9)', value: '16:9' },
+        { label: 'Portrait (9:16)', value: '9:16' },
+        { label: 'Standard (4:3)', value: '4:3' },
+        { label: 'Standard Portrait (3:4)', value: '3:4' },
+      ],
+      admin: {
+        description: 'Aspect ratio for generated images',
+      },
     },
     {
       name: 'models',
@@ -151,7 +209,7 @@ export const Tasks: CollectionConfig = {
       hasMany: true,
       required: true,
       admin: {
-        description: 'Selected AI model IDs',
+        description: 'Select one or more AI models for image generation',
       },
       options: [
         { label: 'Flux Pro', value: 'flux-pro' },
@@ -169,13 +227,36 @@ export const Tasks: CollectionConfig = {
     },
 
     // ============================================
-    // Batch Configuration
+    // SECTION 3: BATCH (How Many Images)
     // ============================================
+    {
+      name: 'batchSection',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionDivider#SectionDivider',
+        },
+      },
+    },
+    {
+      name: 'batchSectionHeader',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionHeader#SectionHeader',
+        },
+        custom: {
+          heading: 'Batch Settings',
+          description: 'Configure how many images to generate',
+          level: 'h2',
+        },
+      },
+    },
     {
       name: 'batchConfig',
       type: 'group',
       admin: {
-        description: 'Batch generation settings',
+        hideGutter: true,
       },
       fields: [
         {
@@ -186,15 +267,7 @@ export const Tasks: CollectionConfig = {
           min: 1,
           max: MAX_BATCH_SIZE,
           admin: {
-            description: `Images per prompt variant (1-${MAX_BATCH_SIZE})`,
-          },
-        },
-        {
-          name: 'totalExpected',
-          type: 'number',
-          admin: {
-            description: 'Computed: prompts × styles × models × countPerPrompt',
-            readOnly: true,
+            description: `Number of images to generate per prompt variant (1-${MAX_BATCH_SIZE})`,
           },
         },
         {
@@ -205,6 +278,7 @@ export const Tasks: CollectionConfig = {
           max: 10,
           admin: {
             description: 'Number of prompt variants to generate (1-10)',
+            hidden: true, // Managed by PromptOptimizerField
           },
         },
         {
@@ -212,15 +286,32 @@ export const Tasks: CollectionConfig = {
           type: 'checkbox',
           defaultValue: true,
           admin: {
-            description: 'Include Base style (no modifications) in generation',
+            description: 'Include Base style (unmodified prompt) in generation',
+          },
+        },
+        {
+          name: 'totalExpected',
+          type: 'number',
+          admin: {
+            description: 'Total images to generate (prompts × styles × models × count)',
+            readOnly: true,
           },
         },
       ],
     },
 
     // ============================================
-    // Status & Progress
+    // SECTION 4: STATUS (Sidebar or Bottom)
     // ============================================
+    {
+      name: 'statusSection',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionDivider#SectionDivider',
+        },
+      },
+    },
     {
       name: 'status',
       type: 'select',
@@ -241,33 +332,7 @@ export const Tasks: CollectionConfig = {
       max: 100,
       admin: {
         description: 'Completion percentage (0-100)',
-      },
-    },
-
-    // ============================================
-    // Options
-    // ============================================
-    {
-      name: 'webSearchEnabled',
-      type: 'checkbox',
-      defaultValue: false,
-      admin: {
-        description: 'Enable web search (RAG) for prompt optimization',
-      },
-    },
-    {
-      name: 'aspectRatio',
-      type: 'select',
-      defaultValue: '1:1',
-      options: [
-        { label: 'Square (1:1)', value: '1:1' },
-        { label: 'Landscape (16:9)', value: '16:9' },
-        { label: 'Portrait (9:16)', value: '9:16' },
-        { label: 'Standard (4:3)', value: '4:3' },
-        { label: 'Standard Portrait (3:4)', value: '3:4' },
-      ],
-      admin: {
-        description: 'Aspect ratio for generated images',
+        readOnly: true,
       },
     },
   ],

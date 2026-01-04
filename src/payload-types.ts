@@ -388,11 +388,11 @@ export interface Task {
       }[]
     | null;
   /**
-   * Selected style templates from database (legacy - use importedStyleIds for JSON styles)
+   * Enable web search (RAG) for prompt optimization
    */
-  styles?: (string | StyleTemplate)[] | null;
+  webSearchEnabled?: boolean | null;
   /**
-   * Select style templates from imported JSON styles
+   * Select style templates to apply to generated prompts
    */
   importedStyleIds?:
     | (
@@ -589,29 +589,34 @@ export interface Task {
       )[]
     | null;
   /**
-   * Selected AI model IDs
+   * Select custom style templates from database
+   */
+  styles?: (string | StyleTemplate)[] | null;
+  /**
+   * Aspect ratio for generated images
+   */
+  aspectRatio?: ('1:1' | '16:9' | '9:16' | '4:3' | '3:4') | null;
+  /**
+   * Select one or more AI models for image generation
    */
   models: ('flux-pro' | 'flux-dev' | 'flux-schnell' | 'dalle-3' | 'imagen-3')[];
-  /**
-   * Batch generation settings
-   */
   batchConfig: {
     /**
-     * Images per prompt variant (1-50)
+     * Number of images to generate per prompt variant (1-50)
      */
     countPerPrompt: number;
-    /**
-     * Computed: prompts × styles × models × countPerPrompt
-     */
-    totalExpected?: number | null;
     /**
      * Number of prompt variants to generate (1-10)
      */
     variantCount?: number | null;
     /**
-     * Include Base style (no modifications) in generation
+     * Include Base style (unmodified prompt) in generation
      */
     includeBaseStyle?: boolean | null;
+    /**
+     * Total images to generate (prompts × styles × models × count)
+     */
+    totalExpected?: number | null;
   };
   /**
    * Current task status
@@ -621,14 +626,6 @@ export interface Task {
    * Completion percentage (0-100)
    */
   progress: number;
-  /**
-   * Enable web search (RAG) for prompt optimization
-   */
-  webSearchEnabled?: boolean | null;
-  /**
-   * Aspect ratio for generated images
-   */
-  aspectRatio?: ('1:1' | '16:9' | '9:16' | '4:3' | '3:4') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1037,21 +1034,21 @@ export interface TasksSelect<T extends boolean = true> {
         subjectSlug?: T;
         id?: T;
       };
-  styles?: T;
+  webSearchEnabled?: T;
   importedStyleIds?: T;
+  styles?: T;
+  aspectRatio?: T;
   models?: T;
   batchConfig?:
     | T
     | {
         countPerPrompt?: T;
-        totalExpected?: T;
         variantCount?: T;
         includeBaseStyle?: T;
+        totalExpected?: T;
       };
   status?: T;
   progress?: T;
-  webSearchEnabled?: T;
-  aspectRatio?: T;
   updatedAt?: T;
   createdAt?: T;
 }
