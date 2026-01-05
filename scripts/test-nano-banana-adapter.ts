@@ -1,22 +1,22 @@
 /**
- * Manual Test Script for Imagen Adapter
+ * Manual Test Script for Nano Banana Adapter
  *
- * This script tests the Imagen adapter with a real Google AI API key.
+ * This script tests the Nano Banana adapter with a real Google AI API key.
  *
  * Usage:
  *   1. Set GOOGLE_AI_API_KEY environment variable
- *   2. Run: npx tsx scripts/test-imagen-adapter.ts
+ *   2. Run: npx tsx scripts/test-nano-banana-adapter.ts
  *
- * Expected output: A generated image saved to scripts/output/test-imagen.png
+ * Expected output: A generated image saved to scripts/output/test-nano-banana.png
  */
 
-import { createImagenAdapter } from '../src/adapters/imagen'
+import { createNanoBananaAdapter } from '../src/adapters/nano-banana'
 import { AspectRatio } from '../src/lib/types'
 import * as fs from 'fs'
 import * as path from 'path'
 
 async function main() {
-  console.log('=== Imagen Adapter Manual Test ===\n')
+  console.log('=== Nano Banana Adapter Manual Test ===\n')
 
   // Check for API key
   const apiKey = process.env.GOOGLE_AI_API_KEY
@@ -29,7 +29,7 @@ async function main() {
   console.log('API key found: ' + apiKey.substring(0, 8) + '...')
 
   // Create adapter
-  const adapter = createImagenAdapter({ apiKey })
+  const adapter = createNanoBananaAdapter({ apiKey })
 
   console.log('\nAdapter Info:')
   console.log('  Model ID:', adapter.modelId)
@@ -65,7 +65,7 @@ async function main() {
 
     for (let i = 0; i < result.images.length; i++) {
       const image = result.images[i]
-      const outputPath = path.join(outputDir, `test-imagen-${i + 1}.png`)
+      const outputPath = path.join(outputDir, `test-nano-banana-${i + 1}.png`)
 
       // Extract base64 data from data URL
       const base64Data = image.url.replace(/^data:image\/\w+;base64,/, '')

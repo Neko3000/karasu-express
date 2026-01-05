@@ -2,7 +2,7 @@
  * AI Provider Adapter Types
  *
  * Common interface for all image generation adapters.
- * Each provider (Flux, DALL-E, Imagen) implements this interface.
+ * Each provider (Flux, DALL-E, Nano Banana) implements this interface.
  */
 
 import type { AspectRatio, Provider } from '../lib/types'
@@ -77,7 +77,7 @@ export interface ImageGenerationAdapter {
   /** Provider identifier (e.g., 'fal', 'openai', 'google') */
   readonly providerId: Provider
 
-  /** Model identifier (e.g., 'flux-pro', 'dalle-3', 'imagen-3') */
+  /** Model identifier (e.g., 'flux-pro', 'dalle-3', 'nano-banana') */
   readonly modelId: string
 
   /** Human-readable display name */
@@ -213,9 +213,9 @@ export interface DalleResponseData {
 }
 
 /**
- * Imagen 3 (Google) request payload
+ * Nano Banana (Google) request payload
  */
-export interface ImagenRequestPayload {
+export interface NanoBananaRequestPayload {
   instances: Array<{
     prompt: string
   }>
@@ -227,9 +227,9 @@ export interface ImagenRequestPayload {
 }
 
 /**
- * Imagen 3 (Google) response data
+ * Nano Banana (Google) response data
  */
-export interface ImagenResponseData {
+export interface NanoBananaResponseData {
   predictions: Array<{
     bytesBase64Encoded: string
     mimeType: string

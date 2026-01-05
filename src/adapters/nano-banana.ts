@@ -1,5 +1,5 @@
 /**
- * Imagen Adapter (Google AI - Gemini 3 Pro Image)
+ * Nano Banana Adapter (Google AI - Gemini 3 Pro Image)
  *
  * Implementation of the ImageGenerationAdapter for Google's Gemini image generation
  * using the @google/genai SDK with API key authentication.
@@ -26,17 +26,17 @@ import type {
 } from './types'
 
 /**
- * Imagen specific configuration using Google AI API Key
+ * Nano Banana specific configuration using Google AI API Key
  */
-export interface ImagenConfig {
+export interface NanoBananaConfig {
   /** Google AI API Key (from https://aistudio.google.com/apikey) */
   apiKey?: string
 }
 
 /**
- * Default Imagen configuration
+ * Default Nano Banana configuration
  */
-const DEFAULT_IMAGEN_CONFIG: ImagenConfig = {
+const DEFAULT_NANO_BANANA_CONFIG: NanoBananaConfig = {
   apiKey: process.env.GOOGLE_AI_API_KEY,
 }
 
@@ -66,9 +66,9 @@ const ASPECT_RATIO_DIMENSIONS: Record<
 }
 
 /**
- * Supported aspect ratios for Gemini image generation
+ * Supported aspect ratios for Nano Banana image generation
  */
-const IMAGEN_SUPPORTED_ASPECT_RATIOS: AspectRatio[] = [
+const NANO_BANANA_SUPPORTED_ASPECT_RATIOS: AspectRatio[] = [
   AspectRatio.Square,
   AspectRatio.Landscape,
   AspectRatio.Portrait,
@@ -77,18 +77,18 @@ const IMAGEN_SUPPORTED_ASPECT_RATIOS: AspectRatio[] = [
 ]
 
 /**
- * Gemini 3 Pro Image Adapter using Google AI SDK
+ * Nano Banana Adapter using Google AI SDK (Gemini 3 Pro Image)
  */
-export class ImagenAdapter implements ImageGenerationAdapter {
+export class NanoBananaAdapter implements ImageGenerationAdapter {
   readonly providerId = Provider.Google
   readonly modelId = 'gemini-3-pro-image-preview'
-  readonly displayName = 'Gemini 3 Pro Image'
+  readonly displayName = 'Nano Banana'
 
-  private readonly config: ImagenConfig
+  private readonly config: NanoBananaConfig
   private genAI: GoogleGenAI | null = null
 
-  constructor(config?: ImagenConfig) {
-    this.config = { ...DEFAULT_IMAGEN_CONFIG, ...config }
+  constructor(config?: NanoBananaConfig) {
+    this.config = { ...DEFAULT_NANO_BANANA_CONFIG, ...config }
   }
 
   /**
@@ -114,7 +114,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
   }
 
   /**
-   * Generate images using Gemini 3 Pro Image
+   * Generate images using Nano Banana (Gemini 3 Pro Image)
    *
    * Uses the @google/genai SDK with models.generateContent API
    * that supports image generation through responseModalities configuration.
@@ -137,7 +137,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
     if (!candidates || candidates.length === 0) {
       throw createNormalizedError(
         ErrorCategory.ProviderError,
-        'No image candidates returned from Gemini',
+        'No image candidates returned from Nano Banana',
         response,
         'NO_CANDIDATES'
       )
@@ -152,7 +152,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
     if (imageParts.length === 0) {
       throw createNormalizedError(
         ErrorCategory.ProviderError,
-        'No image data returned from Gemini',
+        'No image data returned from Nano Banana',
         response,
         'NO_IMAGE_DATA'
       )
@@ -173,7 +173,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
       }
     )
 
-    // Gemini doesn't provide seed - generate for consistency
+    // Nano Banana doesn't provide seed - generate for consistency
     const seed = Math.floor(Math.random() * 2147483647)
 
     return {
@@ -310,7 +310,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
   }
 
   /**
-   * Get default options for Gemini image generation
+   * Get default options for Nano Banana image generation
    */
   getDefaultOptions(): Record<string, unknown> {
     return {
@@ -320,7 +320,7 @@ export class ImagenAdapter implements ImageGenerationAdapter {
 
   /**
    * Check if a feature is supported
-   * Note: Gemini image generation supports batch but not seed or negative prompts
+   * Note: Nano Banana image generation supports batch but not seed or negative prompts
    */
   supportsFeature(feature: AdapterFeature): boolean {
     const supportedFeatures: AdapterFeature[] = ['batch']
@@ -331,13 +331,13 @@ export class ImagenAdapter implements ImageGenerationAdapter {
    * Get supported aspect ratios
    */
   getSupportedAspectRatios(): AspectRatio[] {
-    return IMAGEN_SUPPORTED_ASPECT_RATIOS
+    return NANO_BANANA_SUPPORTED_ASPECT_RATIOS
   }
 }
 
 /**
- * Factory function to create Imagen adapter
+ * Factory function to create Nano Banana adapter
  */
-export function createImagenAdapter(config?: ImagenConfig): ImagenAdapter {
-  return new ImagenAdapter(config)
+export function createNanoBananaAdapter(config?: NanoBananaConfig): NanoBananaAdapter {
+  return new NanoBananaAdapter(config)
 }

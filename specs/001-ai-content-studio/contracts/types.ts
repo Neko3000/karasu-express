@@ -390,8 +390,8 @@ export interface DalleResponseData {
   }>;
 }
 
-// Nano Banana (Google Imagen 3)
-export interface ImagenRequestPayload {
+// Nano Banana (Google)
+export interface NanoBananaRequestPayload {
   instances: Array<{
     prompt: string;
   }>;
@@ -402,7 +402,7 @@ export interface ImagenRequestPayload {
   };
 }
 
-export interface ImagenResponseData {
+export interface NanoBananaResponseData {
   predictions: Array<{
     bytesBase64Encoded: string;
     mimeType: string;

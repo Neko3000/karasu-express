@@ -599,7 +599,7 @@ export interface Task {
   /**
    * Select one or more AI models for image generation
    */
-  models: ('flux-pro' | 'flux-dev' | 'flux-schnell' | 'dalle-3' | 'imagen-3')[];
+  models: ('flux-pro' | 'flux-dev' | 'flux-schnell' | 'dalle-3' | 'nano-banana')[];
   /**
    * Number of images to generate per prompt variant (1-50)
    */

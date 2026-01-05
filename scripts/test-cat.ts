@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { createImagenAdapter } from '../src/adapters/imagen'
+import { createNanoBananaAdapter } from '../src/adapters/nano-banana'
 import { AspectRatio } from '../src/lib/types'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -9,7 +9,7 @@ async function main() {
   console.log('Model: gemini-3-pro-image-preview')
   console.log('API Key:', process.env.GOOGLE_AI_API_KEY?.substring(0, 10) + '...\n')
 
-  const adapter = createImagenAdapter()
+  const adapter = createNanoBananaAdapter()
   const prompt =
     'A cute fluffy orange cat sitting on a windowsill, looking outside at the rain, cozy atmosphere, warm lighting, digital art'
 

@@ -35,7 +35,7 @@ Per plan.md Testing Requirements:
 
 | Module | Unit Tests | Integration Tests | Contract Tests |
 |--------|------------|-------------------|----------------|
-| Adapters (Flux, DALL-E, Imagen) | REQUIRED | N/A | REQUIRED |
+| Adapters (Flux, DALL-E, Nano Banana) | REQUIRED | N/A | REQUIRED |
 | Lib utilities (prompt-merger, task-fission, error-normalizer) | REQUIRED | N/A | N/A |
 | Services (task-service) | REQUIRED | REQUIRED | N/A |
 | Jobs (expand-prompt, generate-image) | N/A | REQUIRED | N/A |
@@ -98,8 +98,8 @@ Per plan.md Testing Requirements:
 - [X] T013a [P] Write unit tests for Flux adapter in tests/unit/adapters/flux.adapter.test.ts (mock Fal.ai client, test generate, normalizeError, getDefaultOptions)
 - [X] T014 [P] Implement DALL-E 3 adapter in src/adapters/dalle.ts with OpenAI client integration
 - [X] T014a [P] Write unit tests for DALL-E adapter in tests/unit/adapters/dalle.adapter.test.ts (mock OpenAI client, test generate, normalizeError, getDefaultOptions)
-- [X] T015 [P] Implement Imagen adapter in src/adapters/imagen.ts with Google Cloud client integration
-- [X] T015a [P] Write unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts (mock Google client, test generate, normalizeError, getDefaultOptions)
+- [X] T015 [P] Implement Nano Banana adapter in src/adapters/nano-banana.ts with Google Cloud client integration
+- [X] T015a [P] Write unit tests for Nano Banana adapter in tests/unit/adapters/nano-banana.adapter.test.ts (mock Google client, test generate, normalizeError, getDefaultOptions)
 - [X] T016 Create adapter registry in src/adapters/index.ts to resolve adapters by modelId
 - [X] T016a Write contract tests for all adapters in tests/contract/adapters.contract.test.ts verifying interface compliance (providerId, generate, normalizeError, getDefaultOptions exist and return correct types)
 
@@ -157,21 +157,21 @@ Per plan.md Testing Requirements:
 - [X] T032 [US1] Create POST /api/tasks/{id}/retry-failed custom endpoint in src/endpoints/retry-failed.ts to re-queue failed sub-tasks
 - [X] T033 [P] [US1] Create POST /api/studio/calculate-fission custom endpoint in src/endpoints/calculate-fission.ts for preview calculation
 
-### Imagen API Key Migration (Authentication Simplification)
+### Nano Banana API Key Migration (Authentication Simplification)
 
-> **Purpose**: Migrate Imagen adapter from Google Cloud Vertex AI (service account JSON) to Google AI Studio API Key (GOOGLE_AI_API_KEY) for simpler authentication
+> **Purpose**: Migrate Nano Banana adapter from Google Cloud Vertex AI (service account JSON) to Google AI Studio API Key (GOOGLE_AI_API_KEY) for simpler authentication
 
-#### Unit Tests (Imagen API Key)
+#### Unit Tests (Nano Banana API Key)
 
-- [X] T033k [P] [US1] Update unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts to mock @google/generative-ai SDK instead of google-auth-library
+- [X] T033k [P] [US1] Update unit tests for Nano Banana adapter in tests/unit/adapters/nano-banana.adapter.test.ts to mock @google/generative-ai SDK instead of google-auth-library
 
-#### Implementation for Imagen API Key
+#### Implementation for Nano Banana API Key
 
-- [X] T033l [US1] Update ImagenConfig interface in src/adapters/imagen.ts to accept apiKey instead of projectId/location
-- [X] T033m [US1] Refactor ImagenAdapter to use @google/generative-ai SDK with GOOGLE_AI_API_KEY environment variable instead of Vertex AI REST API
-- [X] T033n [US1] Update callImagenApi method in src/adapters/imagen.ts to use Google AI generateImages endpoint instead of Vertex AI predict endpoint
-- [X] T033o [US1] Update .env.example to clarify GOOGLE_AI_API_KEY usage for both Gemini LLM and Imagen image generation
-- [X] T033p [P] [US1] Verify Imagen adapter works with real GOOGLE_AI_API_KEY by running manual test
+- [X] T033l [US1] Update NanoBananaConfig interface in src/adapters/nano-banana.ts to accept apiKey instead of projectId/location
+- [X] T033m [US1] Refactor NanoBananaAdapter to use @google/generative-ai SDK with GOOGLE_AI_API_KEY environment variable instead of Vertex AI REST API
+- [X] T033n [US1] Update callNanoBananaApi method in src/adapters/nano-banana.ts to use Google AI generateImages endpoint instead of Vertex AI predict endpoint
+- [X] T033o [US1] Update .env.example to clarify GOOGLE_AI_API_KEY usage for both Gemini LLM and Nano Banana image generation
+- [X] T033p [P] [US1] Verify Nano Banana adapter works with real GOOGLE_AI_API_KEY by running manual test
 
 ### Imported Style Prompts (New Feature)
 
@@ -629,8 +629,8 @@ Task: "Implement Flux adapter in src/adapters/flux.ts"
 Task: "Write unit tests for Flux adapter in tests/unit/adapters/flux.adapter.test.ts"
 Task: "Implement DALL-E 3 adapter in src/adapters/dalle.ts"
 Task: "Write unit tests for DALL-E adapter in tests/unit/adapters/dalle.adapter.test.ts"
-Task: "Implement Imagen adapter in src/adapters/imagen.ts"
-Task: "Write unit tests for Imagen adapter in tests/unit/adapters/imagen.adapter.test.ts"
+Task: "Implement Nano Banana adapter in src/adapters/nano-banana.ts"
+Task: "Write unit tests for Nano Banana adapter in tests/unit/adapters/nano-banana.adapter.test.ts"
 
 # Launch utility files and their tests together:
 Task: "Create error normalization utility in src/lib/error-normalizer.ts"

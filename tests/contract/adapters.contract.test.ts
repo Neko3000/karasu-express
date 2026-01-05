@@ -75,7 +75,7 @@ vi.mock('google-auth-library', () => ({
   })),
 }))
 
-// Mock @google/genai for Imagen adapter
+// Mock @google/genai for Nano Banana adapter
 vi.mock('@google/genai', () => ({
   GoogleGenAI: vi.fn().mockImplementation(() => ({
     models: {
@@ -111,7 +111,7 @@ vi.mock('../../src/lib/rate-limiter', () => ({
 // Import adapters AFTER mocks are set up
 import { FluxAdapter, createFluxAdapter } from '../../src/adapters/flux'
 import { DalleAdapter, createDalleAdapter } from '../../src/adapters/dalle'
-import { ImagenAdapter, createImagenAdapter } from '../../src/adapters/imagen'
+import { NanoBananaAdapter, createNanoBananaAdapter } from '../../src/adapters/nano-banana'
 
 // Import registry
 import {
@@ -399,8 +399,8 @@ describe('Adapter Contracts', () => {
   // Run contract tests for DALL-E adapter
   adapterContractTests('DALL-E 3', () => createDalleAdapter())
 
-  // Run contract tests for Imagen adapter
-  adapterContractTests('Imagen 3', () => createImagenAdapter())
+  // Run contract tests for Nano Banana adapter
+  adapterContractTests('Nano Banana', () => createNanoBananaAdapter())
 })
 
 // ============================================
@@ -435,7 +435,7 @@ describe('Adapter Registry Contract', () => {
       expect(adapters.length).toBeGreaterThan(0)
     })
 
-    it('should include Flux, DALL-E, and Imagen adapters', () => {
+    it('should include Flux, DALL-E, and Nano Banana adapters', () => {
       const adapters = getAllAdapters()
       const modelIds = adapters.map((a) => a.modelId)
 
@@ -507,8 +507,8 @@ describe('Type Compatibility', () => {
     expect(adapter).toBeDefined()
   })
 
-  it('ImagenAdapter should be assignable to ImageGenerationAdapter', () => {
-    const adapter: ImageGenerationAdapter = new ImagenAdapter()
+  it('NanoBananaAdapter should be assignable to ImageGenerationAdapter', () => {
+    const adapter: ImageGenerationAdapter = new NanoBananaAdapter()
     expect(adapter).toBeDefined()
   })
 })

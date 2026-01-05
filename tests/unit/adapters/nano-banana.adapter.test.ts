@@ -1,7 +1,7 @@
 /**
- * Unit Tests: Imagen Adapter
+ * Unit Tests: Nano Banana Adapter
  *
- * Tests for src/adapters/imagen.ts
+ * Tests for src/adapters/nano-banana.ts
  * Per Constitution Principle VI (Testing Discipline)
  *
  * Mock @google/genai SDK and test:
@@ -12,9 +12,9 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import {
-  ImagenAdapter,
-  createImagenAdapter,
-} from '../../../src/adapters/imagen'
+  NanoBananaAdapter,
+  createNanoBananaAdapter,
+} from '../../../src/adapters/nano-banana'
 import { AspectRatio, Provider, ErrorCategory } from '../../../src/lib/types'
 
 // Mock @google/genai SDK
@@ -42,8 +42,8 @@ vi.mock('../../../src/lib/rate-limiter', () => ({
   },
 }))
 
-describe('ImagenAdapter', () => {
-  let adapter: ImagenAdapter
+describe('NanoBananaAdapter', () => {
+  let adapter: NanoBananaAdapter
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -52,7 +52,7 @@ describe('ImagenAdapter', () => {
     process.env.GOOGLE_AI_API_KEY = 'test-api-key'
 
     // Create adapter
-    adapter = new ImagenAdapter()
+    adapter = new NanoBananaAdapter()
   })
 
   // ============================================
@@ -61,15 +61,15 @@ describe('ImagenAdapter', () => {
 
   describe('constructor', () => {
     it('should create adapter with default config', () => {
-      const adapter = new ImagenAdapter()
+      const adapter = new NanoBananaAdapter()
 
       expect(adapter.providerId).toBe(Provider.Google)
       expect(adapter.modelId).toBe('gemini-3-pro-image-preview')
-      expect(adapter.displayName).toBe('Gemini 3 Pro Image')
+      expect(adapter.displayName).toBe('Nano Banana')
     })
 
     it('should accept custom config with API key', () => {
-      const adapter = new ImagenAdapter({
+      const adapter = new NanoBananaAdapter({
         apiKey: 'custom-api-key',
       })
 
@@ -80,7 +80,7 @@ describe('ImagenAdapter', () => {
       process.env.GOOGLE_AI_API_KEY = 'env-api-key'
 
       // Create new adapter to pick up env vars
-      const adapter = new ImagenAdapter()
+      const adapter = new NanoBananaAdapter()
 
       // Verify it uses the env vars (indirectly through the API call)
       expect(adapter).toBeDefined()
@@ -228,7 +228,7 @@ describe('ImagenAdapter', () => {
       ).rejects.toBeDefined()
     })
 
-    it('should generate random seed (Gemini does not return seed)', async () => {
+    it('should generate random seed (Nano Banana does not return seed)', async () => {
       mockGenerateContent.mockResolvedValue({
         candidates: [
           {
@@ -255,7 +255,7 @@ describe('ImagenAdapter', () => {
     it('should throw error when API key is missing', async () => {
       delete process.env.GOOGLE_AI_API_KEY
 
-      const adapter = new ImagenAdapter()
+      const adapter = new NanoBananaAdapter()
 
       await expect(
         adapter.generate({
@@ -392,7 +392,7 @@ describe('ImagenAdapter', () => {
 
   describe('getDefaultOptions', () => {
     it('should return default options', () => {
-      const adapter = new ImagenAdapter()
+      const adapter = new NanoBananaAdapter()
       const options = adapter.getDefaultOptions()
 
       expect(options.aspectRatio).toBeDefined()
@@ -438,19 +438,19 @@ describe('ImagenAdapter', () => {
   })
 
   // ============================================
-  // createImagenAdapter factory
+  // createNanoBananaAdapter factory
   // ============================================
 
-  describe('createImagenAdapter', () => {
+  describe('createNanoBananaAdapter', () => {
     it('should create adapter with default config', () => {
-      const adapter = createImagenAdapter()
+      const adapter = createNanoBananaAdapter()
 
       expect(adapter.modelId).toBe('gemini-3-pro-image-preview')
-      expect(adapter.displayName).toBe('Gemini 3 Pro Image')
+      expect(adapter.displayName).toBe('Nano Banana')
     })
 
     it('should create adapter with custom API key', () => {
-      const adapter = createImagenAdapter({
+      const adapter = createNanoBananaAdapter({
         apiKey: 'custom-api-key',
       })
 

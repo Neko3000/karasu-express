@@ -145,7 +145,7 @@ JSON
 
 ### **3.3 Nano Banana (Google Imagen 3 via Vertex AI)**
 
-**Provider ID:** imagen-3  
+**Provider ID:** nano-banana
 **Request Payload**
 
 JSON

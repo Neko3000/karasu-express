@@ -140,7 +140,7 @@ describe('TaskOrchestrator', () => {
           createExpandedPrompt({ variantId: 'v3' }),
         ],
         selectedStyles: ['ghibli', 'cyberpunk', 'watercolor', 'noir'],
-        selectedModels: ['flux-pro', 'dalle-3', 'imagen-3'],
+        selectedModels: ['flux-pro', 'dalle-3', 'nano-banana'],
         batchSize: 20,
         includeBaseStyle: true,
       })
@@ -331,7 +331,7 @@ describe('TaskOrchestrator', () => {
       const config = createTaskConfig({
         expandedPrompts: [createExpandedPrompt()],
         selectedStyles: ['ghibli'],
-        selectedModels: ['flux-pro', 'dalle-3', 'imagen-3'],
+        selectedModels: ['flux-pro', 'dalle-3', 'nano-banana'],
         batchSize: 1,
         includeBaseStyle: false,
       })
@@ -342,7 +342,7 @@ describe('TaskOrchestrator', () => {
 
       expect(modelIds).toContain('flux-pro')
       expect(modelIds).toContain('dalle-3')
-      expect(modelIds).toContain('imagen-3')
+      expect(modelIds).toContain('nano-banana')
     })
   })
 })

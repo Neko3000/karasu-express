@@ -207,7 +207,7 @@ export const ERROR_CATEGORY_OPTIONS: SelectOption[] = [
 export const PROVIDER_OPTIONS: SelectOption[] = [
   { label: 'Fal.ai (Flux)', value: Provider.Fal },
   { label: 'OpenAI (DALL-E)', value: Provider.OpenAI },
-  { label: 'Google (Imagen)', value: Provider.Google },
+  { label: 'Google (Nano Banana)', value: Provider.Google },
 ]
 
 /**

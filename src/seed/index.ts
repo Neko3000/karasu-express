@@ -210,8 +210,8 @@ const DEFAULT_MODELS: ModelConfigData[] = [
     sortOrder: 40,
   },
   {
-    modelId: 'imagen-3',
-    displayName: 'Imagen 3 (Nano Banana)',
+    modelId: 'nano-banana',
+    displayName: 'Nano Banana',
     provider: Provider.Google,
     isEnabled: true,
     rateLimit: 15,

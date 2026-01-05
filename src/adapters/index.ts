@@ -10,7 +10,7 @@ import { Provider } from '../lib/types'
 import type { ImageGenerationAdapter } from './types'
 import { createFluxAdapter } from './flux'
 import { createDalleAdapter } from './dalle'
-import { createImagenAdapter } from './imagen'
+import { createNanoBananaAdapter } from './nano-banana'
 
 // ============================================
 // ADAPTER REGISTRY
@@ -34,8 +34,8 @@ function initializeDefaultAdapters(): void {
   // DALL-E adapter
   registerAdapter(createDalleAdapter())
 
-  // Imagen adapter
-  registerAdapter(createImagenAdapter())
+  // Nano Banana adapter
+  registerAdapter(createNanoBananaAdapter())
 }
 
 // ============================================
@@ -195,4 +195,4 @@ export type {
 
 export { FluxAdapter, createFluxAdapter, type FluxConfig } from './flux'
 export { DalleAdapter, createDalleAdapter, type DalleConfig } from './dalle'
-export { ImagenAdapter, createImagenAdapter, type ImagenConfig } from './imagen'
+export { NanoBananaAdapter, createNanoBananaAdapter, type NanoBananaConfig } from './nano-banana'

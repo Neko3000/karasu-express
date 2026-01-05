@@ -235,7 +235,7 @@ interface GenerationMeta {
 |-------|-------------|
 | `fal` | Fal.ai (Flux models) |
 | `openai` | OpenAI (DALL-E 3) |
-| `google` | Google Cloud (Imagen, Veo) |
+| `google` | Google Cloud (Nano Banana, Veo) |
 
 **Example Configurations**:
 
@@ -271,9 +271,9 @@ interface GenerationMeta {
   "supportedFeatures": []
 }
 
-// Nano Banana (Imagen 3)
+// Nano Banana
 {
-  "modelId": "imagen-3",
+  "modelId": "nano-banana",
   "displayName": "Nano Banana",
   "provider": "google",
   "isEnabled": true,

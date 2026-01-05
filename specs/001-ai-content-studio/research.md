@@ -383,7 +383,7 @@ db.tasks.createIndex({ status: 1 });  // Admin filtering
 | openai | DALL-E 3 API client | ^4.0.0 |
 | @anthropic-ai/sdk | Claude API client | ^0.20.0 |
 | @fal-ai/client | Flux via Fal.ai | ^0.14.0 |
-| @google-cloud/aiplatform | Imagen/Veo via Vertex AI | ^3.0.0 |
+| @google-cloud/aiplatform | Nano Banana/Veo via Vertex AI | ^3.0.0 |
 | masonic | Virtual masonry layout | ^4.0.0 |
 | tailwindcss | Styling (scoped) | ^3.4.0 |
 | vitest | Unit/integration testing | ^2.0.0 |

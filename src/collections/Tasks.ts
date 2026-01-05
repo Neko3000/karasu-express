@@ -216,7 +216,7 @@ export const Tasks: CollectionConfig = {
         { label: 'Flux Dev', value: 'flux-dev' },
         { label: 'Flux Schnell', value: 'flux-schnell' },
         { label: 'DALL-E 3', value: 'dalle-3' },
-        { label: 'Imagen 3', value: 'imagen-3' },
+        { label: 'Nano Banana', value: 'nano-banana' },
       ],
       validate: (value: string[] | null | undefined) => {
         if (!value || value.length === 0) {
