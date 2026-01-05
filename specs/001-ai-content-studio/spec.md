@@ -7,12 +7,12 @@
 
 ## Clarifications
 
-### Session 2025-12-16
+### Session 2025-01-05
 
-- Q: What authentication mechanism should be used for the Studio workspace? → A: PayloadCMS built-in authentication (email/password with admin panel)
-- Q: What is the asset retention policy for generated images? → A: No automatic deletion (retain all assets indefinitely)
-- Q: Should the system support multiple user roles with different permissions? → A: No, single Admin role only; no role-based access control needed
-- Q: Should video generation (Veo) be included in the initial implementation? → A: No, video generation is deferred to lowest priority; focus on image generation first
+- Q: When a user deletes a StyleTemplate that has been used in existing Tasks, what should happen? → A: Hard delete the style; existing tasks retain style name as text (not style_id) for reference preservation
+- Q: Where in the Configuration Center should style templates be managed? → A: Follow existing PayloadCMS admin layout: sidebar item "Styles" on left, list/detail view on right
+- Q: What validation constraints should apply to StyleTemplate fields? → A: Minimal: name required (1-50 chars), modifiers optional with no character limit
+- Q: Is "Base" style a stored record or a virtual concept? → A: Stored record: "Base" is a seeded StyleTemplate with empty modifiers, protected from deletion
 
 ### Session 2025-12-23
 
@@ -21,6 +21,13 @@
 - Q: What loading state should display during prompt optimization? → A: Progress bar showing optimization stages (analyzing, enhancing, formatting)
 - Q: What should happen in the UI if prompt optimization fails? → A: Inline error banner in the collapsible section with "Retry" button
 - Q: How many prompt variants should the "Extend" optimization generate? → A: Default 3 variants with dropdown to select 3, 5, or 7
+
+### Session 2025-12-16
+
+- Q: What authentication mechanism should be used for the Studio workspace? → A: PayloadCMS built-in authentication (email/password with admin panel)
+- Q: What is the asset retention policy for generated images? → A: No automatic deletion (retain all assets indefinitely)
+- Q: Should the system support multiple user roles with different permissions? → A: No, single Admin role only; no role-based access control needed
+- Q: Should video generation (Veo) be included in the initial implementation? → A: No, video generation is deferred to lowest priority; focus on image generation first
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -168,6 +175,12 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - What happens when a user submits a task while another large task is still processing?
   - System accepts the new task and queues it; both tasks run based on available capacity and rate limits.
 
+- What happens when a StyleTemplate is deleted after being used in existing Tasks?
+  - System hard deletes the style; existing tasks retain the style name as denormalized text (not style_id) ensuring task history remains readable.
+
+- What happens when a user attempts to delete the protected "Base" style?
+  - System blocks the deletion and displays an error message: "The Base style is protected and cannot be deleted."
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -182,7 +195,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 **Style Management**
 - **FR-006**: System MUST support creating style templates with positive and negative prompt modifiers
 - **FR-007**: System MUST allow multi-selection of styles for each generation task
-- **FR-008**: System MUST automatically include a "Base" style (unmodified prompt) when styles are selected
+- **FR-008**: System MUST automatically include the seeded "Base" style (protected, empty modifiers) when styles are selected for comparison
 - **FR-009**: System MUST merge style modifiers with prompts according to template structure
 
 **Model Integration**
@@ -212,13 +225,13 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 ### Key Entities
 
-- **Task (Parent Task)**: Represents a user's complete generation request. Contains the original theme, list of optimized prompts, selected styles, selected models, batch configuration, aggregate status, and progress percentage. One Task produces many Sub-Tasks.
+- **Task (Parent Task)**: Represents a user's complete generation request. Contains the original theme, list of optimized prompts, selected style names (stored as denormalized text for deletion resilience), selected models, batch configuration, aggregate status, and progress percentage. One Task produces many Sub-Tasks.
 
 - **SubTask (Atomic Execution Unit)**: Represents a single API call to a generation provider. Contains the specific prompt (with style applied), target model, request payload, response data, execution status, and error information. One SubTask produces one or more Assets.
 
 - **Asset (Generated Content)**: Represents a single generated image or video file. Contains the storage URL, source SubTask reference, dimensions, file size, and generation metadata snapshot. Assets are organized by their parent Task.
 
-- **StyleTemplate**: Represents a reusable visual style configuration. Contains a unique identifier, display name, positive prompt modifiers, and negative prompt modifiers. Styles are selected and applied during Task creation.
+- **StyleTemplate**: Represents a reusable visual style configuration. Contains a unique identifier, display name (required, 1-50 chars), positive prompt modifiers (optional, no limit), negative prompt modifiers (optional, no limit), and a protected flag. The system seeds a "Base" style with empty modifiers that is protected from deletion. Styles are selected and applied during Task creation.
 
 - **ModelConfiguration**: Represents settings for a specific AI model provider. Contains provider identifier, display name, available parameters, rate limit settings, and default values.
 
