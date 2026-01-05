@@ -291,18 +291,47 @@ Per plan.md Testing Requirements:
 
 ## Phase 5: Optimize Task Creation Page (UI Enhancement)
 
-**Goal**: Enhance the task creation page with a calculated prompts preview showing final prompt combinations and total image count
+**Goal**: Enhance the task creation page with a calculated prompts preview showing final prompt combinations and total image count, plus an Overview section summarizing the entire generation task
 
-**Context**: Currently when user inputs 1 subject, the system generates 3 variant prompts. Then the user selects multiple styles. Each variant prompt combines with each selected style. This phase adds visibility into the final calculated prompts and total image count.
+**Context**: Currently when user inputs 1 subject, the system generates 3 variant prompts. Then the user selects multiple styles. Each variant prompt combines with each selected style. This phase adds visibility into the final calculated prompts and total image count, plus a comprehensive Overview section at the beginning of the Status & Progress area.
 
-**Independent Test**: Enter a subject, generate 3 variants, select 2 styles, and verify the calculated prompts section shows 6 final prompts (3 variants x 2 styles) with the correct total image count based on count per prompt.
+**Independent Test**: Enter a subject, generate 3 variants, select 2 styles, and verify the calculated prompts section shows 6 final prompts (3 variants x 2 styles) with the correct total image count based on count per prompt. Also verify the Overview section displays all summary information correctly.
 
 **Unit Tests**: NOT required (UI components with display logic only)
 **Integration Tests**: NOT required (uses already-tested endpoints)
 
-**Gate Criteria**: Component renders correctly showing all prompt/style combinations, manual testing passes
+**Gate Criteria**: Component renders correctly showing all prompt/style combinations, Overview section displays accurate summary, manual testing passes
 
 ### Implementation for Task Creation Page Optimization
+
+#### Overview Section (NEW - Before Status & Progress)
+
+- [ ] T038u [US1] Create TaskOverviewSection component in src/components/Studio/TaskOverviewSection.tsx as a summary panel displayed before Status & Progress section showing:
+  - Section title: "Overview"
+  - Subsections for each category of information (settings, counts, etc.)
+- [ ] T038v [P] [US1] Create SelectedSettingsSummary component in src/components/Studio/Overview/SelectedSettingsSummary.tsx to display:
+  - Selected models (list with provider badges)
+  - Selected aspect ratio
+  - Any other generation settings configured
+- [ ] T038w [P] [US1] Create PromptsCountSummary component in src/components/Studio/Overview/PromptsCountSummary.tsx to display:
+  - Number of prompt variants selected
+  - Number of styles selected
+  - Calculated prompts count: variants × styles
+  - Visual breakdown formula (e.g., "3 variants × 2 styles = 6 prompts")
+- [ ] T038x [P] [US1] Create ImageCountSummary component in src/components/Studio/Overview/ImageCountSummary.tsx to display:
+  - Image count per model: variants × styles × count per prompt
+  - Image count for all models: variants × styles × count per prompt × models
+  - Visual breakdown with formula display
+  - Prominent display of total images to be generated
+- [ ] T038y [P] [US1] Create TaskSummaryStats component in src/components/Studio/Overview/TaskSummaryStats.tsx to display additional key information:
+  - Estimated API calls count
+  - Selected AI providers summary
+  - Any warnings (e.g., high image count > 500)
+- [ ] T038z [US1] Create useTaskOverview hook in src/components/Studio/hooks/useTaskOverview.ts to:
+  - Aggregate all form state (variants, styles, models, batch config)
+  - Calculate all summary statistics
+  - Return structured overview data for display components
+- [ ] T038aa [US1] Integrate TaskOverviewSection into task creation page in src/components/Studio/index.tsx positioned before the Status & Progress section
 
 #### Calculated Prompts Preview
 
@@ -332,7 +361,7 @@ Per plan.md Testing Requirements:
 - [ ] T038s [US1] Integrate CalculatedPromptsSection into task creation page in src/components/Studio/index.tsx at the end of the "Prompts" section (after prompt variants and before generation submit)
 - [ ] T038t [US1] Connect useCalculatedPrompts hook to style-merger service for accurate prompt merging preview
 
-**Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts and displays the total image count that will be generated.
+**Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts, displays the total image count that will be generated, and includes a comprehensive Overview section summarizing all generation settings and counts.
 
 ---
 
@@ -566,7 +595,7 @@ Per plan.md Testing Requirements:
 - Unit test files marked [P] can be written in parallel
 - UI components within each story marked [P] can run in parallel
 - Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
-- Phase 5 tasks T038o (CalculatedPromptCard) and T038q (TotalImageCount) can run in parallel
+- Phase 5 tasks T038o (CalculatedPromptCard), T038q (TotalImageCount), T038v (SelectedSettingsSummary), T038w (PromptsCountSummary), T038x (ImageCountSummary), and T038y (TaskSummaryStats) can run in parallel
 
 ---
 
