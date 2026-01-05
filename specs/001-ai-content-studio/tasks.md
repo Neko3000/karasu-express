@@ -289,7 +289,54 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 5: User Story 3 - Style Configuration and Management (Priority: P2)
+## Phase 5: Optimize Task Creation Page (UI Enhancement)
+
+**Goal**: Enhance the task creation page with a calculated prompts preview showing final prompt combinations and total image count
+
+**Context**: Currently when user inputs 1 subject, the system generates 3 variant prompts. Then the user selects multiple styles. Each variant prompt combines with each selected style. This phase adds visibility into the final calculated prompts and total image count.
+
+**Independent Test**: Enter a subject, generate 3 variants, select 2 styles, and verify the calculated prompts section shows 6 final prompts (3 variants x 2 styles) with the correct total image count based on count per prompt.
+
+**Unit Tests**: NOT required (UI components with display logic only)
+**Integration Tests**: NOT required (uses already-tested endpoints)
+
+**Gate Criteria**: Component renders correctly showing all prompt/style combinations, manual testing passes
+
+### Implementation for Task Creation Page Optimization
+
+#### Calculated Prompts Preview
+
+- [ ] T038n [US1] Create CalculatedPromptsSection component in src/components/Studio/CalculatedPromptsSection.tsx to display the final prompt combinations at the end of the "Prompts" section
+- [ ] T038o [P] [US1] Create CalculatedPromptCard component in src/components/Studio/CalculatedPromptCard.tsx to display individual calculated prompt with:
+  - Variant label (e.g., "Variant 1 - Realistic")
+  - Style name applied (e.g., "Cyberpunk")
+  - Final merged prompt text (preview, non-editable)
+  - Negative prompt if applicable
+- [ ] T038p [US1] Create useCalculatedPrompts hook in src/components/Studio/hooks/useCalculatedPrompts.ts to:
+  - Take selected variants and selected styles as input
+  - Calculate all combinations (variants x styles)
+  - Apply style-merger logic to generate final prompts
+  - Return array of calculated prompt objects
+
+#### Total Image Count Display
+
+- [ ] T038q [P] [US1] Create TotalImageCount component in src/components/Studio/TotalImageCount.tsx to display:
+  - Number of calculated prompts (variants x styles)
+  - Count per prompt (from BatchConfig)
+  - Final total: (variants x styles x countPerPrompt)
+  - Visual emphasis for the final number
+- [ ] T038r [US1] Integrate TotalImageCount with BatchConfig component to update in real-time as parameters change
+
+#### Integration
+
+- [ ] T038s [US1] Integrate CalculatedPromptsSection into task creation page in src/components/Studio/index.tsx at the end of the "Prompts" section (after prompt variants and before generation submit)
+- [ ] T038t [US1] Connect useCalculatedPrompts hook to style-merger service for accurate prompt merging preview
+
+**Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts and displays the total image count that will be generated.
+
+---
+
+## Phase 6: User Story 3 - Style Configuration and Management (Priority: P2)
 
 **Goal**: Admin can create and manage reusable style templates that can be applied to any generation
 
@@ -315,7 +362,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 6: User Story 4 - Task Monitoring and Management (Priority: P2)
+## Phase 7: User Story 4 - Task Monitoring and Management (Priority: P2)
 
 **Goal**: Admin can view all generation tasks with progress and status, and manage failed tasks
 
@@ -338,7 +385,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 7: User Story 5 - Asset Gallery and Management (Priority: P2)
+## Phase 8: User Story 5 - Asset Gallery and Management (Priority: P2)
 
 **Goal**: Admin can browse generated images in a visual gallery with filtering, search, and download capabilities
 
@@ -362,7 +409,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 8: User Story 6 - Multi-Model Comparison (Priority: P3)
+## Phase 9: User Story 6 - Multi-Model Comparison (Priority: P3)
 
 **Goal**: Admin can generate the same prompt across different AI **image** models simultaneously and compare results
 
@@ -383,7 +430,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 9: User Story 7 - Dashboard Overview (Priority: P3)
+## Phase 10: User Story 7 - Dashboard Overview (Priority: P3)
 
 **Goal**: Admin can see an overview of system activity including daily generation counts and resource consumption
 
@@ -406,7 +453,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 10: Studio Workspace UI (Supporting All Stories)
+## Phase 11: Studio Workspace UI (Supporting All Stories)
 
 **Goal**: Create the main Studio workspace UI that ties together task creation, prompt optimization, and generation
 
@@ -430,7 +477,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 11: Polish & Cross-Cutting Concerns
+## Phase 12: Polish & Cross-Cutting Concerns
 
 **Purpose**: Improvements that affect multiple user stories
 
@@ -449,7 +496,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 12: Video Generation - Veo (DEFERRED - Lowest Priority)
+## Phase 13: Video Generation - Veo (DEFERRED - Lowest Priority)
 
 **Purpose**: Video generation capability using Google Veo - explicitly deferred per clarification
 
@@ -479,17 +526,20 @@ Per plan.md Testing Requirements:
   - **Gate**: All unit tests for services MUST pass, all integration tests MUST pass
 - **User Story 2 (Phase 4)**: Depends on Phase 3 (T027 expand-prompt job)
   - **Gate**: All unit tests for prompt-optimizer MUST pass
-- **User Stories 3-7 (Phases 5-9)**: All depend on Phase 3 completion but can proceed in parallel
+- **Task Creation Optimization (Phase 5)**: Depends on Phase 4 (prompt expansion UI components)
+  - **Gate**: Manual testing passes for calculated prompts and total image count
+- **User Stories 3-7 (Phases 6-10)**: All depend on Phase 3 completion but can proceed in parallel
   - **Gate**: Relevant integration tests MUST pass for each story
-- **Studio UI (Phase 10)**: Depends on Phases 3-5 for full functionality
-- **Polish (Phase 11)**: Depends on all desired user stories being complete
+- **Studio UI (Phase 11)**: Depends on Phases 3-6 for full functionality
+- **Polish (Phase 12)**: Depends on all desired user stories being complete
   - **Gate**: Full test suite MUST pass
-- **Video/Veo (Phase 12)**: DEFERRED - Lowest priority, implement only after all image generation features are complete
+- **Video/Veo (Phase 13)**: DEFERRED - Lowest priority, implement only after all image generation features are complete
 
 ### User Story Dependencies
 
 - **User Story 1 (P1)**: Core foundation - No dependencies on other stories
 - **User Story 2 (P1)**: Builds on US1's expand-prompt job infrastructure
+- **Task Creation Optimization (Phase 5)**: Builds on US2's prompt expansion UI
 - **User Story 3 (P2)**: Can start after Foundational - StyleTemplates are independent
 - **User Story 4 (P2)**: Can start after US1 - Task monitoring requires Tasks/SubTasks
 - **User Story 5 (P2)**: Can start after US1 - Gallery requires Media collection
@@ -515,7 +565,8 @@ Per plan.md Testing Requirements:
 - Job handlers T027-T028 can run in parallel
 - Unit test files marked [P] can be written in parallel
 - UI components within each story marked [P] can run in parallel
-- Once Phase 3 completes, Phases 5-9 can run in parallel (if team capacity allows)
+- Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
+- Phase 5 tasks T038o (CalculatedPromptCard) and T038q (TotalImageCount) can run in parallel
 
 ---
 
@@ -527,14 +578,15 @@ Per plan.md Testing Requirements:
 | Phase 2: Foundational | T010a, T011a, T013a, T014a, T015a | - | T016a | All unit + contract tests pass |
 | Phase 3: US1 | T020a, T020b, T020c, T033b, T033k | T020d, T020e, T020f, T033h | - | All tests pass |
 | Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
-| Phase 5: US3 | - | T038a | - | Integration tests pass |
-| Phase 6: US4 | - | - | - | Manual testing |
-| Phase 7: US5 | - | - | - | Manual testing |
-| Phase 8: US6 | - | - | - | Manual testing |
-| Phase 9: US7 | - | - | - | Manual testing |
-| Phase 10: Studio | - | - | - | Manual testing |
-| Phase 11: Polish | - | - | - | Full suite passes |
-| Phase 12: Veo | T076a | - | - | (Deferred) |
+| Phase 5: Task Creation Optimization | - | - | - | Manual testing |
+| Phase 6: US3 | - | T038a | - | Integration tests pass |
+| Phase 7: US4 | - | - | - | Manual testing |
+| Phase 8: US5 | - | - | - | Manual testing |
+| Phase 9: US6 | - | - | - | Manual testing |
+| Phase 10: US7 | - | - | - | Manual testing |
+| Phase 11: Studio | - | - | - | Manual testing |
+| Phase 12: Polish | - | - | - | Full suite passes |
+| Phase 13: Veo | T076a | - | - | (Deferred) |
 
 **Total Test Tasks**: 20 (11 unit, 8 integration, 1 contract)
 
@@ -587,18 +639,21 @@ Task: "Write integration tests for task endpoints in tests/integration/endpoints
    - **RUN TESTS**: `pnpm test:integration` - Job/endpoint tests must pass
 4. Complete Phase 4: User Story 2 (Prompt Optimization)
    - **RUN TESTS**: `pnpm test` - All tests must pass
-5. **STOP and VALIDATE**: Test core generation workflow end-to-end
-6. Deploy/demo if ready - Admin can now generate AI images
+5. Complete Phase 5: Task Creation Optimization (Calculated Prompts Preview)
+   - **MANUAL TEST**: Verify calculated prompts and total image count display
+6. **STOP and VALIDATE**: Test core generation workflow end-to-end
+7. Deploy/demo if ready - Admin can now generate AI images with full visibility
 
 ### Incremental Delivery
 
 1. Complete Setup + Foundational + Tests -> Foundation ready
 2. Add User Story 1 + Tests -> Test independently -> Deploy/Demo (Core MVP!)
 3. Add User Story 2 + Tests -> Test independently -> Deploy/Demo (Enhanced prompts)
-4. Add User Stories 3-5 + Tests -> Test independently -> Deploy/Demo (Management features)
-5. Add User Stories 6-7 -> Test independently -> Deploy/Demo (Advanced features)
-6. Add Studio UI -> Test independently -> Deploy/Demo (Unified experience)
-7. Each story adds value without breaking previous stories
+4. Add Phase 5 (Task Creation Optimization) -> Test independently -> Deploy/Demo (Calculated prompts preview)
+5. Add User Stories 3-5 + Tests -> Test independently -> Deploy/Demo (Management features)
+6. Add User Stories 6-7 -> Test independently -> Deploy/Demo (Advanced features)
+7. Add Studio UI -> Test independently -> Deploy/Demo (Unified experience)
+8. Each story adds value without breaking previous stories
 
 ### Test Failure Response Protocol
 
