@@ -383,7 +383,7 @@ Per plan.md Testing Requirements:
 ### Implementation for User Story 3
 
 - [ ] T039 [US3] Add StyleTemplates collection access control in src/collections/StyleTemplates.ts to prevent deletion of system styles (isSystem: true)
-- [ ] T040 [US3] Create admin custom component for style template preview in src/components/StylePreview/index.tsx showing merged prompt example
+- [ ] T040 [US3] Create seed script to import all styles from src/resources/style-list/sdxl_styles_exp.json into StyleTemplates collection in src/seed/import-styles.ts
 - [ ] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
 - [ ] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
 
