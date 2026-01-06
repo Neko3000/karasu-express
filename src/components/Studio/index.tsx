@@ -13,10 +13,16 @@
  * - PromptVariantsList to display and edit generated variants
  * - OptimizationErrorBanner for error handling with retry
  *
+ * Phase 5 additions (Optimize Task Creation Page):
+ * - TaskOverviewSection for summary of generation settings
+ * - CalculatedPromptsSection for variant × style combinations
+ * - TotalImageCount for image count display
+ *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
+ * Extended in Phase 5: Optimize Task Creation Page
  */
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { SubjectInput, MIN_SUBJECT_LENGTH } from './SubjectInput'
 import { VariantCountSelector } from './VariantCountSelector'
 import { ExtendButton } from './ExtendButton'
@@ -25,17 +31,86 @@ import { OptimizationProgressBar } from './OptimizationProgressBar'
 import { PromptVariantsList } from './PromptVariantsList'
 import { OptimizationErrorBanner } from './OptimizationErrorBanner'
 import { usePromptExpansion } from './hooks/usePromptExpansion'
+import { useCalculatedPrompts } from './hooks/useCalculatedPrompts'
+import { useTaskOverview, type ModelInfo, type BatchConfig } from './hooks/useTaskOverview'
+import { TaskOverviewSection } from './TaskOverviewSection'
+import { CalculatedPromptsSection } from './CalculatedPromptsSection'
+import { TotalImageCount } from './TotalImageCount'
+import { getDefaultStyle, getAllStyles } from '../../services/style-loader'
+import type { MergeableStyle } from '../../services/style-merger'
 
 export interface StudioProps {
   /** Additional CSS classes */
   className?: string
 }
 
+// ============================================
+// DEFAULT CONFIGURATIONS
+// ============================================
+
+/**
+ * Default batch configuration
+ */
+const DEFAULT_BATCH_CONFIG: BatchConfig = {
+  countPerPrompt: 1,
+  aspectRatio: '1:1',
+}
+
+/**
+ * Default model configurations (for demonstration)
+ * In a real implementation, these would come from the ModelConfigs collection
+ */
+const DEFAULT_MODELS: ModelInfo[] = [
+  { modelId: 'flux-pro', displayName: 'Flux Pro', provider: 'fal' },
+]
+
 /**
  * Studio - Main AI Content Generation Studio Component
  */
 export function Studio({ className = '' }: StudioProps) {
   const [state, actions] = usePromptExpansion()
+
+  // Phase 5: State for styles, models, and batch config
+  // These would typically come from form inputs in a full implementation
+  // Note: setters are defined for future integration with form controls
+  const [selectedStyleIds, _setSelectedStyleIds] = useState<string[]>(['base'])
+  const [selectedModels, _setSelectedModels] = useState<ModelInfo[]>(DEFAULT_MODELS)
+  const [batchConfig, _setBatchConfig] = useState<BatchConfig>(DEFAULT_BATCH_CONFIG)
+  // Future: Expose setters when StyleSelector, ModelSelector, BatchConfig components are integrated
+  void _setSelectedStyleIds
+  void _setSelectedModels
+  void _setBatchConfig
+
+  // Get selected styles as MergeableStyle objects
+  const selectedStyles = useMemo<MergeableStyle[]>(() => {
+    try {
+      const allStyles = getAllStyles()
+      return allStyles.filter((s) => selectedStyleIds.includes(s.styleId))
+    } catch {
+      // If style loader fails (e.g., in SSR), return default style
+      const defaultStyle = getDefaultStyle()
+      return selectedStyleIds.includes(defaultStyle.styleId) ? [defaultStyle] : []
+    }
+  }, [selectedStyleIds])
+
+  // Get selected variants (those with isSelected = true)
+  const selectedVariants = useMemo(() => {
+    return state.variants.filter((v) => v.isSelected)
+  }, [state.variants])
+
+  // Phase 5: Calculate prompts using the hook
+  const { prompts: calculatedPrompts, summary: promptsSummary } = useCalculatedPrompts(
+    selectedVariants,
+    selectedStyles
+  )
+
+  // Phase 5: Calculate overview data using the hook
+  const overviewData = useTaskOverview({
+    variants: state.variants,
+    selectedStyles,
+    selectedModels,
+    batchConfig,
+  })
 
   const isLoading = state.stage === 'analyzing' || state.stage === 'enhancing' || state.stage === 'formatting'
   const canExtend = state.subject.trim().length >= MIN_SUBJECT_LENGTH && !isLoading
@@ -118,6 +193,26 @@ export function Studio({ className = '' }: StudioProps) {
               disabled={isLoading}
             />
 
+            {/* Phase 5: Calculated Prompts Section */}
+            {selectedStyles.length > 0 && selectedVariants.length > 0 && (
+              <div className="twp mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <CalculatedPromptsSection
+                  prompts={calculatedPrompts}
+                  summary={promptsSummary}
+                />
+              </div>
+            )}
+
+            {/* Phase 5: Total Image Count */}
+            <div className="twp mt-6">
+              <TotalImageCount
+                calculatedPromptsCount={promptsSummary.totalPrompts}
+                countPerPrompt={batchConfig.countPerPrompt}
+                modelCount={selectedModels.length}
+                warning={overviewData.warning}
+              />
+            </div>
+
             {/* Action buttons for next steps */}
             <div className="twp flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
               <div className="twp text-sm text-gray-500 dark:text-gray-400">
@@ -153,6 +248,16 @@ export function Studio({ className = '' }: StudioProps) {
           </>
         )}
       </PromptOptimizationSection>
+
+      {/* Phase 5: Task Overview Section (shown after variants are generated) */}
+      {showVariants && overviewData.isReady && (
+        <div className="twp mt-8">
+          <TaskOverviewSection
+            overview={overviewData}
+            isVisible={true}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -169,6 +274,15 @@ export { OptimizationErrorBanner } from './OptimizationErrorBanner'
 export { PromptOptimizerField } from './PromptOptimizerField'
 export { usePromptExpansion } from './hooks/usePromptExpansion'
 
+// Phase 5 component exports
+export { CalculatedPromptCard } from './CalculatedPromptCard'
+export { CalculatedPromptsSection } from './CalculatedPromptsSection'
+export { TotalImageCount } from './TotalImageCount'
+export { TaskOverviewSection } from './TaskOverviewSection'
+export { useCalculatedPrompts } from './hooks/useCalculatedPrompts'
+export { useTaskOverview } from './hooks/useTaskOverview'
+export * from './Overview'
+
 // Type exports
 export type { SubjectInputProps } from './SubjectInput'
 export type { VariantCountSelectorProps, VariantCount } from './VariantCountSelector'
@@ -179,5 +293,22 @@ export type { PromptVariantCardProps, PromptVariant } from './PromptVariantCard'
 export type { PromptVariantsListProps, VariantWithSelection } from './PromptVariantsList'
 export type { OptimizationErrorBannerProps } from './OptimizationErrorBanner'
 export type { PromptExpansionState, PromptExpansionActions } from './hooks/usePromptExpansion'
+
+// Phase 5 type exports
+export type { CalculatedPromptCardProps } from './CalculatedPromptCard'
+export type { CalculatedPromptsSectionProps } from './CalculatedPromptsSection'
+export type { TotalImageCountProps } from './TotalImageCount'
+export type { TaskOverviewSectionProps } from './TaskOverviewSection'
+export type {
+  CalculatedPrompt,
+  CalculatedPromptsSummary,
+  UseCalculatedPromptsResult,
+} from './hooks/useCalculatedPrompts'
+export type {
+  ModelInfo,
+  BatchConfig,
+  TaskOverviewData,
+  UseTaskOverviewParams,
+} from './hooks/useTaskOverview'
 
 export default Studio
