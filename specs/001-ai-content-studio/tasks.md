@@ -333,6 +333,36 @@ Per plan.md Testing Requirements:
   - Return structured overview data for display components
 - [X] T038aa [US1] Integrate TaskOverviewSection into task creation page in src/components/Studio/index.tsx positioned before the Status & Progress section
 
+#### Overview Section UI Optimization (Simplification & Alignment)
+
+> **Purpose**: Simplify Overview section to align with PayloadCMS task creation page style, matching sections like "Batch Settings" and "Image Settings"
+
+- [ ] T038ab [US1] Update TaskOverviewSection title to use SectionHeader style in src/components/Studio/TaskOverviewSection.tsx:
+  - Use same heading hierarchy as "Batch Settings" and "Image Settings" (h2 with text-xl font-semibold)
+  - Match PayloadCMS native section header styling (inline styles using CSS variables)
+  - Remove custom Tailwind heading classes, use PayloadCMS theme variables
+- [ ] T038ac [US1] Refactor TaskOverviewSection layout to vertical arrangement in src/components/Studio/TaskOverviewSection.tsx:
+  - Replace 4-column horizontal grid with single-column vertical layout
+  - Each sub-section (Settings, Prompts Count, Image Count, Summary Stats) stacked vertically
+  - Remove border wrapping around each card (remove rounded-lg border border-gray-200)
+  - Use simple vertical spacing between subsections (margin-bottom or gap)
+- [ ] T038ad [P] [US1] Update SelectedSettingsSummary to borderless style in src/components/Studio/Overview/SelectedSettingsSummary.tsx:
+  - Remove parent container border expectations (component should render without border)
+  - Adjust internal spacing for vertical flow instead of constrained card width
+  - Allow text content to use full available width
+- [ ] T038ae [P] [US1] Update PromptsCountSummary to borderless style in src/components/Studio/Overview/PromptsCountSummary.tsx:
+  - Remove parent container border expectations
+  - Adjust internal spacing for vertical flow
+  - Ensure formula display has adequate width for long text
+- [ ] T038af [P] [US1] Update ImageCountSummary to borderless style in src/components/Studio/Overview/ImageCountSummary.tsx:
+  - Remove parent container border expectations (keep warning background color for high count)
+  - Adjust internal spacing for vertical flow
+  - Ensure breakdown formula has adequate width
+- [ ] T038ag [P] [US1] Update TaskSummaryStats to borderless style in src/components/Studio/Overview/TaskSummaryStats.tsx:
+  - Remove parent container border expectations
+  - Adjust internal spacing for vertical flow
+  - Keep warning styling for high image count
+
 #### Calculated Prompts Preview
 
 - [X] T038n [US1] Create CalculatedPromptsSection component in src/components/Studio/CalculatedPromptsSection.tsx to display the final prompt combinations at the end of the "Prompts" section
@@ -361,7 +391,7 @@ Per plan.md Testing Requirements:
 - [X] T038s [US1] Integrate CalculatedPromptsSection into task creation page in src/components/Studio/index.tsx at the end of the "Prompts" section (after prompt variants and before generation submit)
 - [X] T038t [US1] Connect useCalculatedPrompts hook to style-merger service for accurate prompt merging preview
 
-**Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts, displays the total image count that will be generated, and includes a comprehensive Overview section summarizing all generation settings and counts.
+**Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts, displays the total image count that will be generated, and includes a comprehensive Overview section summarizing all generation settings and counts. The Overview section title and styling aligns with other PayloadCMS sections, layout is simplified to vertical arrangement without borders for better text width handling.
 
 ---
 
@@ -596,6 +626,7 @@ Per plan.md Testing Requirements:
 - UI components within each story marked [P] can run in parallel
 - Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
 - Phase 5 tasks T038o (CalculatedPromptCard), T038q (TotalImageCount), T038v (SelectedSettingsSummary), T038w (PromptsCountSummary), T038x (ImageCountSummary), and T038y (TaskSummaryStats) can run in parallel
+- Phase 5 UI optimization tasks T038ad (SelectedSettingsSummary borderless), T038ae (PromptsCountSummary borderless), T038af (ImageCountSummary borderless), and T038ag (TaskSummaryStats borderless) can run in parallel
 
 ---
 
