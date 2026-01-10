@@ -292,7 +292,29 @@ export const Tasks: CollectionConfig = {
     },
 
     // ============================================
-    // SECTION 4: STATUS (Sidebar or Bottom)
+    // SECTION 4: OVERVIEW (Always Visible Summary)
+    // ============================================
+    {
+      name: 'overviewSection',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionDivider#SectionDivider',
+        },
+      },
+    },
+    {
+      name: 'taskOverview',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Studio/TaskOverviewField#TaskOverviewField',
+        },
+      },
+    },
+
+    // ============================================
+    // SECTION 5: STATUS (Sidebar or Bottom)
     // ============================================
     {
       name: 'statusSection',

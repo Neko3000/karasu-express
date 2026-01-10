@@ -249,15 +249,13 @@ export function Studio({ className = '' }: StudioProps) {
         )}
       </PromptOptimizationSection>
 
-      {/* Phase 5: Task Overview Section (shown after variants are generated) */}
-      {showVariants && overviewData.isReady && (
-        <div className="twp mt-8">
-          <TaskOverviewSection
-            overview={overviewData}
-            isVisible={true}
-          />
-        </div>
-      )}
+      {/* Phase 5: Task Overview Section - Always visible with current selections */}
+      <div className="twp mt-8">
+        <TaskOverviewSection
+          overview={overviewData}
+          isVisible={true}
+        />
+      </div>
     </div>
   )
 }
@@ -279,6 +277,7 @@ export { CalculatedPromptCard } from './CalculatedPromptCard'
 export { CalculatedPromptsSection } from './CalculatedPromptsSection'
 export { TotalImageCount } from './TotalImageCount'
 export { TaskOverviewSection } from './TaskOverviewSection'
+export { TaskOverviewField } from './TaskOverviewField'
 export { useCalculatedPrompts } from './hooks/useCalculatedPrompts'
 export { useTaskOverview } from './hooks/useTaskOverview'
 export * from './Overview'
