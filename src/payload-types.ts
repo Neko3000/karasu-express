@@ -542,7 +542,7 @@ export interface Task {
         | 'photographic'
         | 'pixel-art'
         | 'pointillism'
-        | 'pok-mon'
+        | 'pokemon'
         | 'pop-art-1'
         | 'pop-art-2'
         | 'psychedelic'

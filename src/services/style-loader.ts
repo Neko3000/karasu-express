@@ -1,21 +1,21 @@
 /**
  * Style Loader Service
  *
- * Loads and manages style prompts from external JSON files.
+ * Loads and manages style prompts from embedded TypeScript data.
  * Provides functions to access imported styles with "base" as default.
  *
- * Style source: src/resources/style-list/sdxl_styles_exp.json
+ * Style source: src/resources/style-list/sdxl-styles-exp.ts
+ *
+ * Note: This service uses pre-loaded TypeScript data instead of fs.readFileSync
+ * to ensure compatibility with both server-side and client-side code.
  */
-
-import { readFileSync } from 'fs'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
 
 import type { ImportedStyle, RawImportedStyle } from '../lib/style-types'
 import {
   normalizeImportedStyle,
   isRawImportedStyle,
 } from '../lib/style-types'
+import { sdxlStylesData } from '../resources/style-list/sdxl-styles-exp'
 
 // ============================================
 // CONSTANTS
@@ -41,64 +41,26 @@ export const DEFAULT_STYLE_NAME = 'base'
 let cachedStyles: ImportedStyle[] | null = null
 
 // ============================================
-// PATH RESOLUTION
-// ============================================
-
-/**
- * Get the path to the styles JSON file
- */
-function getStylesFilePath(): string {
-  // Handle both ESM and CommonJS environments
-  try {
-    // ESM environment
-    const __filename = fileURLToPath(import.meta.url)
-    const __dirname = dirname(__filename)
-    return resolve(__dirname, '../resources/style-list/sdxl_styles_exp.json')
-  } catch {
-    // CommonJS fallback
-    return resolve(__dirname, '../resources/style-list/sdxl_styles_exp.json')
-  }
-}
-
-// ============================================
 // LOADING FUNCTIONS
 // ============================================
 
 /**
- * Load and parse raw styles from the JSON file
+ * Load and parse raw styles from the embedded data
  *
- * @param filePath - Optional custom file path (for testing)
  * @returns Array of raw imported styles
- * @throws Error if file cannot be read or parsed
  */
-export function loadStylesFromJson(filePath?: string): RawImportedStyle[] {
-  const path = filePath ?? getStylesFilePath()
-
-  try {
-    const fileContent = readFileSync(path, 'utf-8')
-    const parsed = JSON.parse(fileContent)
-
-    if (!Array.isArray(parsed)) {
-      throw new Error('Styles file must contain an array')
+export function loadStylesFromJson(): RawImportedStyle[] {
+  // Validate each style from the embedded data
+  const validStyles: RawImportedStyle[] = []
+  for (const item of sdxlStylesData) {
+    if (isRawImportedStyle(item)) {
+      validStyles.push(item)
+    } else {
+      console.warn('Skipping invalid style entry:', item)
     }
-
-    // Validate each style
-    const validStyles: RawImportedStyle[] = []
-    for (const item of parsed) {
-      if (isRawImportedStyle(item)) {
-        validStyles.push(item)
-      } else {
-        console.warn('Skipping invalid style entry:', item)
-      }
-    }
-
-    return validStyles
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new Error(`Failed to parse styles JSON: ${error.message}`)
-    }
-    throw error
   }
+
+  return validStyles
 }
 
 /**
