@@ -160,36 +160,37 @@ export const TaskOverviewField: UIFieldClientComponent = () => {
         gap: 'calc(var(--base) * 0.75)',
       }}
     >
-      {/* Section Header */}
-      <div>
-        <h3
+      {/* Section Header - Matches SectionHeader h2 style */}
+      <div style={{ marginTop: '0.5rem' }}>
+        <h2
           style={{
-            fontSize: 'calc(var(--base-body-size) * 1.1)',
-            fontWeight: 600,
+            fontSize: '1.25rem', // text-xl - matches SectionHeader h2
+            fontWeight: 600, // font-semibold
             color: 'var(--theme-text)',
             margin: 0,
-            marginBottom: 'calc(var(--base) * 0.25)',
+            marginBottom: '0.25rem',
           }}
         >
-          📊 Generation Overview
-        </h3>
+          Generation Overview
+        </h2>
         <p
           style={{
-            fontSize: 'calc(var(--base-body-size) * 0.85)',
+            fontSize: '0.875rem', // matches SectionHeader description
             color: 'var(--theme-elevation-500)',
             margin: 0,
+            marginBottom: '1rem', // mb-4 matches SectionHeader
           }}
         >
           Summary of your task configuration and calculated output
         </p>
       </div>
 
-      {/* Overview Cards Grid */}
+      {/* Overview Cards Grid - 2 column layout */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 'calc(var(--base) * 0.5)',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1rem',
         }}
       >
         {/* Settings Card */}
@@ -214,15 +215,15 @@ export const TaskOverviewField: UIFieldClientComponent = () => {
             <InfoRow label="Styles" value={`${overview.styleCount} (${overview.styleNames.slice(0, 3).join(', ')}${overview.styleNames.length > 3 ? '...' : ''})`} />
             <div
               style={{
-                marginTop: '8px',
-                padding: '8px',
+                marginTop: '0.5rem',
+                padding: '0.5rem',
                 backgroundColor: 'var(--theme-elevation-50)',
-                borderRadius: 'var(--style-radius-s)',
-                fontSize: 'calc(var(--base-body-size) * 0.85)',
+                borderRadius: '4px',
+                fontSize: '0.875rem',
                 textAlign: 'center',
               }}
             >
-              <div style={{ color: 'var(--theme-elevation-500)' }}>Formula</div>
+              <div style={{ color: 'var(--theme-elevation-500)', fontSize: '0.75rem' }}>Formula</div>
               <div style={{ fontWeight: 600, color: 'var(--theme-text)' }}>
                 {overview.promptsFormula}
               </div>
@@ -238,7 +239,7 @@ export const TaskOverviewField: UIFieldClientComponent = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <div
               style={{
-                fontSize: 'calc(var(--base-body-size) * 2)',
+                fontSize: '2rem',
                 fontWeight: 700,
                 textAlign: 'center',
                 color: overview.hasWarning
@@ -252,7 +253,7 @@ export const TaskOverviewField: UIFieldClientComponent = () => {
             </div>
             <div
               style={{
-                fontSize: 'calc(var(--base-body-size) * 0.8)',
+                fontSize: '0.75rem',
                 color: 'var(--theme-elevation-500)',
                 textAlign: 'center',
               }}
@@ -262,12 +263,12 @@ export const TaskOverviewField: UIFieldClientComponent = () => {
             {overview.hasWarning && (
               <div
                 style={{
-                  marginTop: '8px',
-                  padding: '8px',
+                  marginTop: '0.5rem',
+                  padding: '0.5rem',
                   backgroundColor: 'var(--theme-warning-50)',
                   border: '1px solid var(--theme-warning-200)',
-                  borderRadius: 'var(--style-radius-s)',
-                  fontSize: 'calc(var(--base-body-size) * 0.8)',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
                   color: 'var(--theme-warning-600)',
                   display: 'flex',
                   alignItems: 'center',
@@ -329,18 +330,18 @@ function OverviewCard({ title, children, highlight }: OverviewCardProps) {
   return (
     <div
       style={{
-        padding: 'calc(var(--base) * 0.75)',
+        padding: '1rem', // consistent padding matching PayloadCMS cards
         backgroundColor: bgColor,
         border: `1px solid ${borderColor}`,
-        borderRadius: 'var(--style-radius-s)',
+        borderRadius: '4px', // matches PayloadCMS style-radius
       }}
     >
       <div
         style={{
-          fontSize: 'calc(var(--base-body-size) * 0.85)',
+          fontSize: '0.75rem', // text-xs for card titles
           fontWeight: 600,
           color: 'var(--theme-elevation-600)',
-          marginBottom: 'calc(var(--base) * 0.5)',
+          marginBottom: '0.75rem',
           textTransform: 'uppercase',
           letterSpacing: '0.5px',
         }}
@@ -358,13 +359,42 @@ interface InfoRowProps {
 }
 
 function InfoRow({ label, value }: InfoRowProps) {
+  // Stack vertically if value is long (more than 30 chars)
+  const isLongValue = value.length > 30
+
+  if (isLongValue) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px',
+          fontSize: '0.875rem', // text-sm
+          marginBottom: '4px',
+        }}
+      >
+        <span style={{ color: 'var(--theme-elevation-500)' }}>{label}</span>
+        <span
+          style={{
+            fontWeight: 500,
+            color: 'var(--theme-text)',
+            wordBreak: 'break-word',
+          }}
+        >
+          {value}
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div
       style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontSize: 'calc(var(--base-body-size) * 0.9)',
+        fontSize: '0.875rem', // text-sm
+        marginBottom: '4px',
       }}
     >
       <span style={{ color: 'var(--theme-elevation-500)' }}>{label}</span>
