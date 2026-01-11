@@ -22,11 +22,8 @@ export { usePromptExpansion } from './hooks/usePromptExpansion'
 export { CalculatedPromptCard } from './CalculatedPromptCard'
 export { CalculatedPromptsSection } from './CalculatedPromptsSection'
 export { TotalImageCount } from './TotalImageCount'
-export { TaskOverviewSection } from './TaskOverviewSection'
 export { TaskOverviewField } from './TaskOverviewField'
 export { useCalculatedPrompts } from './hooks/useCalculatedPrompts'
-export { useTaskOverview } from './hooks/useTaskOverview'
-export * from './Overview'
 
 // Type exports
 export type { SubjectInputProps } from './SubjectInput'
@@ -43,15 +40,8 @@ export type { PromptExpansionState, PromptExpansionActions } from './hooks/usePr
 export type { CalculatedPromptCardProps } from './CalculatedPromptCard'
 export type { CalculatedPromptsSectionProps } from './CalculatedPromptsSection'
 export type { TotalImageCountProps } from './TotalImageCount'
-export type { TaskOverviewSectionProps } from './TaskOverviewSection'
 export type {
   CalculatedPrompt,
   CalculatedPromptsSummary,
   UseCalculatedPromptsResult,
 } from './hooks/useCalculatedPrompts'
-export type {
-  ModelInfo,
-  BatchConfig,
-  TaskOverviewData,
-  UseTaskOverviewParams,
-} from './hooks/useTaskOverview'
