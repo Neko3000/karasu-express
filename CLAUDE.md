@@ -28,4 +28,24 @@ TypeScript 5.x (strict mode enabled): Follow standard conventions
 - 001-ai-content-studio: Added TypeScript 5.x (strict mode enabled) + PayloadCMS v3 (Next.js App Router), React 18+, TailwindCSS (scoped with `.twp`)
 
 <!-- MANUAL ADDITIONS START -->
+
+## Key Collections & Admin Routes
+
+### Tasks Collection (Primary UI Target)
+- **Source file**: `src/collections/Tasks.ts`
+- **Collection slug**: `tasks`
+- **Admin routes**:
+  - **Create page**: `/admin/collections/tasks/create` - Task creation form
+  - **List page**: `/admin/collections/tasks` - All tasks list view
+  - **Edit page**: `/admin/collections/tasks/{id}` - Edit existing task
+
+The Tasks collection is the **main entry point** for the AI Content Generation Studio. When implementing UI features for task creation, editing, or configuration, target the `src/collections/Tasks.ts` file and its associated components under `src/components/Studio/`.
+
+### Other Collections
+- `src/collections/SubTasks.ts` - Child tasks for batch processing
+- `src/collections/StyleTemplates.ts` - Custom style templates
+- `src/collections/ModelConfigs.ts` - AI model configurations
+- `src/collections/Media.ts` - Generated images storage
+- `src/collections/Users.ts` - User authentication
+
 <!-- MANUAL ADDITIONS END -->
