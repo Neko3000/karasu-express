@@ -365,6 +365,24 @@ Per plan.md Testing Requirements:
 
 ---
 
+### UI Enhancement: Overview Section Optimization
+
+> **Purpose**: Improve the Overview section UI to align with PayloadCMS style conventions and improve layout for better readability
+
+#### Title Style Alignment
+
+- [ ] T038ab [US1] Update TaskOverviewField section header in src/components/Studio/TaskOverviewField.tsx to use SectionHeader component style (matching "Batch Settings" and "Image Settings" sections) - remove emoji and align font styles
+
+#### Layout Simplification
+
+- [ ] T038ac [US1] Refactor TaskOverviewField grid layout in src/components/Studio/TaskOverviewField.tsx from 4-column auto-fit to 2-column layout (each card takes 1/2 row width) to handle longer text content properly
+- [ ] T038ad [P] [US1] Update OverviewCard component in src/components/Studio/TaskOverviewField.tsx to use consistent padding and spacing matching PayloadCMS form field cards
+- [ ] T038ae [P] [US1] Simplify InfoRow component in src/components/Studio/TaskOverviewField.tsx to handle longer text values without truncation - adjust label/value layout to stack vertically when content is long
+
+**Checkpoint**: Overview section now matches PayloadCMS admin panel styling with proper section headers, 2-column layout for better text handling, and simplified card design.
+
+---
+
 ## Phase 6: User Story 3 - Style Configuration and Management (Priority: P2)
 
 **Goal**: Admin can create and manage reusable style templates that can be applied to any generation
@@ -596,6 +614,7 @@ Per plan.md Testing Requirements:
 - UI components within each story marked [P] can run in parallel
 - Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
 - Phase 5 tasks T038o (CalculatedPromptCard), T038q (TotalImageCount), T038v (SelectedSettingsSummary), T038w (PromptsCountSummary), T038x (ImageCountSummary), and T038y (TaskSummaryStats) can run in parallel
+- Phase 5 UI Enhancement tasks T038ad (OverviewCard) and T038ae (InfoRow) can run in parallel after T038ab (title) and T038ac (grid layout)
 
 ---
 
