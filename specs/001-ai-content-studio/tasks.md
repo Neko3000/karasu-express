@@ -306,42 +306,42 @@ Per plan.md Testing Requirements:
 
 #### Overview Section (NEW - Before Status & Progress)
 
-- [ ] T038u [US1] Create TaskOverviewSection component in src/components/Studio/TaskOverviewSection.tsx as a summary panel displayed before Status & Progress section showing:
+- [X] T038u [US1] Create TaskOverviewSection component in src/components/Studio/TaskOverviewSection.tsx as a summary panel displayed before Status & Progress section showing:
   - Section title: "Overview"
   - Subsections for each category of information (settings, counts, etc.)
-- [ ] T038v [P] [US1] Create SelectedSettingsSummary component in src/components/Studio/Overview/SelectedSettingsSummary.tsx to display:
+- [X] T038v [P] [US1] Create SelectedSettingsSummary component in src/components/Studio/Overview/SelectedSettingsSummary.tsx to display:
   - Selected models (list with provider badges)
   - Selected aspect ratio
   - Any other generation settings configured
-- [ ] T038w [P] [US1] Create PromptsCountSummary component in src/components/Studio/Overview/PromptsCountSummary.tsx to display:
+- [X] T038w [P] [US1] Create PromptsCountSummary component in src/components/Studio/Overview/PromptsCountSummary.tsx to display:
   - Number of prompt variants selected
   - Number of styles selected
   - Calculated prompts count: variants × styles
   - Visual breakdown formula (e.g., "3 variants × 2 styles = 6 prompts")
-- [ ] T038x [P] [US1] Create ImageCountSummary component in src/components/Studio/Overview/ImageCountSummary.tsx to display:
+- [X] T038x [P] [US1] Create ImageCountSummary component in src/components/Studio/Overview/ImageCountSummary.tsx to display:
   - Image count per model: variants × styles × count per prompt
   - Image count for all models: variants × styles × count per prompt × models
   - Visual breakdown with formula display
   - Prominent display of total images to be generated
-- [ ] T038y [P] [US1] Create TaskSummaryStats component in src/components/Studio/Overview/TaskSummaryStats.tsx to display additional key information:
+- [X] T038y [P] [US1] Create TaskSummaryStats component in src/components/Studio/Overview/TaskSummaryStats.tsx to display additional key information:
   - Estimated API calls count
   - Selected AI providers summary
   - Any warnings (e.g., high image count > 500)
-- [ ] T038z [US1] Create useTaskOverview hook in src/components/Studio/hooks/useTaskOverview.ts to:
+- [X] T038z [US1] Create useTaskOverview hook in src/components/Studio/hooks/useTaskOverview.ts to:
   - Aggregate all form state (variants, styles, models, batch config)
   - Calculate all summary statistics
   - Return structured overview data for display components
-- [ ] T038aa [US1] Integrate TaskOverviewSection into task creation page in src/components/Studio/index.tsx positioned before the Status & Progress section
+- [X] T038aa [US1] Integrate TaskOverviewSection into task creation page in src/components/Studio/index.tsx positioned before the Status & Progress section
 
 #### Calculated Prompts Preview
 
-- [ ] T038n [US1] Create CalculatedPromptsSection component in src/components/Studio/CalculatedPromptsSection.tsx to display the final prompt combinations at the end of the "Prompts" section
-- [ ] T038o [P] [US1] Create CalculatedPromptCard component in src/components/Studio/CalculatedPromptCard.tsx to display individual calculated prompt with:
+- [X] T038n [US1] Create CalculatedPromptsSection component in src/components/Studio/CalculatedPromptsSection.tsx to display the final prompt combinations at the end of the "Prompts" section
+- [X] T038o [P] [US1] Create CalculatedPromptCard component in src/components/Studio/CalculatedPromptCard.tsx to display individual calculated prompt with:
   - Variant label (e.g., "Variant 1 - Realistic")
   - Style name applied (e.g., "Cyberpunk")
   - Final merged prompt text (preview, non-editable)
   - Negative prompt if applicable
-- [ ] T038p [US1] Create useCalculatedPrompts hook in src/components/Studio/hooks/useCalculatedPrompts.ts to:
+- [X] T038p [US1] Create useCalculatedPrompts hook in src/components/Studio/hooks/useCalculatedPrompts.ts to:
   - Take selected variants and selected styles as input
   - Calculate all combinations (variants x styles)
   - Apply style-merger logic to generate final prompts
@@ -349,19 +349,37 @@ Per plan.md Testing Requirements:
 
 #### Total Image Count Display
 
-- [ ] T038q [P] [US1] Create TotalImageCount component in src/components/Studio/TotalImageCount.tsx to display:
+- [X] T038q [P] [US1] Create TotalImageCount component in src/components/Studio/TotalImageCount.tsx to display:
   - Number of calculated prompts (variants x styles)
   - Count per prompt (from BatchConfig)
   - Final total: (variants x styles x countPerPrompt)
   - Visual emphasis for the final number
-- [ ] T038r [US1] Integrate TotalImageCount with BatchConfig component to update in real-time as parameters change
+- [X] T038r [US1] Integrate TotalImageCount with BatchConfig component to update in real-time as parameters change
 
 #### Integration
 
-- [ ] T038s [US1] Integrate CalculatedPromptsSection into task creation page in src/components/Studio/index.tsx at the end of the "Prompts" section (after prompt variants and before generation submit)
-- [ ] T038t [US1] Connect useCalculatedPrompts hook to style-merger service for accurate prompt merging preview
+- [X] T038s [US1] Integrate CalculatedPromptsSection into task creation page in src/components/Studio/index.tsx at the end of the "Prompts" section (after prompt variants and before generation submit)
+- [X] T038t [US1] Connect useCalculatedPrompts hook to style-merger service for accurate prompt merging preview
 
 **Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts, displays the total image count that will be generated, and includes a comprehensive Overview section summarizing all generation settings and counts.
+
+---
+
+### UI Enhancement: Overview Section Optimization
+
+> **Purpose**: Improve the Overview section UI to align with PayloadCMS style conventions and improve layout for better readability
+
+#### Title Style Alignment
+
+- [X] T038ab [US1] Update TaskOverviewField section header in src/components/Studio/TaskOverviewField.tsx to use SectionHeader component style (matching "Batch Settings" and "Image Settings" sections) - remove emoji and align font styles
+
+#### Layout Simplification
+
+- [X] T038ac [US1] Refactor TaskOverviewField grid layout in src/components/Studio/TaskOverviewField.tsx from 4-column auto-fit to 2-column layout (each card takes 1/2 row width) to handle longer text content properly
+- [X] T038ad [P] [US1] Update OverviewCard component in src/components/Studio/TaskOverviewField.tsx to use consistent padding and spacing matching PayloadCMS form field cards
+- [X] T038ae [P] [US1] Simplify InfoRow component in src/components/Studio/TaskOverviewField.tsx to handle longer text values without truncation - adjust label/value layout to stack vertically when content is long
+
+**Checkpoint**: Overview section now matches PayloadCMS admin panel styling with proper section headers, 2-column layout for better text handling, and simplified card design.
 
 ---
 
@@ -596,6 +614,7 @@ Per plan.md Testing Requirements:
 - UI components within each story marked [P] can run in parallel
 - Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
 - Phase 5 tasks T038o (CalculatedPromptCard), T038q (TotalImageCount), T038v (SelectedSettingsSummary), T038w (PromptsCountSummary), T038x (ImageCountSummary), and T038y (TaskSummaryStats) can run in parallel
+- Phase 5 UI Enhancement tasks T038ad (OverviewCard) and T038ae (InfoRow) can run in parallel after T038ab (title) and T038ac (grid layout)
 
 ---
 
