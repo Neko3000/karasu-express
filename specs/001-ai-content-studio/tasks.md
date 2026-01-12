@@ -429,7 +429,30 @@ Per plan.md Testing Requirements:
 - [X] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
 - [X] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
 
-**Checkpoint**: Style management complete - integration tests pass. Admin can create/edit styles with simplified fields and apply them to generations.
+### Import All SDXL Styles from JSON
+
+> **Purpose**: Replace hardcoded default styles with dynamic import from sdxl_styles_exp.json file (~190 styles)
+> - Source file: src/resources/original/sdxl_styles_exp.json
+> - JSON schema: { name: string, prompt: string, negative_prompt: string }
+> - Generate styleId from name (lowercase, spaces to hyphens)
+> - Mark all imported styles as isSystem: false (only "base" is system)
+
+- [ ] T042a [US3] Create style import utility in src/seed/import-styles.ts with functions:
+  - loadStylesFromJson(): Read and parse sdxl_styles_exp.json
+  - transformToStyleTemplate(jsonStyle): Convert JSON format to StyleTemplateData (generate styleId from name, map prompt to positivePrompt, negative_prompt to negativePrompt)
+  - generateStyleId(name): Convert name to kebab-case styleId (e.g., "3D Model" -> "3d-model")
+- [ ] T042b [US3] Update src/seed/index.ts to import styles from JSON instead of hardcoded DEFAULT_STYLES array:
+  - Import loadStylesFromJson from import-styles.ts
+  - Replace hardcoded DEFAULT_STYLES with dynamic loading
+  - Keep "base" style as isSystem: true, all others as isSystem: false
+  - Log total styles count during seed
+- [ ] T042c [P] [US3] Add unit tests for style import utility in tests/unit/seed/import-styles.test.ts:
+  - Test loadStylesFromJson returns array of styles
+  - Test transformToStyleTemplate maps fields correctly
+  - Test generateStyleId handles edge cases (spaces, special chars, numbers)
+- [ ] T042d [US3] Run pnpm seed and verify all ~190 styles are imported into style-templates collection
+
+**Checkpoint**: Style management complete - integration tests pass. Admin can create/edit styles with simplified fields and apply them to generations. All SDXL styles (~190) are seeded from JSON file.
 
 ---
 
@@ -651,7 +674,7 @@ Per plan.md Testing Requirements:
 | Phase 3: US1 | T020a, T020b, T020c, T033b, T033k | T020d, T020e, T020f, T033h | - | All tests pass |
 | Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
 | Phase 5: Task Creation Optimization | - | - | - | Manual testing |
-| Phase 6: US3 | - | T038a | - | Integration tests pass, previewImage/sortOrder removed |
+| Phase 6: US3 | T042c | T038a | - | Integration tests pass, all SDXL styles imported |
 | Phase 7: US4 | - | - | - | Manual testing |
 | Phase 8: US5 | - | - | - | Manual testing |
 | Phase 9: US6 | - | - | - | Manual testing |
@@ -660,7 +683,7 @@ Per plan.md Testing Requirements:
 | Phase 12: Polish | - | - | - | Full suite passes |
 | Phase 13: Veo | T076a | - | - | (Deferred) |
 
-**Total Test Tasks**: 20 (11 unit, 8 integration, 1 contract)
+**Total Test Tasks**: 21 (12 unit, 8 integration, 1 contract)
 
 ---
 
