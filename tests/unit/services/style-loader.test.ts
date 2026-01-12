@@ -8,7 +8,22 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import * as fs from 'fs'
+import type { RawImportedStyle, ImportedStyle } from '../../../src/lib/style-types'
+import {
+  generateStyleId,
+  normalizeImportedStyle,
+  isRawImportedStyle,
+} from '../../../src/lib/style-types'
+
+// Mock the embedded styles data module
+const mockStylesData: RawImportedStyle[] = []
+vi.mock('../../../src/resources/style-list/sdxl-styles-exp', () => ({
+  get sdxlStylesData() {
+    return mockStylesData
+  },
+}))
+
+// Import after mocking
 import {
   loadStylesFromJson,
   parseStyleTemplates,
@@ -21,17 +36,6 @@ import {
   clearStyleCache,
   DEFAULT_STYLE_ID,
 } from '../../../src/services/style-loader'
-import type { RawImportedStyle, ImportedStyle } from '../../../src/lib/style-types'
-import {
-  generateStyleId,
-  normalizeImportedStyle,
-  isRawImportedStyle,
-} from '../../../src/lib/style-types'
-
-// Mock fs module
-vi.mock('fs', () => ({
-  readFileSync: vi.fn(),
-}))
 
 describe('StyleLoader', () => {
   // ============================================
@@ -45,8 +49,9 @@ describe('StyleLoader', () => {
     ...overrides,
   })
 
-  const createMockStylesJson = (styles: RawImportedStyle[]): string => {
-    return JSON.stringify(styles)
+  const setMockStyles = (styles: RawImportedStyle[]): void => {
+    mockStylesData.length = 0
+    mockStylesData.push(...styles)
   }
 
   // ============================================
@@ -55,7 +60,7 @@ describe('StyleLoader', () => {
 
   beforeEach(() => {
     clearStyleCache()
-    vi.clearAllMocks()
+    setMockStyles([])
   })
 
   afterEach(() => {
@@ -167,15 +172,13 @@ describe('StyleLoader', () => {
   // ============================================
 
   describe('loadStylesFromJson', () => {
-    it('should load and parse valid JSON file', () => {
-      const mockStyles = [
+    it('should load and parse valid styles from embedded data', () => {
+      setMockStyles([
         createRawStyle({ name: 'base', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Cyberpunk', prompt: '{prompt}, neon', negative_prompt: 'old' }),
-      ]
+      ])
 
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
-
-      const result = loadStylesFromJson('/test/path.json')
+      const result = loadStylesFromJson()
 
       expect(result).toHaveLength(2)
       expect(result[0].name).toBe('base')
@@ -183,16 +186,17 @@ describe('StyleLoader', () => {
     })
 
     it('should skip invalid style entries', () => {
-      const mockData = JSON.stringify([
+      // Set mock data with invalid entries mixed in
+      mockStylesData.length = 0
+      mockStylesData.push(
         createRawStyle({ name: 'Valid', prompt: '{prompt}', negative_prompt: '' }),
-        { name: 'Invalid' }, // Missing prompt and negative_prompt
-        createRawStyle({ name: 'Also Valid', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+        { name: 'Invalid' } as RawImportedStyle, // Missing prompt and negative_prompt
+        createRawStyle({ name: 'Also Valid', prompt: '{prompt}', negative_prompt: '' })
+      )
 
-      vi.mocked(fs.readFileSync).mockReturnValue(mockData)
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-      const result = loadStylesFromJson('/test/path.json')
+      const result = loadStylesFromJson()
 
       expect(result).toHaveLength(2)
       expect(result[0].name).toBe('Valid')
@@ -200,18 +204,12 @@ describe('StyleLoader', () => {
       expect(consoleSpy).toHaveBeenCalled()
     })
 
-    it('should throw error for non-array JSON', () => {
-      vi.mocked(fs.readFileSync).mockReturnValue('{"not": "array"}')
+    it('should return empty array for empty data', () => {
+      setMockStyles([])
 
-      expect(() => loadStylesFromJson('/test/path.json')).toThrow(
-        'Styles file must contain an array'
-      )
-    })
+      const result = loadStylesFromJson()
 
-    it('should throw error for invalid JSON syntax', () => {
-      vi.mocked(fs.readFileSync).mockReturnValue('invalid json {{{')
-
-      expect(() => loadStylesFromJson('/test/path.json')).toThrow('Failed to parse styles JSON')
+      expect(result).toHaveLength(0)
     })
   })
 
@@ -246,13 +244,11 @@ describe('StyleLoader', () => {
 
   describe('getAllStyles', () => {
     it('should return styles sorted with "base" first', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Zebra', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'base', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Apple', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getAllStyles(true)
 
@@ -262,23 +258,29 @@ describe('StyleLoader', () => {
     })
 
     it('should cache styles after first load', () => {
-      const mockStyles = [createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' })]
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      setMockStyles([createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' })])
 
-      getAllStyles(true) // First call - loads from file
-      getAllStyles() // Second call - should use cache
+      const first = getAllStyles(true) // First call - loads from data
+      const second = getAllStyles() // Second call - should use cache
 
-      expect(fs.readFileSync).toHaveBeenCalledTimes(1)
+      expect(first).toBe(second) // Same reference means cached
     })
 
     it('should reload when forceReload is true', () => {
-      const mockStyles = [createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' })]
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      setMockStyles([createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' })])
 
-      getAllStyles(true) // First call
-      getAllStyles(true) // Second call with forceReload
+      const first = getAllStyles(true) // First call
 
-      expect(fs.readFileSync).toHaveBeenCalledTimes(2)
+      // Modify the mock data
+      setMockStyles([
+        createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' }),
+        createRawStyle({ name: 'NewStyle', prompt: '{prompt}', negative_prompt: '' }),
+      ])
+
+      const second = getAllStyles(true) // Second call with forceReload
+
+      expect(first).not.toBe(second) // Different references
+      expect(second).toHaveLength(2)
     })
   })
 
@@ -288,12 +290,10 @@ describe('StyleLoader', () => {
 
   describe('getDefaultStyle', () => {
     it('should return "base" style when present', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Other', prompt: '{prompt}, other', negative_prompt: '' }),
         createRawStyle({ name: 'base', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getDefaultStyle()
 
@@ -303,11 +303,9 @@ describe('StyleLoader', () => {
     })
 
     it('should return fallback base style when not found in file', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Other', prompt: '{prompt}, other', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getDefaultStyle()
 
@@ -323,11 +321,9 @@ describe('StyleLoader', () => {
 
   describe('getStyleById', () => {
     it('should return style when found', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Cyberpunk', prompt: '{prompt}, neon', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getStyleById('cyberpunk')
 
@@ -336,11 +332,9 @@ describe('StyleLoader', () => {
     })
 
     it('should return undefined when not found', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Other', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getStyleById('nonexistent')
 
@@ -354,13 +348,11 @@ describe('StyleLoader', () => {
 
   describe('getStylesByIds', () => {
     it('should return multiple styles by IDs', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Style B', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Style C', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getStylesByIds(['style-a', 'style-c'])
 
@@ -370,11 +362,9 @@ describe('StyleLoader', () => {
     })
 
     it('should filter out non-existent IDs', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getStylesByIds(['style-a', 'nonexistent'])
 
@@ -389,13 +379,11 @@ describe('StyleLoader', () => {
 
   describe('searchStyles', () => {
     it('should find styles by name (case-insensitive)', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Cyberpunk', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Steampunk', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Other', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = searchStyles('punk')
 
@@ -405,11 +393,9 @@ describe('StyleLoader', () => {
     })
 
     it('should return empty array when no matches', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = searchStyles('xyz')
 
@@ -423,13 +409,11 @@ describe('StyleLoader', () => {
 
   describe('getStyleCount', () => {
     it('should return total count of styles', () => {
-      const mockStyles = [
+      setMockStyles([
         createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Style B', prompt: '{prompt}', negative_prompt: '' }),
         createRawStyle({ name: 'Style C', prompt: '{prompt}', negative_prompt: '' }),
-      ]
-
-      vi.mocked(fs.readFileSync).mockReturnValue(createMockStylesJson(mockStyles))
+      ])
 
       const result = getStyleCount()
 

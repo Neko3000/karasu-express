@@ -1,119 +1,28 @@
 /**
  * Seed Script
  *
- * Seeds the database with default style templates and model configurations.
- * Run with: pnpm payload:seed
+ * Seeds the database with style templates (from JSON) and model configurations.
+ * Run with: pnpm seed
  *
- * Style templates include:
+ * Style templates are loaded from src/resources/original/sdxl_styles_exp.json
+ * which contains ~190 styles including:
  * - Base (No Style) - system default
- * - Studio Ghibli Style
- * - Cyberpunk
- * - Film Noir
- * - Watercolor Painting
- * - Oil Painting
- * - Pixel Art
- * - Minimalist
+ * - 3D Model, Abstract, Anime, Art Deco, Cyberpunk, and many more...
  *
  * Phase 6 Optimization: Removed sortOrder field from styles
+ * Phase 6 Enhancement: Import styles from JSON instead of hardcoded array
  */
 
 import type { Payload } from 'payload'
 
 import { AspectRatio, Provider } from '../lib/types'
+import { loadStylesFromJson, type StyleTemplateData } from './import-styles'
 
 // ============================================
-// DEFAULT STYLE TEMPLATES
+// STYLE TEMPLATES (loaded from JSON)
 // ============================================
 
-interface StyleTemplateData {
-  styleId: string
-  name: string
-  description: string
-  positivePrompt: string
-  negativePrompt: string
-  isSystem: boolean
-}
-
-const DEFAULT_STYLES: StyleTemplateData[] = [
-  {
-    styleId: 'base',
-    name: 'Base (No Style)',
-    description: 'Original prompt without style modifications',
-    positivePrompt: '{prompt}',
-    negativePrompt: '',
-    isSystem: true,
-  },
-  {
-    styleId: 'ghibli-anime',
-    name: 'Studio Ghibli Style',
-    description: "Hayao Miyazaki's signature animation aesthetic",
-    positivePrompt:
-      '{prompt}, studio ghibli style, cel shaded, vibrant colors, hayao miyazaki, hand-drawn animation, whimsical, detailed backgrounds, soft lighting',
-    negativePrompt:
-      '3d render, realistic, photorealistic, low quality, blurry, cgi, western animation',
-    isSystem: true,
-  },
-  {
-    styleId: 'cyberpunk',
-    name: 'Cyberpunk',
-    description: 'Neon-lit futuristic dystopian aesthetic',
-    positivePrompt:
-      '{prompt}, cyberpunk style, neon lights, futuristic, dystopian, high tech, low life, rain, reflections, blade runner aesthetic, holographic displays',
-    negativePrompt:
-      'natural lighting, rural, vintage, old-fashioned, bright daylight, warm colors',
-    isSystem: true,
-  },
-  {
-    styleId: 'film-noir',
-    name: 'Film Noir',
-    description: 'Classic 1940s noir cinematography style',
-    positivePrompt:
-      '{prompt}, film noir style, black and white, high contrast, dramatic shadows, venetian blind lighting, 1940s aesthetic, moody, atmospheric, cinematic',
-    negativePrompt:
-      'colorful, bright, cheerful, modern, low contrast, flat lighting',
-    isSystem: true,
-  },
-  {
-    styleId: 'watercolor',
-    name: 'Watercolor Painting',
-    description: 'Soft watercolor painting style',
-    positivePrompt:
-      '{prompt}, watercolor painting, soft edges, flowing colors, artistic, traditional media, paper texture, wet on wet technique, delicate, impressionistic',
-    negativePrompt:
-      'digital art, sharp edges, 3d render, photorealistic, hard lines, vector art',
-    isSystem: true,
-  },
-  {
-    styleId: 'oil-painting',
-    name: 'Oil Painting',
-    description: 'Classical oil painting technique',
-    positivePrompt:
-      '{prompt}, oil painting, classical art, rich colors, visible brushstrokes, canvas texture, old master style, dramatic lighting, chiaroscuro',
-    negativePrompt:
-      'digital art, flat colors, modern style, minimalist, photograph',
-    isSystem: true,
-  },
-  {
-    styleId: 'pixel-art',
-    name: 'Pixel Art',
-    description: 'Retro 8-bit/16-bit pixel art style',
-    positivePrompt:
-      '{prompt}, pixel art, 16-bit style, retro gaming aesthetic, limited color palette, dithering, crisp pixels, nostalgic, sprite art',
-    negativePrompt:
-      'realistic, smooth gradients, high resolution, photorealistic, 3d render',
-    isSystem: true,
-  },
-  {
-    styleId: 'minimalist',
-    name: 'Minimalist',
-    description: 'Clean, simple minimalist design',
-    positivePrompt:
-      '{prompt}, minimalist style, simple, clean lines, negative space, limited color palette, modern design, geometric, elegant simplicity',
-    negativePrompt:
-      'cluttered, busy, ornate, detailed, complex, realistic, photographic',
-    isSystem: true,
-  },
-]
+// StyleTemplateData is imported from ./import-styles
 
 // ============================================
 // DEFAULT MODEL CONFIGURATIONS
@@ -245,12 +154,21 @@ type FlexiblePayload = Payload & {
 }
 
 /**
- * Seed style templates
+ * Seed style templates from JSON file
  */
 async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
+  console.log('Loading style templates from JSON...')
+
+  // Load styles from JSON file
+  const styles = loadStylesFromJson()
+  console.log(`  Found ${styles.length} styles in JSON file`)
+
   console.log('Seeding style templates...')
 
-  for (const style of DEFAULT_STYLES) {
+  let created = 0
+  let skipped = 0
+
+  for (const style of styles) {
     try {
       // Check if style already exists
       const existing = await payload.find({
@@ -262,7 +180,7 @@ async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
       })
 
       if (existing.docs.length > 0) {
-        console.log(`  Style "${style.styleId}" already exists, skipping`)
+        skipped++
         continue
       }
 
@@ -272,12 +190,14 @@ async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
         data: style as unknown as Record<string, unknown>,
       })
 
-      console.log(`  Created style: ${style.name}`)
+      created++
     } catch (error) {
       console.error(`  Failed to create style "${style.styleId}":`, error)
     }
   }
 
+  console.log(`  Created: ${created} styles`)
+  console.log(`  Skipped: ${skipped} styles (already exist)`)
   console.log('Style templates seeded successfully')
 }
 
@@ -335,9 +255,9 @@ export async function seed(payload: Payload): Promise<void> {
 }
 
 /**
- * Export default styles for reference
+ * Export style loading function for reference
  */
-export const defaultStyles = DEFAULT_STYLES
+export { loadStylesFromJson } from './import-styles'
 
 /**
  * Export default models for reference
