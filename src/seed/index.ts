@@ -3,6 +3,18 @@
  *
  * Seeds the database with default style templates and model configurations.
  * Run with: pnpm payload:seed
+ *
+ * Style templates include:
+ * - Base (No Style) - system default
+ * - Studio Ghibli Style
+ * - Cyberpunk
+ * - Film Noir
+ * - Watercolor Painting
+ * - Oil Painting
+ * - Pixel Art
+ * - Minimalist
+ *
+ * Phase 6 Optimization: Removed sortOrder field from styles
  */
 
 import type { Payload } from 'payload'
@@ -20,7 +32,6 @@ interface StyleTemplateData {
   positivePrompt: string
   negativePrompt: string
   isSystem: boolean
-  sortOrder: number
 }
 
 const DEFAULT_STYLES: StyleTemplateData[] = [
@@ -31,7 +42,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     positivePrompt: '{prompt}',
     negativePrompt: '',
     isSystem: true,
-    sortOrder: -1,
   },
   {
     styleId: 'ghibli-anime',
@@ -42,7 +52,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt:
       '3d render, realistic, photorealistic, low quality, blurry, cgi, western animation',
     isSystem: true,
-    sortOrder: 10,
   },
   {
     styleId: 'cyberpunk',
@@ -53,7 +62,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt:
       'natural lighting, rural, vintage, old-fashioned, bright daylight, warm colors',
     isSystem: true,
-    sortOrder: 20,
   },
   {
     styleId: 'film-noir',
@@ -64,7 +72,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt:
       'colorful, bright, cheerful, modern, low contrast, flat lighting',
     isSystem: true,
-    sortOrder: 30,
   },
   {
     styleId: 'watercolor',
@@ -75,7 +82,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt:
       'digital art, sharp edges, 3d render, photorealistic, hard lines, vector art',
     isSystem: true,
-    sortOrder: 40,
   },
   {
     styleId: 'oil-painting',
@@ -86,7 +92,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt:
       'digital art, flat colors, modern style, minimalist, photograph',
     isSystem: true,
-    sortOrder: 50,
   },
   {
     styleId: 'pixel-art',
@@ -97,7 +102,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt:
       'realistic, smooth gradients, high resolution, photorealistic, 3d render',
     isSystem: true,
-    sortOrder: 60,
   },
   {
     styleId: 'minimalist',
@@ -108,7 +112,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt:
       'cluttered, busy, ornate, detailed, complex, realistic, photographic',
     isSystem: true,
-    sortOrder: 70,
   },
 ]
 

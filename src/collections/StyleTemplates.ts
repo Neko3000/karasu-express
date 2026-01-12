@@ -4,6 +4,14 @@
  * Reusable style configurations with prompt modifiers.
  * Each style template contains positive and negative prompt templates
  * that can be merged with user prompts.
+ *
+ * Simplified fields (Phase 6 optimization):
+ * - styleId: unique identifier
+ * - name: display name (unique, case-insensitive)
+ * - description: optional style description
+ * - positivePrompt: must contain {prompt} placeholder
+ * - negativePrompt: optional negative prompt additions
+ * - isSystem: system styles cannot be deleted
  */
 
 import type { CollectionConfig } from 'payload'
@@ -12,7 +20,7 @@ export const StyleTemplates: CollectionConfig = {
   slug: 'style-templates',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'styleId', 'isSystem', 'sortOrder'],
+    defaultColumns: ['name', 'styleId', 'isSystem'],
     group: 'Configuration',
     description: 'Reusable style templates for AI image generation',
   },
@@ -60,7 +68,7 @@ export const StyleTemplates: CollectionConfig = {
       type: 'text',
       required: true,
       admin: {
-        description: 'Display name for the style',
+        description: 'Display name for the style (must be unique)',
       },
       minLength: 1,
       maxLength: 100,
@@ -97,30 +105,12 @@ export const StyleTemplates: CollectionConfig = {
       defaultValue: '',
     },
     {
-      name: 'previewImage',
-      type: 'upload',
-      relationTo: 'media',
-      admin: {
-        description: 'Preview thumbnail showing the style effect',
-      },
-    },
-    {
       name: 'isSystem',
       type: 'checkbox',
       defaultValue: false,
       admin: {
         description: 'System styles cannot be deleted',
         readOnly: true,
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'sortOrder',
-      type: 'number',
-      defaultValue: 0,
-      index: true,
-      admin: {
-        description: 'Display order in UI (lower = first)',
         position: 'sidebar',
       },
     },

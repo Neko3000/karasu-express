@@ -417,17 +417,17 @@ Per plan.md Testing Requirements:
 >
 > **Remove**: previewImage and sortOrder fields
 
-- [ ] T038a [P] [US3] Write integration tests for StyleTemplates collection in tests/integration/collections/style-templates.integration.test.ts (test CRUD, validation of {prompt} placeholder, unique name case-insensitive)
-- [ ] T039 [US3] Remove previewImage field from StyleTemplates collection in src/collections/StyleTemplates.ts
-- [ ] T039a [US3] Remove sortOrder field from StyleTemplates collection in src/collections/StyleTemplates.ts
-- [ ] T039b [US3] Update StyleTemplates admin.defaultColumns to remove sortOrder in src/collections/StyleTemplates.ts (keep: name, styleId, isSystem)
-- [ ] T039c [US3] Update data-model.md StyleTemplates section to remove previewImage and sortOrder fields
+- [X] T038a [P] [US3] Write integration tests for StyleTemplates collection in tests/integration/collections/style-templates.integration.test.ts (test CRUD, validation of {prompt} placeholder, unique name case-insensitive)
+- [X] T039 [US3] Remove previewImage field from StyleTemplates collection in src/collections/StyleTemplates.ts
+- [X] T039a [US3] Remove sortOrder field from StyleTemplates collection in src/collections/StyleTemplates.ts
+- [X] T039b [US3] Update StyleTemplates admin.defaultColumns to remove sortOrder in src/collections/StyleTemplates.ts (keep: name, styleId, isSystem)
+- [X] T039c [US3] Update data-model.md StyleTemplates section to remove previewImage and sortOrder fields
 
 ### Implementation for User Story 3
 
-- [ ] T040 [US3] Create admin custom component for style template preview in src/components/StylePreview/index.tsx showing merged prompt example
-- [ ] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
-- [ ] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
+- [X] T040 [US3] Create admin custom component for style template preview in src/components/StylePreview/index.tsx showing merged prompt example
+- [X] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
+- [X] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
 
 **Checkpoint**: Style management complete - integration tests pass. Admin can create/edit styles with simplified fields and apply them to generations.
 

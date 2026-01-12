@@ -640,7 +640,7 @@ export interface StyleTemplate {
    */
   styleId: string;
   /**
-   * Display name for the style
+   * Display name for the style (must be unique)
    */
   name: string;
   /**
@@ -656,17 +656,9 @@ export interface StyleTemplate {
    */
   negativePrompt?: string | null;
   /**
-   * Preview thumbnail showing the style effect
-   */
-  previewImage?: (string | null) | Media;
-  /**
    * System styles cannot be deleted
    */
   isSystem?: boolean | null;
-  /**
-   * Display order in UI (lower = first)
-   */
-  sortOrder?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -992,9 +984,7 @@ export interface StyleTemplatesSelect<T extends boolean = true> {
   description?: T;
   positivePrompt?: T;
   negativePrompt?: T;
-  previewImage?: T;
   isSystem?: T;
-  sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
