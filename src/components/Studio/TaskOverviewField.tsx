@@ -160,36 +160,37 @@ export const TaskOverviewField: UIFieldClientComponent = () => {
         gap: 'calc(var(--base) * 0.75)',
       }}
     >
-      {/* Section Header */}
-      <div>
+      {/* Section Header - Aligned with PayloadCMS SectionHeader h3 style */}
+      <div style={{ marginTop: '0.5rem' }}>
         <h3
           style={{
-            fontSize: 'calc(var(--base-body-size) * 1.1)',
-            fontWeight: 600,
+            fontSize: '1.125rem', // text-lg matching SectionHeader h3
+            fontWeight: 500, // font-medium matching SectionHeader h3
             color: 'var(--theme-text)',
             margin: 0,
-            marginBottom: 'calc(var(--base) * 0.25)',
+            marginBottom: '0.25rem',
           }}
         >
-          📊 Generation Overview
+          Generation Overview
         </h3>
         <p
           style={{
-            fontSize: 'calc(var(--base-body-size) * 0.85)',
+            fontSize: '0.875rem',
             color: 'var(--theme-elevation-500)',
             margin: 0,
+            marginBottom: '0.75rem', // mb-3 matching SectionHeader h3
           }}
         >
           Summary of your task configuration and calculated output
         </p>
       </div>
 
-      {/* Overview Cards Grid */}
+      {/* Overview Cards Grid - 2-column layout for better text handling */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 'calc(var(--base) * 0.5)',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1rem',
         }}
       >
         {/* Settings Card */}
@@ -329,18 +330,18 @@ function OverviewCard({ title, children, highlight }: OverviewCardProps) {
   return (
     <div
       style={{
-        padding: 'calc(var(--base) * 0.75)',
+        padding: '1rem', // Consistent padding matching PayloadCMS form field cards
         backgroundColor: bgColor,
         border: `1px solid ${borderColor}`,
-        borderRadius: 'var(--style-radius-s)',
+        borderRadius: '4px', // Matching PayloadCMS border radius
       }}
     >
       <div
         style={{
-          fontSize: 'calc(var(--base-body-size) * 0.85)',
+          fontSize: '0.75rem',
           fontWeight: 600,
           color: 'var(--theme-elevation-600)',
-          marginBottom: 'calc(var(--base) * 0.5)',
+          marginBottom: '0.75rem',
           textTransform: 'uppercase',
           letterSpacing: '0.5px',
         }}
@@ -358,13 +359,33 @@ interface InfoRowProps {
 }
 
 function InfoRow({ label, value }: InfoRowProps) {
+  // Determine if the value is long (more than 30 characters) and needs vertical stacking
+  const isLongValue = value.length > 30
+
+  if (isLongValue) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px',
+          fontSize: '0.875rem',
+          marginBottom: '4px',
+        }}
+      >
+        <span style={{ color: 'var(--theme-elevation-500)' }}>{label}</span>
+        <span style={{ fontWeight: 500, color: 'var(--theme-text)', wordBreak: 'break-word' }}>{value}</span>
+      </div>
+    )
+  }
+
   return (
     <div
       style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontSize: 'calc(var(--base-body-size) * 0.9)',
+        fontSize: '0.875rem',
       }}
     >
       <span style={{ color: 'var(--theme-elevation-500)' }}>{label}</span>

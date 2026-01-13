@@ -8,6 +8,8 @@
 import type { Payload } from 'payload'
 
 import { AspectRatio, Provider } from '../lib/types'
+import { sdxlStylesData } from '../resources/style-list/sdxl-styles-exp'
+import { generateStyleId } from '../lib/style-types'
 
 // ============================================
 // DEFAULT STYLE TEMPLATES
@@ -23,7 +25,29 @@ interface StyleTemplateData {
   sortOrder: number
 }
 
-const DEFAULT_STYLES: StyleTemplateData[] = [
+/**
+ * Convert all SDXL styles from the TypeScript data file to StyleTemplateData format
+ * This ensures ALL styles are seeded to the database
+ */
+function getAllStylesToSeed(): StyleTemplateData[] {
+  return sdxlStylesData.map((rawStyle, index) => {
+    const styleId = generateStyleId(rawStyle.name)
+    const isBase = styleId === 'base'
+
+    return {
+      styleId,
+      name: rawStyle.name,
+      description: isBase ? 'Original prompt without style modifications' : `${rawStyle.name} style`,
+      positivePrompt: rawStyle.prompt,
+      negativePrompt: rawStyle.negative_prompt,
+      isSystem: isBase, // Only base is marked as system style (cannot be deleted)
+      sortOrder: isBase ? -1 : index * 10, // Base first, then ordered by index
+    }
+  })
+}
+
+// Legacy default styles kept for reference - now generated from sdxlStylesData
+const _LEGACY_DEFAULT_STYLES: StyleTemplateData[] = [
   {
     styleId: 'base',
     name: 'Base (No Style)',
@@ -32,83 +56,6 @@ const DEFAULT_STYLES: StyleTemplateData[] = [
     negativePrompt: '',
     isSystem: true,
     sortOrder: -1,
-  },
-  {
-    styleId: 'ghibli-anime',
-    name: 'Studio Ghibli Style',
-    description: "Hayao Miyazaki's signature animation aesthetic",
-    positivePrompt:
-      '{prompt}, studio ghibli style, cel shaded, vibrant colors, hayao miyazaki, hand-drawn animation, whimsical, detailed backgrounds, soft lighting',
-    negativePrompt:
-      '3d render, realistic, photorealistic, low quality, blurry, cgi, western animation',
-    isSystem: true,
-    sortOrder: 10,
-  },
-  {
-    styleId: 'cyberpunk',
-    name: 'Cyberpunk',
-    description: 'Neon-lit futuristic dystopian aesthetic',
-    positivePrompt:
-      '{prompt}, cyberpunk style, neon lights, futuristic, dystopian, high tech, low life, rain, reflections, blade runner aesthetic, holographic displays',
-    negativePrompt:
-      'natural lighting, rural, vintage, old-fashioned, bright daylight, warm colors',
-    isSystem: true,
-    sortOrder: 20,
-  },
-  {
-    styleId: 'film-noir',
-    name: 'Film Noir',
-    description: 'Classic 1940s noir cinematography style',
-    positivePrompt:
-      '{prompt}, film noir style, black and white, high contrast, dramatic shadows, venetian blind lighting, 1940s aesthetic, moody, atmospheric, cinematic',
-    negativePrompt:
-      'colorful, bright, cheerful, modern, low contrast, flat lighting',
-    isSystem: true,
-    sortOrder: 30,
-  },
-  {
-    styleId: 'watercolor',
-    name: 'Watercolor Painting',
-    description: 'Soft watercolor painting style',
-    positivePrompt:
-      '{prompt}, watercolor painting, soft edges, flowing colors, artistic, traditional media, paper texture, wet on wet technique, delicate, impressionistic',
-    negativePrompt:
-      'digital art, sharp edges, 3d render, photorealistic, hard lines, vector art',
-    isSystem: true,
-    sortOrder: 40,
-  },
-  {
-    styleId: 'oil-painting',
-    name: 'Oil Painting',
-    description: 'Classical oil painting technique',
-    positivePrompt:
-      '{prompt}, oil painting, classical art, rich colors, visible brushstrokes, canvas texture, old master style, dramatic lighting, chiaroscuro',
-    negativePrompt:
-      'digital art, flat colors, modern style, minimalist, photograph',
-    isSystem: true,
-    sortOrder: 50,
-  },
-  {
-    styleId: 'pixel-art',
-    name: 'Pixel Art',
-    description: 'Retro 8-bit/16-bit pixel art style',
-    positivePrompt:
-      '{prompt}, pixel art, 16-bit style, retro gaming aesthetic, limited color palette, dithering, crisp pixels, nostalgic, sprite art',
-    negativePrompt:
-      'realistic, smooth gradients, high resolution, photorealistic, 3d render',
-    isSystem: true,
-    sortOrder: 60,
-  },
-  {
-    styleId: 'minimalist',
-    name: 'Minimalist',
-    description: 'Clean, simple minimalist design',
-    positivePrompt:
-      '{prompt}, minimalist style, simple, clean lines, negative space, limited color palette, modern design, geometric, elegant simplicity',
-    negativePrompt:
-      'cluttered, busy, ornate, detailed, complex, realistic, photographic',
-    isSystem: true,
-    sortOrder: 70,
   },
 ]
 
@@ -242,12 +189,17 @@ type FlexiblePayload = Payload & {
 }
 
 /**
- * Seed style templates
+ * Seed style templates from SDXL styles data
+ * Seeds ALL styles from sdxl-styles-exp.ts to the database
  */
 async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
-  console.log('Seeding style templates...')
+  const stylesToSeed = getAllStylesToSeed()
+  console.log(`Seeding ${stylesToSeed.length} style templates...`)
 
-  for (const style of DEFAULT_STYLES) {
+  let created = 0
+  let skipped = 0
+
+  for (const style of stylesToSeed) {
     try {
       // Check if style already exists
       const existing = await payload.find({
@@ -259,7 +211,7 @@ async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
       })
 
       if (existing.docs.length > 0) {
-        console.log(`  Style "${style.styleId}" already exists, skipping`)
+        skipped++
         continue
       }
 
@@ -269,13 +221,13 @@ async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
         data: style as unknown as Record<string, unknown>,
       })
 
-      console.log(`  Created style: ${style.name}`)
+      created++
     } catch (error) {
       console.error(`  Failed to create style "${style.styleId}":`, error)
     }
   }
 
-  console.log('Style templates seeded successfully')
+  console.log(`Style templates seeded: ${created} created, ${skipped} already existed`)
 }
 
 /**
@@ -332,9 +284,9 @@ export async function seed(payload: Payload): Promise<void> {
 }
 
 /**
- * Export default styles for reference
+ * Export default styles for reference (now includes all SDXL styles)
  */
-export const defaultStyles = DEFAULT_STYLES
+export const defaultStyles = getAllStylesToSeed()
 
 /**
  * Export default models for reference

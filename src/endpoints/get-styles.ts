@@ -3,32 +3,48 @@
  *
  * GET /api/studio/styles
  *
- * Returns all available imported styles for the task creation page.
- * Styles are sorted alphabetically with "base" as the first item.
+ * Returns all available styles from the StyleTemplates collection in the database.
+ * Styles are sorted by sortOrder with "base" as the first item.
  *
  * This file contains the endpoint handler logic.
  * The actual route is defined in src/app/api/studio/styles/route.ts
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import {
-  getAllStyles,
+  getStylesFromDB,
   searchStyles,
-  getStyleCount,
   DEFAULT_STYLE_ID,
+  refreshStyleCache,
 } from '../services/style-loader'
 import type { StylesResponse } from '../lib/style-types'
 
 /**
  * GET handler for /api/studio/styles
+ *
+ * Fetches all styles from the StyleTemplates collection in the database.
+ * Supports optional search query parameter for filtering.
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const searchQuery = searchParams.get('search')
 
+    // Get Payload instance
+    const payload = await getPayload({ config })
+
+    // Refresh cache from database
+    await refreshStyleCache(payload)
+
     // Get styles (filtered if search query provided)
-    const styles = searchQuery ? searchStyles(searchQuery) : getAllStyles()
+    let styles
+    if (searchQuery) {
+      styles = searchStyles(searchQuery)
+    } else {
+      styles = await getStylesFromDB(payload)
+    }
 
     // Build response
     const response: StylesResponse = {
@@ -61,12 +77,18 @@ export async function GET(request: NextRequest) {
  */
 export async function HEAD() {
   try {
-    const count = getStyleCount()
+    // Get Payload instance
+    const payload = await getPayload({ config })
+
+    // Count styles in database
+    const result = await payload.count({
+      collection: 'style-templates',
+    })
 
     return new NextResponse(null, {
       status: 200,
       headers: {
-        'X-Total-Count': count.toString(),
+        'X-Total-Count': result.totalDocs.toString(),
         'X-Default-Style': DEFAULT_STYLE_ID,
       },
     })

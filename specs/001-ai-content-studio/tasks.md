@@ -371,13 +371,13 @@ Per plan.md Testing Requirements:
 
 #### Title Style Alignment
 
-- [ ] T038ab [US1] Update TaskOverviewField section header in src/components/Studio/TaskOverviewField.tsx to use SectionHeader component style (matching "Batch Settings" and "Image Settings" sections) - remove emoji and align font styles
+- [X] T038ab [US1] Update TaskOverviewField section header in src/components/Studio/TaskOverviewField.tsx to use SectionHeader component style (matching "Batch Settings" and "Image Settings" sections) - remove emoji and align font styles
 
 #### Layout Simplification
 
-- [ ] T038ac [US1] Refactor TaskOverviewField grid layout in src/components/Studio/TaskOverviewField.tsx from 4-column auto-fit to 2-column layout (each card takes 1/2 row width) to handle longer text content properly
-- [ ] T038ad [P] [US1] Update OverviewCard component in src/components/Studio/TaskOverviewField.tsx to use consistent padding and spacing matching PayloadCMS form field cards
-- [ ] T038ae [P] [US1] Simplify InfoRow component in src/components/Studio/TaskOverviewField.tsx to handle longer text values without truncation - adjust label/value layout to stack vertically when content is long
+- [X] T038ac [US1] Refactor TaskOverviewField grid layout in src/components/Studio/TaskOverviewField.tsx from 4-column auto-fit to 2-column layout (each card takes 1/2 row width) to handle longer text content properly
+- [X] T038ad [P] [US1] Update OverviewCard component in src/components/Studio/TaskOverviewField.tsx to use consistent padding and spacing matching PayloadCMS form field cards
+- [X] T038ae [P] [US1] Simplify InfoRow component in src/components/Studio/TaskOverviewField.tsx to handle longer text values without truncation - adjust label/value layout to stack vertically when content is long
 
 **Checkpoint**: Overview section now matches PayloadCMS admin panel styling with proper section headers, 2-column layout for better text handling, and simplified card design.
 
@@ -393,22 +393,22 @@ Per plan.md Testing Requirements:
 
 #### Implementation for Style DB Migration
 
-- [ ] T038af [US1] Update `style-loader.ts` in src/services/style-loader.ts to read styles from StyleTemplates collection via PayloadCMS API instead of embedded TypeScript data
-- [ ] T038ag [P] [US1] Create `getStylesFromDB()` function in src/services/style-loader.ts that fetches all styles from StyleTemplates collection using `payload.find()`
-- [ ] T038ah [US1] Update `getAllStyles()` function in src/services/style-loader.ts to call `getStylesFromDB()` instead of importing from `sdxl-styles-exp.ts`
-- [ ] T038ai [US1] Update `getStyleById()` function in src/services/style-loader.ts to query StyleTemplates collection by styleId field
-- [ ] T038aj [US1] Update `getStylesByIds()` function in src/services/style-loader.ts to batch query StyleTemplates collection
-- [ ] T038ak [P] [US1] Update GET /api/studio/styles endpoint in src/endpoints/get-styles.ts to use the refactored style-loader service
-- [ ] T038al [US1] Ensure seed script in src/seed/index.ts imports all styles from `sdxl-styles-exp.ts` to StyleTemplates collection before migration
-- [ ] T038am [P] [US1] Write migration script or update seed to populate StyleTemplates with all styles from sdxl-styles-exp.ts (currently only 8 system styles are seeded, need to seed all 180+ styles)
+- [X] T038af [US1] Update `style-loader.ts` in src/services/style-loader.ts to read styles from StyleTemplates collection via PayloadCMS API instead of embedded TypeScript data
+- [X] T038ag [P] [US1] Create `getStylesFromDB()` function in src/services/style-loader.ts that fetches all styles from StyleTemplates collection using `payload.find()`
+- [X] T038ah [US1] Update `getAllStyles()` function in src/services/style-loader.ts to call `getStylesFromDB()` instead of importing from `sdxl-styles-exp.ts`
+- [X] T038ai [US1] Update `getStyleById()` function in src/services/style-loader.ts to query StyleTemplates collection by styleId field
+- [X] T038aj [US1] Update `getStylesByIds()` function in src/services/style-loader.ts to batch query StyleTemplates collection
+- [X] T038ak [P] [US1] Update GET /api/studio/styles endpoint in src/endpoints/get-styles.ts to use the refactored style-loader service
+- [X] T038al [US1] Ensure seed script in src/seed/index.ts imports all styles from `sdxl-styles-exp.ts` to StyleTemplates collection before migration
+- [X] T038am [P] [US1] Write migration script or update seed to populate StyleTemplates with all styles from sdxl-styles-exp.ts (currently only 8 system styles are seeded, need to seed all 180+ styles)
 
 #### Cleanup After Migration
 
 - [ ] T038an [US1] Remove TypeScript style data file src/resources/style-list/sdxl-styles-exp.ts after confirming DB migration works
-- [ ] T038ao [P] [US1] Remove import of `sdxlStylesData` from style-loader.ts after migration
-- [ ] T038ap [US1] Update unit tests in tests/unit/services/style-loader.test.ts to mock PayloadCMS API calls instead of embedded data
+- [X] T038ao [P] [US1] Remove import of `sdxlStylesData` from style-loader.ts after migration
+- [X] T038ap [US1] Update unit tests in tests/unit/services/style-loader.test.ts to mock PayloadCMS API calls instead of embedded data
 
-**Checkpoint**: Style selection now reads from StyleTemplates collection in database. Redundant TypeScript file has been removed. All styles are seeded via seed script.
+**Checkpoint**: Style selection now reads from StyleTemplates collection in database. TypeScript file (sdxl-styles-exp.ts) is still used by seed script to populate DB but no longer imported by style-loader. All 180+ styles will be seeded on next pnpm payload:seed run.
 
 ---
 
