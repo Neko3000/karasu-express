@@ -17,6 +17,7 @@
 ### Session 2025-12-23
 
 - Q: What UI pattern should the "extend/optimize prompts" button use for displaying optimization results? → A: Collapsible section below the text input that expands with optimization results
+
 - Q: How should users interact with prompt variants before generation? → A: Selectable variants with inline editing capability for each
 - Q: What loading state should display during prompt optimization? → A: Progress bar showing optimization stages (analyzing, enhancing, formatting)
 - Q: What should happen in the UI if prompt optimization fails? → A: Inline error banner in the collapsible section with "Retry" button
@@ -28,6 +29,14 @@
 - Q: What is the asset retention policy for generated images? → A: No automatic deletion (retain all assets indefinitely)
 - Q: Should the system support multiple user roles with different permissions? → A: No, single Admin role only; no role-based access control needed
 - Q: Should video generation (Veo) be included in the initial implementation? → A: No, video generation is deferred to lowest priority; focus on image generation first
+
+### Session 2026-01-11
+
+- Q: What should happen when an Admin attempts to delete a style template that is currently referenced by existing tasks? → A: Allow deletion; historical tasks retain a snapshot of style data
+- Q: Should style template names be unique within the system? → A: Yes, enforce unique names (case-insensitive)
+- Q: How should styles be ordered in the selection list when creating a generation task? → A: Most recently created first
+- Q: What should the UI display when no style templates exist yet in the Configuration Center? → A: Blank list with just "No styles found" message
+- Q: Should style templates support editing after creation, and if so, how does this affect tasks currently in progress? → A: Allow editing; in-progress tasks use snapshot captured at task creation
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -175,11 +184,14 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - What happens when a user submits a task while another large task is still processing?
   - System accepts the new task and queues it; both tasks run based on available capacity and rate limits.
 
-- What happens when a StyleTemplate is deleted after being used in existing Tasks?
-  - System hard deletes the style; existing tasks retain the style name as denormalized text (not style_id) ensuring task history remains readable.
+- What happens when an Admin deletes a style template that is referenced by existing tasks?
+  - System allows deletion; historical tasks retain a snapshot of the style data captured at task creation time, ensuring reproducibility.
 
-- What happens when a user attempts to delete the protected "Base" style?
-  - System blocks the deletion and displays an error message: "The Base style is protected and cannot be deleted."
+- What happens when no style templates exist in the system?
+  - Configuration Center displays a blank list with "No styles found" message; generation tasks can still proceed using only the automatic "Base" style.
+
+- What happens when a style template is edited while tasks using it are in progress?
+  - In-progress tasks continue using the style snapshot captured at task creation; only new tasks use the updated style definition.
 
 ## Requirements *(mandatory)*
 
@@ -197,31 +209,33 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - **FR-007**: System MUST allow multi-selection of styles for each generation task
 - **FR-008**: System MUST automatically include the seeded "Base" style (protected, empty modifiers) when styles are selected for comparison
 - **FR-009**: System MUST merge style modifiers with prompts according to template structure
+- **FR-010**: System MUST display styles ordered by creation date (most recent first) in selection lists
+- **FR-011**: System MUST support editing style templates; in-progress tasks retain their original style snapshot
 
 **Model Integration**
-- **FR-010**: System MUST support concurrent generation across multiple AI model providers
-- **FR-011**: System MUST handle model-specific parameter configurations (aspect ratio, inference steps, quality settings)
-- **FR-012**: System MUST automatically map common settings (e.g., aspect ratio) to provider-specific values
-- **FR-013**: System MUST enforce rate limits per provider to prevent API throttling
+- **FR-012**: System MUST support concurrent generation across multiple AI model providers
+- **FR-013**: System MUST handle model-specific parameter configurations (aspect ratio, inference steps, quality settings)
+- **FR-014**: System MUST automatically map common settings (e.g., aspect ratio) to provider-specific values
+- **FR-015**: System MUST enforce rate limits per provider to prevent API throttling
 
 **Task Processing**
-- **FR-014**: System MUST decompose batch tasks into atomic sub-tasks (one prompt + one model = one sub-task)
-- **FR-015**: System MUST process sub-tasks asynchronously without blocking user interaction
-- **FR-016**: System MUST support automatic retry for failed sub-tasks with configurable retry count
-- **FR-017**: System MUST update task progress in real-time as sub-tasks complete
-- **FR-018**: System MUST persist task configuration as a snapshot for reproducibility
+- **FR-016**: System MUST decompose batch tasks into atomic sub-tasks (one prompt + one model = one sub-task)
+- **FR-017**: System MUST process sub-tasks asynchronously without blocking user interaction
+- **FR-018**: System MUST support automatic retry for failed sub-tasks with configurable retry count
+- **FR-019**: System MUST update task progress in real-time as sub-tasks complete
+- **FR-020**: System MUST persist task configuration as a snapshot for reproducibility
 
 **Asset Management**
-- **FR-019**: System MUST upload generated images to object storage with standardized naming: `image_{timestamp}_{subject}_{style}_{model}_{index}.{ext}`
-- **FR-020**: System MUST store generation metadata with each asset (prompts, parameters, seed, model)
-- **FR-021**: System MUST display assets in a masonry layout supporting mixed aspect ratios
-- **FR-022**: System MUST support virtual scrolling for large image galleries
-- **FR-023**: System MUST provide batch download capability
+- **FR-021**: System MUST upload generated images to object storage with standardized naming: `image_{timestamp}_{subject}_{style}_{model}_{index}.{ext}`
+- **FR-022**: System MUST store generation metadata with each asset (prompts, parameters, seed, model)
+- **FR-023**: System MUST display assets in a masonry layout supporting mixed aspect ratios
+- **FR-024**: System MUST support virtual scrolling for large image galleries
+- **FR-025**: System MUST provide batch download capability
 
 **Navigation and Interface**
-- **FR-024**: System MUST provide a fixed left navigation with Dashboard, Studio, Task Manager, Asset Library, and Configuration Center
-- **FR-025**: System MUST display task status with visual progress indicators
-- **FR-026**: System MUST provide detailed error logs for failed sub-tasks
+- **FR-026**: System MUST provide a fixed left navigation with Dashboard, Studio, Task Manager, Asset Library, and Configuration Center
+- **FR-027**: System MUST display task status with visual progress indicators
+- **FR-028**: System MUST provide detailed error logs for failed sub-tasks
 
 ### Key Entities
 
@@ -231,7 +245,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 - **Asset (Generated Content)**: Represents a single generated image or video file. Contains the storage URL, source SubTask reference, dimensions, file size, and generation metadata snapshot. Assets are organized by their parent Task.
 
-- **StyleTemplate**: Represents a reusable visual style configuration. Contains a unique identifier, display name (required, 1-50 chars), positive prompt modifiers (optional, no limit), negative prompt modifiers (optional, no limit), and a protected flag. The system seeds a "Base" style with empty modifiers that is protected from deletion. Styles are selected and applied during Task creation.
+- **StyleTemplate**: Represents a reusable visual style configuration. Contains a unique identifier, display name (unique, case-insensitive), positive prompt modifiers, and negative prompt modifiers. Styles are selected and applied during Task creation.
 
 - **ModelConfiguration**: Represents settings for a specific AI model provider. Contains provider identifier, display name, available parameters, rate limit settings, and default values.
 

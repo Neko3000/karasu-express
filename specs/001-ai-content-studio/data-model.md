@@ -135,13 +135,11 @@ interface ExpandedPrompt {
 |-------|------|----------|-------------|------------|
 | id | UUID | Auto | Primary key | - |
 | styleId | Text | Yes | Unique identifier (slug) | Pattern: `^[a-z0-9-]+$` |
-| name | Text | Yes | Display name | Min: 1, Max: 100 chars |
+| name | Text | Yes | Display name (unique, case-insensitive) | Min: 1, Max: 100 chars |
 | description | Textarea | No | Style description | Max: 500 chars |
 | positivePrompt | Textarea | Yes | Positive prompt template | Must contain `{prompt}` |
 | negativePrompt | Textarea | No | Negative prompt additions | - |
-| previewImage | Upload | No | Style preview thumbnail | - |
 | isSystem | Checkbox | Yes | System-provided (non-editable) | Default: false |
-| sortOrder | Number | No | Display order in UI | Default: 0 |
 | createdAt | Date | Auto | Creation timestamp | - |
 | updatedAt | Date | Auto | Last update timestamp | - |
 
@@ -153,8 +151,7 @@ interface ExpandedPrompt {
   "description": "Original prompt without style modifications",
   "positivePrompt": "{prompt}",
   "negativePrompt": "",
-  "isSystem": true,
-  "sortOrder": -1
+  "isSystem": true
 }
 ```
 
@@ -166,8 +163,7 @@ interface ExpandedPrompt {
   "description": "Hayao Miyazaki's signature animation aesthetic",
   "positivePrompt": "{prompt}, studio ghibli style, cel shaded, vibrant colors, hayao miyazaki, hand-drawn animation",
   "negativePrompt": "3d render, realistic, photorealistic, low quality, blurry, cgi",
-  "isSystem": true,
-  "sortOrder": 10
+  "isSystem": true
 }
 ```
 
