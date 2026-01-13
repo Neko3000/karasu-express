@@ -383,6 +383,35 @@ Per plan.md Testing Requirements:
 
 ---
 
+### Style Selection Database Migration (Data Source Refactor)
+
+> **Purpose**: Migrate style selection from embedded TypeScript file to database lookup, aligning with PayloadCMS standard patterns for reading data from DB. Remove redundant TS file after migration.
+>
+> **Current State**: Style selection reads from `src/resources/style-list/sdxl-styles-exp.ts` via `style-loader.ts`
+>
+> **Target State**: Style selection reads from `StyleTemplates` collection in MongoDB (populated by seed script)
+
+#### Implementation for Style DB Migration
+
+- [ ] T038af [US1] Update `style-loader.ts` in src/services/style-loader.ts to read styles from StyleTemplates collection via PayloadCMS API instead of embedded TypeScript data
+- [ ] T038ag [P] [US1] Create `getStylesFromDB()` function in src/services/style-loader.ts that fetches all styles from StyleTemplates collection using `payload.find()`
+- [ ] T038ah [US1] Update `getAllStyles()` function in src/services/style-loader.ts to call `getStylesFromDB()` instead of importing from `sdxl-styles-exp.ts`
+- [ ] T038ai [US1] Update `getStyleById()` function in src/services/style-loader.ts to query StyleTemplates collection by styleId field
+- [ ] T038aj [US1] Update `getStylesByIds()` function in src/services/style-loader.ts to batch query StyleTemplates collection
+- [ ] T038ak [P] [US1] Update GET /api/studio/styles endpoint in src/endpoints/get-styles.ts to use the refactored style-loader service
+- [ ] T038al [US1] Ensure seed script in src/seed/index.ts imports all styles from `sdxl-styles-exp.ts` to StyleTemplates collection before migration
+- [ ] T038am [P] [US1] Write migration script or update seed to populate StyleTemplates with all styles from sdxl-styles-exp.ts (currently only 8 system styles are seeded, need to seed all 180+ styles)
+
+#### Cleanup After Migration
+
+- [ ] T038an [US1] Remove TypeScript style data file src/resources/style-list/sdxl-styles-exp.ts after confirming DB migration works
+- [ ] T038ao [P] [US1] Remove import of `sdxlStylesData` from style-loader.ts after migration
+- [ ] T038ap [US1] Update unit tests in tests/unit/services/style-loader.test.ts to mock PayloadCMS API calls instead of embedded data
+
+**Checkpoint**: Style selection now reads from StyleTemplates collection in database. Redundant TypeScript file has been removed. All styles are seeded via seed script.
+
+---
+
 ## Phase 6: User Story 3 - Style Configuration and Management (Priority: P2)
 
 **Goal**: Admin can create and manage reusable style templates that can be applied to any generation
@@ -615,6 +644,8 @@ Per plan.md Testing Requirements:
 - Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
 - Phase 5 tasks T038o (CalculatedPromptCard), T038q (TotalImageCount), T038v (SelectedSettingsSummary), T038w (PromptsCountSummary), T038x (ImageCountSummary), and T038y (TaskSummaryStats) can run in parallel
 - Phase 5 UI Enhancement tasks T038ad (OverviewCard) and T038ae (InfoRow) can run in parallel after T038ab (title) and T038ac (grid layout)
+- Phase 5 Style DB Migration tasks T038ag (getStylesFromDB), T038ak (endpoint update), T038am (seed all styles) can run in parallel
+- Phase 5 Style DB Migration cleanup tasks T038ao (remove import) can run in parallel with T038an (remove TS file) after confirming migration works
 
 ---
 
@@ -626,7 +657,7 @@ Per plan.md Testing Requirements:
 | Phase 2: Foundational | T010a, T011a, T013a, T014a, T015a | - | T016a | All unit + contract tests pass |
 | Phase 3: US1 | T020a, T020b, T020c, T033b, T033k | T020d, T020e, T020f, T033h | - | All tests pass |
 | Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
-| Phase 5: Task Creation Optimization | - | - | - | Manual testing |
+| Phase 5: Task Creation Optimization | T038ap | - | - | Manual testing + unit tests pass |
 | Phase 6: US3 | - | T038a | - | Integration tests pass |
 | Phase 7: US4 | - | - | - | Manual testing |
 | Phase 8: US5 | - | - | - | Manual testing |
@@ -636,7 +667,7 @@ Per plan.md Testing Requirements:
 | Phase 12: Polish | - | - | - | Full suite passes |
 | Phase 13: Veo | T076a | - | - | (Deferred) |
 
-**Total Test Tasks**: 20 (11 unit, 8 integration, 1 contract)
+**Total Test Tasks**: 21 (12 unit, 8 integration, 1 contract)
 
 ---
 
