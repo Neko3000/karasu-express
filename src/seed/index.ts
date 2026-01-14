@@ -3,13 +3,16 @@
  *
  * Seeds the database with default style templates and model configurations.
  * Run with: pnpm payload:seed
+ *
+ * Style data source: src/resources/original/sdxl_styles_exp.json
  */
 
+import * as fs from 'fs'
+import * as path from 'path'
 import type { Payload } from 'payload'
 
 import { AspectRatio, Provider } from '../lib/types'
-import { sdxlStylesData } from '../resources/style-list/sdxl-styles-exp'
-import { generateStyleId } from '../lib/style-types'
+import { generateStyleId, type RawImportedStyle } from '../lib/style-types'
 
 // ============================================
 // DEFAULT STYLE TEMPLATES
@@ -26,10 +29,21 @@ interface StyleTemplateData {
 }
 
 /**
- * Convert all SDXL styles from the TypeScript data file to StyleTemplateData format
+ * Load SDXL styles from the JSON file
+ */
+function loadStylesFromJson(): RawImportedStyle[] {
+  const jsonPath = path.join(__dirname, '../resources/original/sdxl_styles_exp.json')
+  const jsonContent = fs.readFileSync(jsonPath, 'utf-8')
+  return JSON.parse(jsonContent) as RawImportedStyle[]
+}
+
+/**
+ * Convert all SDXL styles from the JSON file to StyleTemplateData format
  * This ensures ALL styles are seeded to the database
  */
 function getAllStylesToSeed(): StyleTemplateData[] {
+  const sdxlStylesData = loadStylesFromJson()
+
   return sdxlStylesData.map((rawStyle, index) => {
     const styleId = generateStyleId(rawStyle.name)
     const isBase = styleId === 'base'
@@ -45,19 +59,6 @@ function getAllStylesToSeed(): StyleTemplateData[] {
     }
   })
 }
-
-// Legacy default styles kept for reference - now generated from sdxlStylesData
-const _LEGACY_DEFAULT_STYLES: StyleTemplateData[] = [
-  {
-    styleId: 'base',
-    name: 'Base (No Style)',
-    description: 'Original prompt without style modifications',
-    positivePrompt: '{prompt}',
-    negativePrompt: '',
-    isSystem: true,
-    sortOrder: -1,
-  },
-]
 
 // ============================================
 // DEFAULT MODEL CONFIGURATIONS

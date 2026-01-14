@@ -404,11 +404,11 @@ Per plan.md Testing Requirements:
 
 #### Cleanup After Migration
 
-- [ ] T038an [US1] Remove TypeScript style data file src/resources/style-list/sdxl-styles-exp.ts after confirming DB migration works
+- [X] T038an [US1] Remove TypeScript style data file src/resources/style-list/sdxl-styles-exp.ts after confirming DB migration works
 - [X] T038ao [P] [US1] Remove import of `sdxlStylesData` from style-loader.ts after migration
 - [X] T038ap [US1] Update unit tests in tests/unit/services/style-loader.test.ts to mock PayloadCMS API calls instead of embedded data
 
-**Checkpoint**: Style selection now reads from StyleTemplates collection in database. TypeScript file (sdxl-styles-exp.ts) is still used by seed script to populate DB but no longer imported by style-loader. All 180+ styles will be seeded on next pnpm payload:seed run.
+**Checkpoint**: Style selection now reads from StyleTemplates collection in database. Redundant TypeScript file removed. Seed script reads from JSON file (src/resources/original/sdxl_styles_exp.json). All 180+ styles will be seeded on next pnpm payload:seed run.
 
 ---
 
