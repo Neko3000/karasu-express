@@ -22,6 +22,14 @@
 - Q: What should happen in the UI if prompt optimization fails? → A: Inline error banner in the collapsible section with "Retry" button
 - Q: How many prompt variants should the "Extend" optimization generate? → A: Default 3 variants with dropdown to select 3, 5, or 7
 
+### Session 2026-01-14
+
+- Q: What filter options should the Task Manager provide for the task list? → A: Status + date range + search by theme keyword
+- Q: What should happen when a user retries a failed sub-task? → A: Retry updates the existing sub-task in place, clearing the error
+- Q: Should users be able to cancel in-progress generation tasks? → A: Yes, cancel stops new sub-tasks but completes the current one
+- Q: What should be the default sort order for the Task Manager list? → A: Newest first (most recent creation time at top)
+- Q: What should happen to assets already generated when a task is cancelled? → A: Keep all completed assets; only pending sub-tasks are stopped
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Batch Generation Task (Priority: P1)
@@ -88,11 +96,15 @@ As an **Admin**, I want to view all generation tasks with their progress and sta
 
 **Acceptance Scenarios**:
 
-1. **Given** I have submitted multiple generation tasks, **When** I view the Task Manager, **Then** I see a list of all tasks with ID, theme, creation time, progress bar, and status (In Progress/Completed/Failed).
+1. **Given** I have submitted multiple generation tasks, **When** I view the Task Manager, **Then** I see a list of all tasks sorted by newest first, showing ID, theme, creation time, progress bar, and status (In Progress/Completed/Failed/Cancelled).
 
-2. **Given** a task has failed sub-tasks, **When** I view task details, **Then** I can see which specific sub-tasks failed, their error messages, and retry them individually.
+2. **Given** I want to find specific tasks, **When** I use the Task Manager filters, **Then** I can filter by status (In Progress/Completed/Failed/Cancelled), date range (today, last 7 days, last 30 days, or custom range), and search by theme keyword.
 
-3. **Given** I am viewing a task's details, **When** I check the configuration snapshot, **Then** I can see exactly which prompts, styles, models, and parameters were used for this task.
+3. **Given** a task has failed sub-tasks, **When** I view task details, **Then** I can see which specific sub-tasks failed, their error messages, and retry them individually.
+
+4. **Given** I am viewing a task's details, **When** I check the configuration snapshot, **Then** I can see exactly which prompts, styles, models, and parameters were used for this task.
+
+5. **Given** a task is in progress, **When** I click the cancel button, **Then** the system completes the currently running sub-task, stops processing remaining sub-tasks, keeps all already-generated assets, and marks the task as Cancelled.
 
 ---
 
@@ -168,6 +180,9 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - What happens when a user submits a task while another large task is still processing?
   - System accepts the new task and queues it; both tasks run based on available capacity and rate limits.
 
+- What happens when a user cancels a task that has partially completed?
+  - System completes the currently running sub-task, stops all pending sub-tasks, retains all already-generated assets, and marks the task as Cancelled. Assets remain accessible in the gallery.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -194,21 +209,22 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 **Task Processing**
 - **FR-014**: System MUST decompose batch tasks into atomic sub-tasks (one prompt + one model = one sub-task)
 - **FR-015**: System MUST process sub-tasks asynchronously without blocking user interaction
-- **FR-016**: System MUST support automatic retry for failed sub-tasks with configurable retry count
+- **FR-016**: System MUST support automatic retry for failed sub-tasks with configurable retry count; manual retry updates the existing sub-task in place (clearing previous error state)
 - **FR-017**: System MUST update task progress in real-time as sub-tasks complete
 - **FR-018**: System MUST persist task configuration as a snapshot for reproducibility
+- **FR-019**: System MUST support task cancellation that completes the current sub-task and stops processing remaining sub-tasks
 
 **Asset Management**
-- **FR-019**: System MUST upload generated images to object storage with standardized naming: `image_{timestamp}_{subject}_{style}_{model}_{index}.{ext}`
-- **FR-020**: System MUST store generation metadata with each asset (prompts, parameters, seed, model)
-- **FR-021**: System MUST display assets in a masonry layout supporting mixed aspect ratios
-- **FR-022**: System MUST support virtual scrolling for large image galleries
-- **FR-023**: System MUST provide batch download capability
+- **FR-020**: System MUST upload generated images to object storage with standardized naming: `image_{timestamp}_{subject}_{style}_{model}_{index}.{ext}`
+- **FR-021**: System MUST store generation metadata with each asset (prompts, parameters, seed, model)
+- **FR-022**: System MUST display assets in a masonry layout supporting mixed aspect ratios
+- **FR-023**: System MUST support virtual scrolling for large image galleries
+- **FR-024**: System MUST provide batch download capability
 
 **Navigation and Interface**
-- **FR-024**: System MUST provide a fixed left navigation with Dashboard, Studio, Task Manager, Asset Library, and Configuration Center
-- **FR-025**: System MUST display task status with visual progress indicators
-- **FR-026**: System MUST provide detailed error logs for failed sub-tasks
+- **FR-025**: System MUST provide a fixed left navigation with Dashboard, Studio, Task Manager, Asset Library, and Configuration Center
+- **FR-026**: System MUST display task status with visual progress indicators
+- **FR-027**: System MUST provide detailed error logs for failed sub-tasks
 
 ### Key Entities
 
