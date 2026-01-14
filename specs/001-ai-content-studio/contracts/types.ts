@@ -17,6 +17,7 @@ export enum TaskStatus {
   Completed = 'completed',
   PartialFailed = 'partial_failed',
   Failed = 'failed',
+  Cancelled = 'cancelled', // Phase 7
 }
 
 export enum SubTaskStatus {
@@ -24,6 +25,7 @@ export enum SubTaskStatus {
   Processing = 'processing',
   Success = 'success',
   Failed = 'failed',
+  Cancelled = 'cancelled', // Phase 7
 }
 
 export enum ErrorCategory {
@@ -336,6 +338,30 @@ export type AssetListResponse = PaginatedResponse<Asset>;
 export interface ModelConfigListResponse {
   docs: ModelConfig[];
   totalDocs: number;
+}
+
+// ============================================
+// PHASE 7: TASK MANAGER TYPES
+// ============================================
+
+export interface TaskFilters {
+  status?: TaskStatus[];
+  dateRange?: 'today' | '7days' | '30days' | 'custom';
+  startDate?: Date;
+  endDate?: Date;
+  searchKeyword?: string;
+}
+
+export interface CancelTaskResponse {
+  message: string;
+  cancelledSubTasks: number;
+  completedSubTasks: number;
+}
+
+export interface RetrySubTaskResponse {
+  message: string;
+  subTaskId: string;
+  newStatus: SubTaskStatus;
 }
 
 // ============================================

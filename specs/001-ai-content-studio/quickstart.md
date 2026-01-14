@@ -127,6 +127,36 @@ curl http://localhost:3000/api/tasks/task_abc123
 curl "http://localhost:3000/api/sub-tasks?parentTask=task_abc123"
 ```
 
+### B2. Cancel a Task (Phase 7)
+
+```bash
+# Cancel an in-progress task
+# The currently running sub-task will complete, but pending sub-tasks are cancelled
+# Already generated assets are retained
+curl -X POST http://localhost:3000/api/tasks/task_abc123/cancel
+
+# Response:
+# {
+#   "message": "Task cancelled successfully",
+#   "cancelledSubTasks": 15,
+#   "completedSubTasks": 10
+# }
+```
+
+### B3. Retry Failed Sub-Tasks (Phase 7)
+
+```bash
+# Retry all failed sub-tasks for a task
+curl -X POST http://localhost:3000/api/tasks/task_abc123/retry-failed
+
+# Response: { "retriedCount": 3 }
+
+# Retry a single failed sub-task (updates in place)
+curl -X POST http://localhost:3000/api/sub-tasks/subtask_xyz789/retry
+
+# Response: { "message": "SubTask re-queued", "subTaskId": "subtask_xyz789" }
+```
+
 ### C. Preview Prompt Expansion
 
 ```bash
@@ -168,6 +198,27 @@ Navigate to `/admin` to access:
 - **Style Templates**: Create/edit style configurations
 - **Model Configs**: View AI provider settings
 - **Media**: Browse generated assets
+- **Task Manager**: Custom view for monitoring and managing tasks (Phase 7)
+
+### Task Manager (Phase 7)
+
+Navigate to `/admin/custom/task-manager` for enhanced task monitoring:
+
+1. **Task List View**
+   - Tasks sorted by newest first (default)
+   - Filter by status: In Progress, Completed, Failed, Cancelled
+   - Filter by date range: Today, Last 7 days, Last 30 days, or custom
+   - Search by theme keyword
+
+2. **Task Actions**
+   - **Cancel**: Stop processing a task (completes current sub-task, cancels pending)
+   - **View Details**: See configuration snapshot and sub-task breakdown
+   - **Retry Failed**: Re-queue all failed sub-tasks
+
+3. **Sub-Task Detail Panel**
+   - View individual sub-task status and error logs
+   - Retry individual failed sub-tasks
+   - View request/response payloads for debugging
 
 ### Creating Styles via Admin
 
