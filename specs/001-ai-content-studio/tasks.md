@@ -412,6 +412,22 @@ Per plan.md Testing Requirements:
 
 ---
 
+### Imported Style Ids Field - DB Integration (UI Component)
+
+> **Purpose**: Connect the "Imported Style Ids" field on the task creation page (collections/tasks) to fetch style options from the database via API
+>
+> **Context**: The task creation page needs to display available styles for selection. The styles should be fetched from the StyleTemplates collection in MongoDB via the `/api/studio/styles` endpoint.
+
+#### Implementation for Imported Style Ids Field
+
+- [ ] T038aq [US1] Update StyleSelector component in src/components/Studio/StyleSelector.tsx to fetch style options from GET /api/studio/styles endpoint on component mount
+- [ ] T038ar [P] [US1] Create useStyleOptions hook in src/components/Studio/hooks/useStyleOptions.ts to manage fetching styles from API, loading state, and error handling
+- [ ] T038as [US1] Integrate useStyleOptions hook with StyleSelector component to populate the multi-select style options from database query results
+
+**Checkpoint**: Imported Style Ids field on task creation page now fetches style options from database via API. Users see all available styles from StyleTemplates collection when creating a task.
+
+---
+
 ## Phase 6: User Story 3 - Style Configuration and Management (Priority: P2)
 
 **Goal**: Admin can create and manage reusable style templates that can be applied to any generation
@@ -646,6 +662,7 @@ Per plan.md Testing Requirements:
 - Phase 5 UI Enhancement tasks T038ad (OverviewCard) and T038ae (InfoRow) can run in parallel after T038ab (title) and T038ac (grid layout)
 - Phase 5 Style DB Migration tasks T038ag (getStylesFromDB), T038ak (endpoint update), T038am (seed all styles) can run in parallel
 - Phase 5 Style DB Migration cleanup tasks T038ao (remove import) can run in parallel with T038an (remove TS file) after confirming migration works
+- Phase 5 Imported Style Ids task T038ar (useStyleOptions hook) can run in parallel with T038aq (StyleSelector update)
 
 ---
 
