@@ -333,36 +333,6 @@ Per plan.md Testing Requirements:
   - Return structured overview data for display components
 - [X] T038aa [US1] Integrate TaskOverviewSection into task creation page in src/components/Studio/index.tsx positioned before the Status & Progress section
 
-#### Overview Section UI Optimization (Simplification & Alignment)
-
-> **Purpose**: Simplify Overview section to align with PayloadCMS task creation page style, matching sections like "Batch Settings" and "Image Settings"
-
-- [ ] T038ab [US1] Update TaskOverviewSection title to use SectionHeader style in src/components/Studio/TaskOverviewSection.tsx:
-  - Use same heading hierarchy as "Batch Settings" and "Image Settings" (h2 with text-xl font-semibold)
-  - Match PayloadCMS native section header styling (inline styles using CSS variables)
-  - Remove custom Tailwind heading classes, use PayloadCMS theme variables
-- [ ] T038ac [US1] Refactor TaskOverviewSection layout to vertical arrangement in src/components/Studio/TaskOverviewSection.tsx:
-  - Replace 4-column horizontal grid with single-column vertical layout
-  - Each sub-section (Settings, Prompts Count, Image Count, Summary Stats) stacked vertically
-  - Remove border wrapping around each card (remove rounded-lg border border-gray-200)
-  - Use simple vertical spacing between subsections (margin-bottom or gap)
-- [ ] T038ad [P] [US1] Update SelectedSettingsSummary to borderless style in src/components/Studio/Overview/SelectedSettingsSummary.tsx:
-  - Remove parent container border expectations (component should render without border)
-  - Adjust internal spacing for vertical flow instead of constrained card width
-  - Allow text content to use full available width
-- [ ] T038ae [P] [US1] Update PromptsCountSummary to borderless style in src/components/Studio/Overview/PromptsCountSummary.tsx:
-  - Remove parent container border expectations
-  - Adjust internal spacing for vertical flow
-  - Ensure formula display has adequate width for long text
-- [ ] T038af [P] [US1] Update ImageCountSummary to borderless style in src/components/Studio/Overview/ImageCountSummary.tsx:
-  - Remove parent container border expectations (keep warning background color for high count)
-  - Adjust internal spacing for vertical flow
-  - Ensure breakdown formula has adequate width
-- [ ] T038ag [P] [US1] Update TaskSummaryStats to borderless style in src/components/Studio/Overview/TaskSummaryStats.tsx:
-  - Remove parent container border expectations
-  - Adjust internal spacing for vertical flow
-  - Keep warning styling for high image count
-
 #### Calculated Prompts Preview
 
 - [X] T038n [US1] Create CalculatedPromptsSection component in src/components/Studio/CalculatedPromptsSection.tsx to display the final prompt combinations at the end of the "Prompts" section
@@ -391,7 +361,7 @@ Per plan.md Testing Requirements:
 - [X] T038s [US1] Integrate CalculatedPromptsSection into task creation page in src/components/Studio/index.tsx at the end of the "Prompts" section (after prompt variants and before generation submit)
 - [X] T038t [US1] Connect useCalculatedPrompts hook to style-merger service for accurate prompt merging preview
 
-**Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts, displays the total image count that will be generated, and includes a comprehensive Overview section summarizing all generation settings and counts. The Overview section title and styling aligns with other PayloadCMS sections, layout is simplified to vertical arrangement without borders for better text width handling.
+**Checkpoint**: Task creation page now shows all calculated prompt combinations (variants x styles) with final merged prompts, displays the total image count that will be generated, and includes a comprehensive Overview section summarizing all generation settings and counts.
 
 ---
 
@@ -413,6 +383,51 @@ Per plan.md Testing Requirements:
 
 ---
 
+### Style Selection Database Migration (Data Source Refactor)
+
+> **Purpose**: Migrate style selection from embedded TypeScript file to database lookup, aligning with PayloadCMS standard patterns for reading data from DB. Remove redundant TS file after migration.
+>
+> **Current State**: Style selection reads from `src/resources/style-list/sdxl-styles-exp.ts` via `style-loader.ts`
+>
+> **Target State**: Style selection reads from `StyleTemplates` collection in MongoDB (populated by seed script)
+
+#### Implementation for Style DB Migration
+
+- [X] T038af [US1] Update `style-loader.ts` in src/services/style-loader.ts to read styles from StyleTemplates collection via PayloadCMS API instead of embedded TypeScript data
+- [X] T038ag [P] [US1] Create `getStylesFromDB()` function in src/services/style-loader.ts that fetches all styles from StyleTemplates collection using `payload.find()`
+- [X] T038ah [US1] Update `getAllStyles()` function in src/services/style-loader.ts to call `getStylesFromDB()` instead of importing from `sdxl-styles-exp.ts`
+- [X] T038ai [US1] Update `getStyleById()` function in src/services/style-loader.ts to query StyleTemplates collection by styleId field
+- [X] T038aj [US1] Update `getStylesByIds()` function in src/services/style-loader.ts to batch query StyleTemplates collection
+- [X] T038ak [P] [US1] Update GET /api/studio/styles endpoint in src/endpoints/get-styles.ts to use the refactored style-loader service
+- [X] T038al [US1] Ensure seed script in src/seed/index.ts imports all styles from `sdxl-styles-exp.ts` to StyleTemplates collection before migration
+- [X] T038am [P] [US1] Write migration script or update seed to populate StyleTemplates with all styles from sdxl-styles-exp.ts (currently only 8 system styles are seeded, need to seed all 180+ styles)
+
+#### Cleanup After Migration
+
+- [X] T038an [US1] Remove TypeScript style data file src/resources/style-list/sdxl-styles-exp.ts after confirming DB migration works
+- [X] T038ao [P] [US1] Remove import of `sdxlStylesData` from style-loader.ts after migration
+- [X] T038ap [US1] Update unit tests in tests/unit/services/style-loader.test.ts to mock PayloadCMS API calls instead of embedded data
+
+**Checkpoint**: Style selection now reads from StyleTemplates collection in database. Redundant TypeScript file removed. Seed script reads from JSON file (src/resources/original/sdxl_styles_exp.json). All 180+ styles will be seeded on next pnpm payload:seed run.
+
+---
+
+### Imported Style Ids Field - DB Integration (UI Component)
+
+> **Purpose**: Connect the "Imported Style Ids" field on the task creation page (collections/tasks) to fetch style options from the database via API
+>
+> **Context**: The task creation page needs to display available styles for selection. The styles should be fetched from the StyleTemplates collection in MongoDB via the `/api/studio/styles` endpoint.
+
+#### Implementation for Imported Style Ids Field
+
+- [X] T038aq [US1] Update StyleSelector component in src/components/Studio/StyleSelectorField.tsx to fetch style options from GET /api/studio/styles endpoint on component mount
+- [X] T038ar [P] [US1] Create useStyleOptions hook in src/components/Studio/hooks/useStyleOptions.ts to manage fetching styles from API, loading state, and error handling
+- [X] T038as [US1] Integrate useStyleOptions hook with StyleSelectorField component to populate the multi-select style options from database query results
+
+**Checkpoint**: Imported Style Ids field on task creation page now fetches style options from database via API. Users see all available styles from StyleTemplates collection when creating a task.
+
+---
+
 ## Phase 6: User Story 3 - Style Configuration and Management (Priority: P2)
 
 **Goal**: Admin can create and manage reusable style templates that can be applied to any generation
@@ -424,53 +439,18 @@ Per plan.md Testing Requirements:
 
 **Gate Criteria**: Integration tests pass for StyleTemplates CRUD
 
-### Optimize Style Template Page (Simplification)
+### Tests for User Story 3
 
-> **Purpose**: Simplify the style template collection to only include essential fields:
-> - styleId (unique identifier)
-> - name (display name)
-> - description (optional)
-> - positivePrompt (with {prompt} placeholder)
-> - negativePrompt (optional)
->
-> **Remove**: previewImage and sortOrder fields
-
-- [X] T038a [P] [US3] Write integration tests for StyleTemplates collection in tests/integration/collections/style-templates.integration.test.ts (test CRUD, validation of {prompt} placeholder, unique name case-insensitive)
-- [X] T039 [US3] Remove previewImage field from StyleTemplates collection in src/collections/StyleTemplates.ts
-- [X] T039a [US3] Remove sortOrder field from StyleTemplates collection in src/collections/StyleTemplates.ts
-- [X] T039b [US3] Update StyleTemplates admin.defaultColumns to remove sortOrder in src/collections/StyleTemplates.ts (keep: name, styleId, isSystem)
-- [X] T039c [US3] Update data-model.md StyleTemplates section to remove previewImage and sortOrder fields
+- [ ] T038a [P] [US3] Write integration tests for StyleTemplates collection in tests/integration/collections/style-templates.integration.test.ts (test CRUD, validation of {prompt} placeholder, system style deletion prevention)
 
 ### Implementation for User Story 3
 
-- [X] T040 [US3] Create admin custom component for style template preview in src/components/StylePreview/index.tsx showing merged prompt example
-- [X] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
-- [X] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
+- [ ] T039 [US3] Add StyleTemplates collection access control in src/collections/StyleTemplates.ts to prevent deletion of system styles (isSystem: true)
+- [ ] T040 [US3] Create admin custom component for style template preview in src/components/StylePreview/index.tsx showing merged prompt example
+- [ ] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
+- [ ] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
 
-### Import All SDXL Styles from JSON
-
-> **Purpose**: Replace hardcoded default styles with dynamic import from sdxl_styles_exp.json file (~190 styles)
-> - Source file: src/resources/original/sdxl_styles_exp.json
-> - JSON schema: { name: string, prompt: string, negative_prompt: string }
-> - Generate styleId from name (lowercase, spaces to hyphens)
-> - Mark all imported styles as isSystem: false (only "base" is system)
-
-- [X] T042a [US3] Create style import utility in src/seed/import-styles.ts with functions:
-  - loadStylesFromJson(): Read and parse sdxl_styles_exp.json
-  - transformToStyleTemplate(jsonStyle): Convert JSON format to StyleTemplateData (generate styleId from name, map prompt to positivePrompt, negative_prompt to negativePrompt)
-  - generateStyleId(name): Convert name to kebab-case styleId (e.g., "3D Model" -> "3d-model")
-- [X] T042b [US3] Update src/seed/index.ts to import styles from JSON instead of hardcoded DEFAULT_STYLES array:
-  - Import loadStylesFromJson from import-styles.ts
-  - Replace hardcoded DEFAULT_STYLES with dynamic loading
-  - Keep "base" style as isSystem: true, all others as isSystem: false
-  - Log total styles count during seed
-- [X] T042c [P] [US3] Add unit tests for style import utility in tests/unit/seed/import-styles.test.ts:
-  - Test loadStylesFromJson returns array of styles
-  - Test transformToStyleTemplate maps fields correctly
-  - Test generateStyleId handles edge cases (spaces, special chars, numbers)
-- [X] T042d [US3] Run pnpm seed and verify all ~190 styles are imported into style-templates collection
-
-**Checkpoint**: Style management complete - integration tests pass. Admin can create/edit styles with simplified fields and apply them to generations. All SDXL styles (~190) are seeded from JSON file.
+**Checkpoint**: Style management complete - integration tests pass. Admin can create/edit styles and apply them to generations.
 
 ---
 
@@ -679,7 +659,10 @@ Per plan.md Testing Requirements:
 - UI components within each story marked [P] can run in parallel
 - Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
 - Phase 5 tasks T038o (CalculatedPromptCard), T038q (TotalImageCount), T038v (SelectedSettingsSummary), T038w (PromptsCountSummary), T038x (ImageCountSummary), and T038y (TaskSummaryStats) can run in parallel
-- Phase 5 UI optimization tasks T038ad (SelectedSettingsSummary borderless), T038ae (PromptsCountSummary borderless), T038af (ImageCountSummary borderless), and T038ag (TaskSummaryStats borderless) can run in parallel
+- Phase 5 UI Enhancement tasks T038ad (OverviewCard) and T038ae (InfoRow) can run in parallel after T038ab (title) and T038ac (grid layout)
+- Phase 5 Style DB Migration tasks T038ag (getStylesFromDB), T038ak (endpoint update), T038am (seed all styles) can run in parallel
+- Phase 5 Style DB Migration cleanup tasks T038ao (remove import) can run in parallel with T038an (remove TS file) after confirming migration works
+- Phase 5 Imported Style Ids task T038ar (useStyleOptions hook) can run in parallel with T038aq (StyleSelector update)
 
 ---
 
@@ -691,8 +674,8 @@ Per plan.md Testing Requirements:
 | Phase 2: Foundational | T010a, T011a, T013a, T014a, T015a | - | T016a | All unit + contract tests pass |
 | Phase 3: US1 | T020a, T020b, T020c, T033b, T033k | T020d, T020e, T020f, T033h | - | All tests pass |
 | Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
-| Phase 5: Task Creation Optimization | - | - | - | Manual testing |
-| Phase 6: US3 | T042c | T038a | - | Integration tests pass, all SDXL styles imported |
+| Phase 5: Task Creation Optimization | T038ap | - | - | Manual testing + unit tests pass |
+| Phase 6: US3 | - | T038a | - | Integration tests pass |
 | Phase 7: US4 | - | - | - | Manual testing |
 | Phase 8: US5 | - | - | - | Manual testing |
 | Phase 9: US6 | - | - | - | Manual testing |

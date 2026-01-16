@@ -4,29 +4,14 @@
  * Tests for src/services/style-loader.ts
  * Per Constitution Principle VI (Testing Discipline)
  *
- * Tests loadStylesFromJson, parseStyleTemplates, getDefaultStyle returns "base"
+ * Tests getStylesFromDB, getAllStyles (cached), getDefaultStyle returns "base"
+ *
+ * Note: This service now reads from database via PayloadCMS API.
+ * Tests mock the Payload find() method to simulate DB responses.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import type { RawImportedStyle, ImportedStyle } from '../../../src/lib/style-types'
 import {
-  generateStyleId,
-  normalizeImportedStyle,
-  isRawImportedStyle,
-} from '../../../src/lib/style-types'
-
-// Mock the embedded styles data module
-const mockStylesData: RawImportedStyle[] = []
-vi.mock('../../../src/resources/style-list/sdxl-styles-exp', () => ({
-  get sdxlStylesData() {
-    return mockStylesData
-  },
-}))
-
-// Import after mocking
-import {
-  loadStylesFromJson,
-  parseStyleTemplates,
   getAllStyles,
   getDefaultStyle,
   getStyleById,
@@ -34,33 +19,67 @@ import {
   searchStyles,
   getStyleCount,
   clearStyleCache,
+  refreshStyleCache,
+  getStylesFromDB,
+  getStyleByIdFromDB,
+  getStylesByIdsFromDB,
+  setPayloadInstance,
   DEFAULT_STYLE_ID,
 } from '../../../src/services/style-loader'
+import type { ImportedStyle } from '../../../src/lib/style-types'
+import {
+  generateStyleId,
+  normalizeImportedStyle,
+  isRawImportedStyle,
+} from '../../../src/lib/style-types'
+import type { RawImportedStyle } from '../../../src/lib/style-types'
+
+// ============================================
+// Mock Payload Instance Factory
+// ============================================
+
+interface MockStyleDoc {
+  id: string
+  styleId: string
+  name: string
+  positivePrompt: string
+  negativePrompt: string
+  sortOrder: number
+  isSystem: boolean
+}
+
+function createMockStyleDoc(overrides?: Partial<MockStyleDoc>): MockStyleDoc {
+  return {
+    id: `doc-${Math.random().toString(36).substring(7)}`,
+    styleId: 'test-style',
+    name: 'Test Style',
+    positivePrompt: '{prompt}, test style modifiers',
+    negativePrompt: 'bad quality, blurry',
+    sortOrder: 0,
+    isSystem: false,
+    ...overrides,
+  }
+}
+
+function createMockPayload(docs: MockStyleDoc[]) {
+  return {
+    find: vi.fn().mockResolvedValue({ docs, totalDocs: docs.length }),
+    count: vi.fn().mockResolvedValue({ totalDocs: docs.length }),
+  }
+}
+
+// ============================================
+// Test Suite
+// ============================================
 
 describe('StyleLoader', () => {
-  // ============================================
-  // Test Data Factories
-  // ============================================
-
-  const createRawStyle = (overrides?: Partial<RawImportedStyle>): RawImportedStyle => ({
-    name: 'Test Style',
-    prompt: '{prompt}, test style modifiers',
-    negative_prompt: 'bad quality, blurry',
-    ...overrides,
-  })
-
-  const setMockStyles = (styles: RawImportedStyle[]): void => {
-    mockStylesData.length = 0
-    mockStylesData.push(...styles)
-  }
-
   // ============================================
   // Setup / Teardown
   // ============================================
 
   beforeEach(() => {
     clearStyleCache()
-    setMockStyles([])
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -105,6 +124,13 @@ describe('StyleLoader', () => {
   // ============================================
 
   describe('normalizeImportedStyle', () => {
+    const createRawStyle = (overrides?: Partial<RawImportedStyle>): RawImportedStyle => ({
+      name: 'Test Style',
+      prompt: '{prompt}, test style modifiers',
+      negative_prompt: 'bad quality, blurry',
+      ...overrides,
+    })
+
     it('should convert raw style to normalized format', () => {
       const raw = createRawStyle({
         name: 'Cyberpunk',
@@ -141,6 +167,13 @@ describe('StyleLoader', () => {
   // ============================================
 
   describe('isRawImportedStyle', () => {
+    const createRawStyle = (overrides?: Partial<RawImportedStyle>): RawImportedStyle => ({
+      name: 'Test Style',
+      prompt: '{prompt}, test style modifiers',
+      negative_prompt: 'bad quality, blurry',
+      ...overrides,
+    })
+
     it('should return true for valid raw style', () => {
       const valid = createRawStyle()
       expect(isRawImportedStyle(valid)).toBe(true)
@@ -168,119 +201,171 @@ describe('StyleLoader', () => {
   })
 
   // ============================================
-  // loadStylesFromJson
+  // getStylesFromDB
   // ============================================
 
-  describe('loadStylesFromJson', () => {
-    it('should load and parse valid styles from embedded data', () => {
-      setMockStyles([
-        createRawStyle({ name: 'base', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Cyberpunk', prompt: '{prompt}, neon', negative_prompt: 'old' }),
-      ])
+  describe('getStylesFromDB', () => {
+    it('should fetch all styles from database', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'base', name: 'base', sortOrder: -1 }),
+        createMockStyleDoc({ styleId: 'cyberpunk', name: 'Cyberpunk', sortOrder: 10 }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
-      const result = loadStylesFromJson()
-
-      expect(result).toHaveLength(2)
-      expect(result[0].name).toBe('base')
-      expect(result[1].name).toBe('Cyberpunk')
-    })
-
-    it('should skip invalid style entries', () => {
-      // Set mock data with invalid entries mixed in
-      mockStylesData.length = 0
-      mockStylesData.push(
-        createRawStyle({ name: 'Valid', prompt: '{prompt}', negative_prompt: '' }),
-        { name: 'Invalid' } as RawImportedStyle, // Missing prompt and negative_prompt
-        createRawStyle({ name: 'Also Valid', prompt: '{prompt}', negative_prompt: '' })
-      )
-
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-
-      const result = loadStylesFromJson()
+      const result = await getStylesFromDB(mockPayload as unknown as Parameters<typeof getStylesFromDB>[0])
 
       expect(result).toHaveLength(2)
-      expect(result[0].name).toBe('Valid')
-      expect(result[1].name).toBe('Also Valid')
-      expect(consoleSpy).toHaveBeenCalled()
+      expect(result[0].styleId).toBe('base')
+      expect(result[1].styleId).toBe('cyberpunk')
+      expect(mockPayload.find).toHaveBeenCalledWith({
+        collection: 'style-templates',
+        limit: 0,
+        sort: 'sortOrder',
+      })
     })
 
-    it('should return empty array for empty data', () => {
-      setMockStyles([])
+    it('should return empty array when no styles in database', async () => {
+      const mockPayload = createMockPayload([])
 
-      const result = loadStylesFromJson()
+      const result = await getStylesFromDB(mockPayload as unknown as Parameters<typeof getStylesFromDB>[0])
 
-      expect(result).toHaveLength(0)
+      expect(result).toEqual([])
+    })
+
+    it('should convert DB documents to ImportedStyle format', async () => {
+      const mockDocs = [
+        createMockStyleDoc({
+          styleId: 'test-style',
+          name: 'Test Style',
+          positivePrompt: '{prompt}, test',
+          negativePrompt: 'bad',
+        }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
+
+      const result = await getStylesFromDB(mockPayload as unknown as Parameters<typeof getStylesFromDB>[0])
+
+      expect(result[0]).toEqual({
+        styleId: 'test-style',
+        name: 'Test Style',
+        positivePrompt: '{prompt}, test',
+        negativePrompt: 'bad',
+        source: 'imported',
+      })
     })
   })
 
   // ============================================
-  // parseStyleTemplates
+  // getStyleByIdFromDB
   // ============================================
 
-  describe('parseStyleTemplates', () => {
-    it('should convert array of raw styles to ImportedStyle array', () => {
-      const rawStyles: RawImportedStyle[] = [
-        createRawStyle({ name: 'Style A', prompt: '{prompt}, a', negative_prompt: 'x' }),
-        createRawStyle({ name: 'Style B', prompt: '{prompt}, b', negative_prompt: 'y' }),
-      ]
+  describe('getStyleByIdFromDB', () => {
+    it('should fetch style by styleId from database', async () => {
+      const mockDoc = createMockStyleDoc({ styleId: 'cyberpunk', name: 'Cyberpunk' })
+      const mockPayload = {
+        find: vi.fn().mockResolvedValue({ docs: [mockDoc] }),
+      }
 
-      const result = parseStyleTemplates(rawStyles)
+      const result = await getStyleByIdFromDB('cyberpunk', mockPayload as unknown as Parameters<typeof getStyleByIdFromDB>[1])
+
+      expect(result).toBeDefined()
+      expect(result?.styleId).toBe('cyberpunk')
+      expect(mockPayload.find).toHaveBeenCalledWith({
+        collection: 'style-templates',
+        where: { styleId: { equals: 'cyberpunk' } },
+        limit: 1,
+      })
+    })
+
+    it('should return undefined when style not found', async () => {
+      const mockPayload = {
+        find: vi.fn().mockResolvedValue({ docs: [] }),
+      }
+
+      const result = await getStyleByIdFromDB('nonexistent', mockPayload as unknown as Parameters<typeof getStyleByIdFromDB>[1])
+
+      expect(result).toBeUndefined()
+    })
+  })
+
+  // ============================================
+  // getStylesByIdsFromDB
+  // ============================================
+
+  describe('getStylesByIdsFromDB', () => {
+    it('should fetch multiple styles by IDs from database', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'style-a', name: 'Style A' }),
+        createMockStyleDoc({ styleId: 'style-c', name: 'Style C' }),
+      ]
+      const mockPayload = {
+        find: vi.fn().mockResolvedValue({ docs: mockDocs }),
+      }
+
+      const result = await getStylesByIdsFromDB(['style-a', 'style-c'], mockPayload as unknown as Parameters<typeof getStylesByIdsFromDB>[1])
 
       expect(result).toHaveLength(2)
       expect(result[0].styleId).toBe('style-a')
-      expect(result[0].source).toBe('imported')
-      expect(result[1].styleId).toBe('style-b')
+      expect(result[1].styleId).toBe('style-c')
+      expect(mockPayload.find).toHaveBeenCalledWith({
+        collection: 'style-templates',
+        where: { styleId: { in: ['style-a', 'style-c'] } },
+        limit: 2,
+      })
     })
 
-    it('should handle empty array', () => {
-      const result = parseStyleTemplates([])
+    it('should return empty array when no IDs provided', async () => {
+      const mockPayload = {
+        find: vi.fn().mockResolvedValue({ docs: [] }),
+      }
+
+      const result = await getStylesByIdsFromDB([], mockPayload as unknown as Parameters<typeof getStylesByIdsFromDB>[1])
+
       expect(result).toEqual([])
+      expect(mockPayload.find).not.toHaveBeenCalled()
     })
   })
 
   // ============================================
-  // getAllStyles
+  // refreshStyleCache and getAllStyles
   // ============================================
 
-  describe('getAllStyles', () => {
-    it('should return styles sorted with "base" first', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Zebra', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'base', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Apple', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+  describe('refreshStyleCache and getAllStyles', () => {
+    it('should populate cache from database', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'base', name: 'base', sortOrder: -1 }),
+        createMockStyleDoc({ styleId: 'cyberpunk', name: 'Cyberpunk', sortOrder: 10 }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
-      const result = getAllStyles(true)
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
+      const result = getAllStyles()
 
+      expect(result).toHaveLength(2)
       expect(result[0].styleId).toBe('base')
-      expect(result[1].name).toBe('Apple')
-      expect(result[2].name).toBe('Zebra')
     })
 
-    it('should cache styles after first load', () => {
-      setMockStyles([createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' })])
+    it('should return fallback style when cache not populated', () => {
+      clearStyleCache()
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-      const first = getAllStyles(true) // First call - loads from data
-      const second = getAllStyles() // Second call - should use cache
+      const result = getAllStyles()
 
-      expect(first).toBe(second) // Same reference means cached
+      expect(result).toHaveLength(1)
+      expect(result[0].styleId).toBe(DEFAULT_STYLE_ID)
+      expect(consoleSpy).toHaveBeenCalled()
     })
 
-    it('should reload when forceReload is true', () => {
-      setMockStyles([createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' })])
+    it('should return cached styles on subsequent calls', async () => {
+      const mockDocs = [createMockStyleDoc({ styleId: 'test', name: 'Test' })]
+      const mockPayload = createMockPayload(mockDocs)
 
-      const first = getAllStyles(true) // First call
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
+      getAllStyles()
+      getAllStyles()
 
-      // Modify the mock data
-      setMockStyles([
-        createRawStyle({ name: 'Test', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'NewStyle', prompt: '{prompt}', negative_prompt: '' }),
-      ])
-
-      const second = getAllStyles(true) // Second call with forceReload
-
-      expect(first).not.toBe(second) // Different references
-      expect(second).toHaveLength(2)
+      // find should only be called once during refreshStyleCache
+      expect(mockPayload.find).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -289,24 +374,27 @@ describe('StyleLoader', () => {
   // ============================================
 
   describe('getDefaultStyle', () => {
-    it('should return "base" style when present', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Other', prompt: '{prompt}, other', negative_prompt: '' }),
-        createRawStyle({ name: 'base', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+    it('should return "base" style when present in cache', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'other', name: 'Other', sortOrder: 10 }),
+        createMockStyleDoc({ styleId: 'base', name: 'base', positivePrompt: '{prompt}', sortOrder: -1 }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = getDefaultStyle()
 
       expect(result.styleId).toBe('base')
-      expect(result.name).toBe('base')
       expect(result.positivePrompt).toBe('{prompt}')
     })
 
-    it('should return fallback base style when not found in file', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Other', prompt: '{prompt}, other', negative_prompt: '' }),
-      ])
+    it('should return fallback base style when not found in cache', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'other', name: 'Other', sortOrder: 10 }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = getDefaultStyle()
 
       expect(result.styleId).toBe(DEFAULT_STYLE_ID)
@@ -316,26 +404,30 @@ describe('StyleLoader', () => {
   })
 
   // ============================================
-  // getStyleById
+  // getStyleById (cached)
   // ============================================
 
   describe('getStyleById', () => {
-    it('should return style when found', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Cyberpunk', prompt: '{prompt}, neon', negative_prompt: '' }),
-      ])
+    it('should return style when found in cache', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'cyberpunk', name: 'Cyberpunk' }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = getStyleById('cyberpunk')
 
       expect(result).toBeDefined()
       expect(result?.name).toBe('Cyberpunk')
     })
 
-    it('should return undefined when not found', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Other', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+    it('should return undefined when not found in cache', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'other', name: 'Other' }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = getStyleById('nonexistent')
 
       expect(result).toBeUndefined()
@@ -343,17 +435,19 @@ describe('StyleLoader', () => {
   })
 
   // ============================================
-  // getStylesByIds
+  // getStylesByIds (cached)
   // ============================================
 
   describe('getStylesByIds', () => {
-    it('should return multiple styles by IDs', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Style B', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Style C', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+    it('should return multiple styles by IDs from cache', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'style-a', name: 'Style A' }),
+        createMockStyleDoc({ styleId: 'style-b', name: 'Style B' }),
+        createMockStyleDoc({ styleId: 'style-c', name: 'Style C' }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = getStylesByIds(['style-a', 'style-c'])
 
       expect(result).toHaveLength(2)
@@ -361,11 +455,13 @@ describe('StyleLoader', () => {
       expect(result[1].styleId).toBe('style-c')
     })
 
-    it('should filter out non-existent IDs', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+    it('should filter out non-existent IDs', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'style-a', name: 'Style A' }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = getStylesByIds(['style-a', 'nonexistent'])
 
       expect(result).toHaveLength(1)
@@ -374,17 +470,19 @@ describe('StyleLoader', () => {
   })
 
   // ============================================
-  // searchStyles
+  // searchStyles (cached)
   // ============================================
 
   describe('searchStyles', () => {
-    it('should find styles by name (case-insensitive)', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Cyberpunk', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Steampunk', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Other', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+    it('should find styles by name (case-insensitive) from cache', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'cyberpunk', name: 'Cyberpunk' }),
+        createMockStyleDoc({ styleId: 'steampunk', name: 'Steampunk' }),
+        createMockStyleDoc({ styleId: 'other', name: 'Other' }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = searchStyles('punk')
 
       expect(result).toHaveLength(2)
@@ -392,11 +490,13 @@ describe('StyleLoader', () => {
       expect(result.map((s) => s.name)).toContain('Steampunk')
     })
 
-    it('should return empty array when no matches', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+    it('should return empty array when no matches', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'style-a', name: 'Style A' }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = searchStyles('xyz')
 
       expect(result).toEqual([])
@@ -404,20 +504,45 @@ describe('StyleLoader', () => {
   })
 
   // ============================================
-  // getStyleCount
+  // getStyleCount (cached)
   // ============================================
 
   describe('getStyleCount', () => {
-    it('should return total count of styles', () => {
-      setMockStyles([
-        createRawStyle({ name: 'Style A', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Style B', prompt: '{prompt}', negative_prompt: '' }),
-        createRawStyle({ name: 'Style C', prompt: '{prompt}', negative_prompt: '' }),
-      ])
+    it('should return total count of cached styles', async () => {
+      const mockDocs = [
+        createMockStyleDoc({ styleId: 'style-a', name: 'Style A' }),
+        createMockStyleDoc({ styleId: 'style-b', name: 'Style B' }),
+        createMockStyleDoc({ styleId: 'style-c', name: 'Style C' }),
+      ]
+      const mockPayload = createMockPayload(mockDocs)
 
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
       const result = getStyleCount()
 
       expect(result).toBe(3)
+    })
+  })
+
+  // ============================================
+  // clearStyleCache
+  // ============================================
+
+  describe('clearStyleCache', () => {
+    it('should clear cached styles', async () => {
+      const mockDocs = [createMockStyleDoc({ styleId: 'test', name: 'Test' })]
+      const mockPayload = createMockPayload(mockDocs)
+
+      await refreshStyleCache(mockPayload as unknown as Parameters<typeof refreshStyleCache>[0])
+      expect(getAllStyles()).toHaveLength(1)
+
+      clearStyleCache()
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      // After clearing, getAllStyles returns fallback
+      const result = getAllStyles()
+      expect(result).toHaveLength(1)
+      expect(result[0].styleId).toBe(DEFAULT_STYLE_ID)
+      expect(consoleSpy).toHaveBeenCalled()
     })
   })
 })

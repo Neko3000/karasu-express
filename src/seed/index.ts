@@ -1,28 +1,64 @@
 /**
  * Seed Script
  *
- * Seeds the database with style templates (from JSON) and model configurations.
- * Run with: pnpm seed
+ * Seeds the database with default style templates and model configurations.
+ * Run with: pnpm payload:seed
  *
- * Style templates are loaded from src/resources/original/sdxl_styles_exp.json
- * which contains ~190 styles including:
- * - Base (No Style) - system default
- * - 3D Model, Abstract, Anime, Art Deco, Cyberpunk, and many more...
- *
- * Phase 6 Optimization: Removed sortOrder field from styles
- * Phase 6 Enhancement: Import styles from JSON instead of hardcoded array
+ * Style data source: src/resources/original/sdxl_styles_exp.json
  */
 
+import * as fs from 'fs'
+import * as path from 'path'
 import type { Payload } from 'payload'
 
 import { AspectRatio, Provider } from '../lib/types'
-import { loadStylesFromJson, type StyleTemplateData } from './import-styles'
+import { generateStyleId, type RawImportedStyle } from '../lib/style-types'
 
 // ============================================
-// STYLE TEMPLATES (loaded from JSON)
+// DEFAULT STYLE TEMPLATES
 // ============================================
 
-// StyleTemplateData is imported from ./import-styles
+interface StyleTemplateData {
+  styleId: string
+  name: string
+  description: string
+  positivePrompt: string
+  negativePrompt: string
+  isSystem: boolean
+  sortOrder: number
+}
+
+/**
+ * Load SDXL styles from the JSON file
+ */
+function loadStylesFromJson(): RawImportedStyle[] {
+  const jsonPath = path.join(__dirname, '../resources/original/sdxl_styles_exp.json')
+  const jsonContent = fs.readFileSync(jsonPath, 'utf-8')
+  return JSON.parse(jsonContent) as RawImportedStyle[]
+}
+
+/**
+ * Convert all SDXL styles from the JSON file to StyleTemplateData format
+ * This ensures ALL styles are seeded to the database
+ */
+function getAllStylesToSeed(): StyleTemplateData[] {
+  const sdxlStylesData = loadStylesFromJson()
+
+  return sdxlStylesData.map((rawStyle, index) => {
+    const styleId = generateStyleId(rawStyle.name)
+    const isBase = styleId === 'base'
+
+    return {
+      styleId,
+      name: rawStyle.name,
+      description: isBase ? 'Original prompt without style modifications' : `${rawStyle.name} style`,
+      positivePrompt: rawStyle.prompt,
+      negativePrompt: rawStyle.negative_prompt,
+      isSystem: isBase, // Only base is marked as system style (cannot be deleted)
+      sortOrder: isBase ? -1 : index * 10, // Base first, then ordered by index
+    }
+  })
+}
 
 // ============================================
 // DEFAULT MODEL CONFIGURATIONS
@@ -154,21 +190,17 @@ type FlexiblePayload = Payload & {
 }
 
 /**
- * Seed style templates from JSON file
+ * Seed style templates from SDXL styles data
+ * Seeds ALL styles from sdxl-styles-exp.ts to the database
  */
 async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
-  console.log('Loading style templates from JSON...')
-
-  // Load styles from JSON file
-  const styles = loadStylesFromJson()
-  console.log(`  Found ${styles.length} styles in JSON file`)
-
-  console.log('Seeding style templates...')
+  const stylesToSeed = getAllStylesToSeed()
+  console.log(`Seeding ${stylesToSeed.length} style templates...`)
 
   let created = 0
   let skipped = 0
 
-  for (const style of styles) {
+  for (const style of stylesToSeed) {
     try {
       // Check if style already exists
       const existing = await payload.find({
@@ -196,9 +228,7 @@ async function seedStyleTemplates(payload: FlexiblePayload): Promise<void> {
     }
   }
 
-  console.log(`  Created: ${created} styles`)
-  console.log(`  Skipped: ${skipped} styles (already exist)`)
-  console.log('Style templates seeded successfully')
+  console.log(`Style templates seeded: ${created} created, ${skipped} already existed`)
 }
 
 /**
@@ -255,9 +285,9 @@ export async function seed(payload: Payload): Promise<void> {
 }
 
 /**
- * Export style loading function for reference
+ * Export default styles for reference (now includes all SDXL styles)
  */
-export { loadStylesFromJson } from './import-styles'
+export const defaultStyles = getAllStylesToSeed()
 
 /**
  * Export default models for reference
