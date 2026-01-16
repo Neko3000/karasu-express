@@ -9,6 +9,7 @@
  * Features:
  * - Fetches styles from database on mount
  * - Multi-select capability with "base" as default
+ * - Selected styles displayed as removable tags
  * - Search/filter functionality
  * - Loading and error states
  * - Real-time updates to PayloadCMS form
@@ -27,6 +28,7 @@ import type { ImportedStyle } from '../../lib/style-types'
 // ============================================
 
 const MAX_VISIBLE_STYLES = 50 // Initial number of styles to show
+const MAX_VISIBLE_TAGS = 10 // Max tags to show before collapsing
 
 // ============================================
 // TYPES
@@ -39,9 +41,98 @@ interface StyleOptionProps {
   isDefault: boolean
 }
 
+interface SelectedStyleTagProps {
+  style: ImportedStyle
+  onRemove: (styleId: string) => void
+  isDefault: boolean
+}
+
 // ============================================
 // SUB-COMPONENTS
 // ============================================
+
+/**
+ * Selected style tag with remove button
+ */
+function SelectedStyleTag({ style, onRemove, isDefault }: SelectedStyleTagProps) {
+  const handleRemove = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!isDefault) {
+        onRemove(style.styleId)
+      }
+    },
+    [style.styleId, onRemove, isDefault]
+  )
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '4px 8px',
+        backgroundColor: isDefault ? 'var(--theme-success-100)' : 'var(--theme-elevation-100)',
+        border: `1px solid ${isDefault ? 'var(--theme-success-200)' : 'var(--theme-elevation-200)'}`,
+        borderRadius: '4px',
+        fontSize: 'calc(var(--base-body-size) * 0.85)',
+        color: isDefault ? 'var(--theme-success-700)' : 'var(--theme-text)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <span>{style.name}</span>
+      {!isDefault && (
+        <button
+          type="button"
+          onClick={handleRemove}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '16px',
+            height: '16px',
+            padding: 0,
+            background: 'none',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            color: 'var(--theme-elevation-500)',
+            transition: 'all 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--theme-elevation-200)'
+            e.currentTarget.style.color = 'var(--theme-error-500)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = 'var(--theme-elevation-500)'
+          }}
+          title={`Remove ${style.name}`}
+        >
+          <svg style={{ width: '12px', height: '12px' }} fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      )}
+      {isDefault && (
+        <span
+          style={{
+            fontSize: 'calc(var(--base-body-size) * 0.7)',
+            color: 'var(--theme-success-600)',
+            fontStyle: 'italic',
+          }}
+        >
+          default
+        </span>
+      )}
+    </span>
+  )
+}
 
 /**
  * Individual style option with checkbox
@@ -239,9 +330,10 @@ export const StyleSelectorField: UIFieldClientComponent = () => {
   // Fetch styles from the API
   const { styles, isLoading, error, refetch, defaultStyleId, totalCount } = useStyleOptions()
 
-  // Local state for search and visible styles
+  // Local state for search, visible styles, and expanded tags
   const [searchQuery, setSearchQuery] = useState('')
   const [showAll, setShowAll] = useState(false)
+  const [showAllTags, setShowAllTags] = useState(false)
 
   // Get current selected style IDs (from form or default)
   const selectedStyleIds = useMemo(() => {
@@ -252,6 +344,15 @@ export const StyleSelectorField: UIFieldClientComponent = () => {
     // Default to 'base' if nothing selected
     return new Set([defaultStyleId])
   }, [styleField.value, defaultStyleId])
+
+  // Get selected styles with full data
+  const selectedStyles = useMemo(() => {
+    if (styles.length === 0) return []
+    const styleMap = new Map(styles.map((s) => [s.styleId, s]))
+    return Array.from(selectedStyleIds)
+      .map((id) => styleMap.get(id))
+      .filter((s): s is ImportedStyle => s !== undefined)
+  }, [styles, selectedStyleIds])
 
   // Filter styles based on search query
   const filteredStyles = useMemo(() => {
@@ -269,6 +370,14 @@ export const StyleSelectorField: UIFieldClientComponent = () => {
     }
     return filteredStyles.slice(0, MAX_VISIBLE_STYLES)
   }, [filteredStyles, showAll])
+
+  // Visible tags (limited unless expanded)
+  const visibleTags = useMemo(() => {
+    if (showAllTags || selectedStyles.length <= MAX_VISIBLE_TAGS) {
+      return selectedStyles
+    }
+    return selectedStyles.slice(0, MAX_VISIBLE_TAGS)
+  }, [selectedStyles, showAllTags])
 
   // Handle style selection toggle
   const handleToggle = useCallback(
@@ -296,6 +405,14 @@ export const StyleSelectorField: UIFieldClientComponent = () => {
       })
     },
     [selectedStyleIds, styleField, dispatchFields, defaultStyleId]
+  )
+
+  // Handle removing a style from selection
+  const handleRemoveStyle = useCallback(
+    (styleId: string) => {
+      handleToggle(styleId, false)
+    },
+    [handleToggle]
   )
 
   // Handle search input change with debouncing
@@ -332,6 +449,7 @@ export const StyleSelectorField: UIFieldClientComponent = () => {
       path: 'importedStyleIds',
       value: newValue,
     })
+    setShowAllTags(false)
   }, [styleField, dispatchFields, defaultStyleId])
 
   // Initialize default value if not set
@@ -369,6 +487,114 @@ export const StyleSelectorField: UIFieldClientComponent = () => {
           Select style templates to apply to your generated prompts
         </p>
       </div>
+
+      {/* Selected Styles Display */}
+      {selectedStyles.length > 0 && (
+        <div
+          style={{
+            padding: '12px',
+            backgroundColor: 'var(--theme-elevation-50)',
+            border: '1px solid var(--theme-elevation-150)',
+            borderRadius: 'var(--style-radius-s)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 'calc(var(--base-body-size) * 0.85)',
+                fontWeight: 500,
+                color: 'var(--theme-elevation-600)',
+              }}
+            >
+              Selected ({selectedStyles.length})
+            </span>
+            {selectedStyles.length > 1 && (
+              <button
+                type="button"
+                onClick={handleClearAll}
+                style={{
+                  padding: '2px 8px',
+                  fontSize: 'calc(var(--base-body-size) * 0.8)',
+                  backgroundColor: 'transparent',
+                  color: 'var(--theme-elevation-500)',
+                  border: '1px solid var(--theme-elevation-200)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--theme-error-50)'
+                  e.currentTarget.style.borderColor = 'var(--theme-error-200)'
+                  e.currentTarget.style.color = 'var(--theme-error-500)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.borderColor = 'var(--theme-elevation-200)'
+                  e.currentTarget.style.color = 'var(--theme-elevation-500)'
+                }}
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '6px',
+            }}
+          >
+            {visibleTags.map((style) => (
+              <SelectedStyleTag
+                key={style.styleId}
+                style={style}
+                onRemove={handleRemoveStyle}
+                isDefault={style.styleId === defaultStyleId && selectedStyles.length === 1}
+              />
+            ))}
+            {!showAllTags && selectedStyles.length > MAX_VISIBLE_TAGS && (
+              <button
+                type="button"
+                onClick={() => setShowAllTags(true)}
+                style={{
+                  padding: '4px 8px',
+                  backgroundColor: 'var(--theme-elevation-100)',
+                  border: '1px solid var(--theme-elevation-200)',
+                  borderRadius: '4px',
+                  fontSize: 'calc(var(--base-body-size) * 0.85)',
+                  color: 'var(--theme-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                +{selectedStyles.length - MAX_VISIBLE_TAGS} more
+              </button>
+            )}
+            {showAllTags && selectedStyles.length > MAX_VISIBLE_TAGS && (
+              <button
+                type="button"
+                onClick={() => setShowAllTags(false)}
+                style={{
+                  padding: '4px 8px',
+                  backgroundColor: 'var(--theme-elevation-100)',
+                  border: '1px solid var(--theme-elevation-200)',
+                  borderRadius: '4px',
+                  fontSize: 'calc(var(--base-body-size) * 0.85)',
+                  color: 'var(--theme-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                Show less
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Search and Controls */}
       <div
