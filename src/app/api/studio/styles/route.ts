@@ -1,8 +1,8 @@
 /**
  * API Route: GET /api/studio/styles
  *
- * Returns all available imported styles for the task creation page.
- * Styles are sorted alphabetically with "base" as the first item.
+ * Returns all available styles from the StyleTemplates collection in the database.
+ * Styles are sorted by sortOrder with "base" as the first item.
  *
  * Query Parameters:
  * - search (optional): Filter styles by name
@@ -17,10 +17,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import {
-  getAllStyles,
+  getStylesFromDB,
   searchStyles,
   DEFAULT_STYLE_ID,
+  refreshStyleCache,
 } from '../../../../services/style-loader'
 import type { StylesResponse } from '../../../../lib/style-types'
 
@@ -29,8 +32,19 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const searchQuery = searchParams.get('search')
 
-    // Get styles (filtered if search query provided)
-    const styles = searchQuery ? searchStyles(searchQuery) : getAllStyles()
+    // Get Payload instance for database access
+    const payload = await getPayload({ config })
+
+    // Refresh cache from database (ensures cache is populated)
+    await refreshStyleCache(payload)
+
+    // Get styles (filtered if search query provided, otherwise from DB)
+    let styles
+    if (searchQuery) {
+      styles = searchStyles(searchQuery)
+    } else {
+      styles = await getStylesFromDB(payload)
+    }
 
     // Build response
     const response: StylesResponse = {
@@ -62,13 +76,18 @@ export async function GET(request: NextRequest) {
  */
 export async function HEAD() {
   try {
-    const styles = getAllStyles()
-    const count = styles.length
+    // Get Payload instance for database access
+    const payload = await getPayload({ config })
+
+    // Count styles directly from database
+    const result = await payload.count({
+      collection: 'style-templates',
+    })
 
     return new NextResponse(null, {
       status: 200,
       headers: {
-        'X-Total-Count': count.toString(),
+        'X-Total-Count': result.totalDocs.toString(),
         'X-Default-Style': DEFAULT_STYLE_ID,
       },
     })
@@ -80,3 +99,4 @@ export async function HEAD() {
     })
   }
 }
+
