@@ -15,25 +15,6 @@ import {
   DEFAULT_BATCH_SIZE,
   DEFAULT_VARIANT_COUNT,
 } from '../lib/types'
-import { getAllStyles } from '../services/style-loader'
-
-/**
- * Generate select options for imported styles
- * Loads all styles from the JSON file and converts them to PayloadCMS select options
- */
-function getImportedStyleOptions(): { label: string; value: string }[] {
-  try {
-    const styles = getAllStyles()
-    return styles.map((style) => ({
-      label: style.name,
-      value: style.styleId,
-    }))
-  } catch (error) {
-    console.error('[Tasks] Failed to load imported style options:', error)
-    // Return base style as fallback
-    return [{ label: 'base', value: 'base' }]
-  }
-}
 
 export const Tasks: CollectionConfig = {
   slug: 'tasks',
@@ -140,14 +121,24 @@ export const Tasks: CollectionConfig = {
         description: 'Enable web search (RAG) for prompt optimization',
       },
     },
+    // Style Selector UI component - fetches styles from database via API
+    {
+      name: 'styleSelectorUI',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Studio/StyleSelectorField#StyleSelectorField',
+        },
+      },
+    },
+    // Hidden field to store the actual importedStyleIds value
+    // The StyleSelectorField UI component manages this field
     {
       name: 'importedStyleIds',
-      type: 'select',
-      hasMany: true,
-      options: getImportedStyleOptions(),
+      type: 'json',
       admin: {
-        description: 'Select style templates to apply to generated prompts',
-        isSortable: true,
+        hidden: true, // Hidden because StyleSelectorField manages the UI
+        description: 'Selected style template IDs (managed by StyleSelectorField)',
       },
       defaultValue: ['base'],
     },

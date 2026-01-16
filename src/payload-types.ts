@@ -392,9 +392,17 @@ export interface Task {
    */
   webSearchEnabled?: boolean | null;
   /**
-   * Select style templates to apply to generated prompts
+   * Selected style template IDs (managed by StyleSelectorField)
    */
-  importedStyleIds?: 'base'[] | null;
+  importedStyleIds?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * Select custom style templates from database
    */

@@ -420,9 +420,9 @@ Per plan.md Testing Requirements:
 
 #### Implementation for Imported Style Ids Field
 
-- [ ] T038aq [US1] Update StyleSelector component in src/components/Studio/StyleSelector.tsx to fetch style options from GET /api/studio/styles endpoint on component mount
-- [ ] T038ar [P] [US1] Create useStyleOptions hook in src/components/Studio/hooks/useStyleOptions.ts to manage fetching styles from API, loading state, and error handling
-- [ ] T038as [US1] Integrate useStyleOptions hook with StyleSelector component to populate the multi-select style options from database query results
+- [X] T038aq [US1] Update StyleSelector component in src/components/Studio/StyleSelectorField.tsx to fetch style options from GET /api/studio/styles endpoint on component mount
+- [X] T038ar [P] [US1] Create useStyleOptions hook in src/components/Studio/hooks/useStyleOptions.ts to manage fetching styles from API, loading state, and error handling
+- [X] T038as [US1] Integrate useStyleOptions hook with StyleSelectorField component to populate the multi-select style options from database query results
 
 **Checkpoint**: Imported Style Ids field on task creation page now fetches style options from database via API. Users see all available styles from StyleTemplates collection when creating a task.
 

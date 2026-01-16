@@ -17,6 +17,8 @@ export { PromptVariantsList } from './PromptVariantsList'
 export { OptimizationErrorBanner } from './OptimizationErrorBanner'
 export { PromptOptimizerField } from './PromptOptimizerField'
 export { usePromptExpansion } from './hooks/usePromptExpansion'
+export { useStyleOptions } from './hooks/useStyleOptions'
+export { StyleSelectorField } from './StyleSelectorField'
 
 // Phase 5 component exports
 export { CalculatedPromptCard } from './CalculatedPromptCard'
@@ -38,6 +40,11 @@ export type { PromptVariantCardProps, PromptVariant } from './PromptVariantCard'
 export type { PromptVariantsListProps, VariantWithSelection } from './PromptVariantsList'
 export type { OptimizationErrorBannerProps } from './OptimizationErrorBanner'
 export type { PromptExpansionState, PromptExpansionActions } from './hooks/usePromptExpansion'
+export type {
+  StyleOptionsState,
+  StyleOptionsActions,
+  UseStyleOptionsResult,
+} from './hooks/useStyleOptions'
 
 // Phase 5 type exports
 export type { CalculatedPromptCardProps } from './CalculatedPromptCard'
