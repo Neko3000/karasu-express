@@ -3,6 +3,10 @@
 **Branch**: `001-phase-07` | **Date**: 2026-01-14 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-ai-content-studio/spec.md`
 
+## Scope Note
+
+This plan document covers **Phase 7 only** (Task Monitoring and Management). For the complete implementation roadmap covering all 13 phases and their dependencies, see [tasks.md](./tasks.md). Each phase has its own focused plan document created during `/speckit.plan` execution; this document is the current active phase.
+
 ## Summary
 
 Phase 7 focuses on **Task Monitoring and Management** (User Story 4), implementing the Task Manager interface that enables administrators to view, filter, search, retry, and cancel generation tasks. This builds upon the existing Task/SubTask collections and job queue infrastructure established in previous phases.

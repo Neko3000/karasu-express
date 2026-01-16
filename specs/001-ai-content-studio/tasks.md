@@ -9,6 +9,8 @@
 
 **LLM for Prompt Expansion**: **Gemini 3 Flash Preview** (model: `gemini-3-flash-preview`) is the primary LLM for prompt optimization. This model offers Pro-level reasoning with Flash speed and pricing. Supports configurable thinking levels (minimal/low/medium/high) for latency vs reasoning depth tradeoffs. Future expansion will support ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet).
 
+**Image Generation Models**: Flux (via Fal.ai), DALL-E 3 (via OpenAI), and Nano Banana (via Google AI) are the image generation providers. These are distinct from the LLM used for prompt expansion - the LLM enhances prompts, then the image models generate visuals from those enhanced prompts.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -446,7 +448,7 @@ Per plan.md Testing Requirements:
 ### Implementation for User Story 3
 
 - [ ] T039 [US3] Add StyleTemplates collection access control in src/collections/StyleTemplates.ts to prevent deletion of system styles (isSystem: true)
-- [ ] T040 [US3] Create seed script in src/seed/import-styles.ts to import all style items from src/resources/style-list/sdxl-styles-exp.ts into StyleTemplates collection (map name→name, name→styleId with slugify, prompt→positivePrompt, negative_prompt→negativePrompt, set isSystem: true)
+- [ ] T040 [US3] **SUPERSEDED by T038al-am** - Style import functionality moved to Phase 5 (Style Selection Database Migration). This task is no longer needed as all 180+ styles are seeded via T038al-am from src/resources/original/sdxl_styles_exp.json
 - [ ] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
 - [ ] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
 
@@ -578,7 +580,7 @@ Per plan.md Testing Requirements:
 - [ ] T048 [US5] Create Gallery custom admin view in src/components/Gallery/index.tsx with masonry layout using Masonic library
 - [ ] T049 [P] [US5] Create GalleryFilters component in src/components/Gallery/GalleryFilters.tsx with taskId, styleId, modelId filters
 - [ ] T050 [P] [US5] Create ImageLightbox component in src/components/Gallery/ImageLightbox.tsx showing full-size image with generation metadata panel
-- [ ] T051 [US5] Implement virtual scrolling in Gallery component for 500+ items performance
+- [ ] T051 [US5] Implement virtual scrolling in Gallery component for 500+ items performance (FR-024)
 - [ ] T052 [US5] Create batch download functionality in src/components/Gallery/BatchDownload.tsx with selection and ZIP generation
 - [ ] T053 [US5] Add Gallery to Payload admin panel navigation in payload.config.ts admin.components configuration
 
@@ -663,7 +665,7 @@ Per plan.md Testing Requirements:
 
 **Gate Criteria**: Full test suite passes, quickstart.md validation passes
 
-- [ ] T070 Add admin panel left navigation with Dashboard, Studio, Task Manager, Gallery, and Configuration Center in payload.config.ts
+- [ ] T070 Add admin panel left navigation with Dashboard, Studio, Task Manager, Gallery, and Configuration Center in payload.config.ts (FR-026)
 - [ ] T071 [P] Create MongoDB indexes per data-model.md specifications in src/seed/indexes.ts
 - [ ] T072 [P] Add input validation across all collections using Payload field validation
 - [ ] T073 Implement configurable warning threshold (default 500) for large batch submissions
@@ -678,6 +680,12 @@ Per plan.md Testing Requirements:
 **Purpose**: Video generation capability using Google Veo - explicitly deferred per clarification
 
 **DEFERRED**: Video generation is not required for initial release. Focus on image generation first.
+
+**Implementation Criteria**: Begin Phase 13 implementation ONLY when ALL of the following conditions are met:
+1. All image generation phases (1-12) are complete with passing tests
+2. Core image generation workflows are stable in production for at least 2 weeks
+3. Explicit stakeholder request or business requirement for video generation
+4. Google Veo API is generally available (not preview/beta) with documented SLAs
 
 **Unit Tests**: REQUIRED when implemented (Veo adapter)
 **Integration Tests**: REQUIRED when implemented (video job handler)

@@ -174,12 +174,14 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 2. **Given** I have been using the system over time, **When** I view the Dashboard, **Then** I can see which styles and models have been most frequently used.
 
+3. **Given** I am viewing the Dashboard, **When** new tasks complete in the background, **Then** the dashboard metrics refresh automatically within 30 seconds without requiring a page reload.
+
 ---
 
 ### Edge Cases
 
 - What happens when all selected AI model providers are unavailable or rate-limited?
-  - System should queue tasks and retry automatically with exponential backoff; user sees "Waiting for API availability" status.
+  - System should queue tasks and retry automatically with exponential backoff (initial delay: 1 second, max delay: 5 minutes, multiplier: 2x, max retries: 5); user sees "Waiting for API availability" status.
 
 - What happens when a generation produces content flagged as inappropriate (NSFW)?
   - System logs the event, marks the sub-task as failed with specific error code, and continues processing other sub-tasks.
@@ -216,7 +218,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - **FR-002**: System MUST optimize user themes into prompt variants using LLM, with a dropdown allowing users to select 3 (default), 5, or 7 variants
 - **FR-003**: System MUST support optional web search enhancement for prompt optimization
 - **FR-004**: System MUST display a real-time calculation of total expected outputs based on selected parameters (prompts x styles x models x batch size)
-- **FR-005**: System MUST warn users when calculated total exceeds a configurable threshold
+- **FR-005**: System MUST warn users when calculated total exceeds a configurable threshold (configured via `BATCH_WARNING_THRESHOLD` environment variable, default: 500 images)
 
 **Style Management**
 - **FR-006**: System MUST support creating style templates with positive and negative prompt modifiers
@@ -267,7 +269,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can submit a generation task and receive first results within 5 minutes for standard batch sizes (up to 50 images)
+- **SC-001**: Users can submit a generation task and receive first results within 5 minutes for standard batch sizes (up to 50 images). "First results" means at least one generated image is viewable in the gallery with a visible progress indicator showing completion percentage.
 - **SC-002**: System can process 500+ image generation requests in a single batch task
 - **SC-003**: 95% of generation sub-tasks complete successfully without manual intervention
 - **SC-004**: Users can locate any generated image through gallery search/filter within 30 seconds
