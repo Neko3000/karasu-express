@@ -46,6 +46,10 @@
 - Q: What should be the default sort order for the Task Manager list? → A: Newest first (most recent creation time at top)
 - Q: What should happen to assets already generated when a task is cancelled? → A: Keep all completed assets; only pending sub-tasks are stopped
 
+### Session 2026-01-17
+
+- Q: What is the scope of the Configuration Center? → A: Configuration Center includes: (1) Style Templates management (CRUD for visual styles), (2) Model Configurations (view-only display of available AI models with their parameters and rate limits), (3) System Settings (batch warning threshold, default variant count). Style Templates is the primary focus; Model Configurations and System Settings are read-mostly administrative views.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Batch Generation Task (Priority: P1)
@@ -78,9 +82,9 @@ As an **Admin**, I want the system to automatically enhance my brief creative th
 
 1. **Given** I enter a simple theme like "a crying cat in the rain", **When** I click the "Extend" button below the text input, **Then** a collapsible section expands showing a progress bar with stages (Analyzing → Enhancing → Formatting), followed by multiple prompt variants (e.g., realistic, abstract, artistic versions) with enhanced details about composition, lighting, and atmosphere.
 
-2. **Given** I enable web search enhancement for a trending topic like "Black Myth Wukong style", **When** I request prompt optimization, **Then** the system incorporates current visual descriptions from web sources into the optimized prompts.
+2. **Given** I enable web search enhancement for a trending topic like "Black Myth Wukong style", **When** I request prompt optimization, **Then** the system incorporates current visual descriptions from web sources into the generated prompt variants.
 
-3. **Given** the system generates optimized prompts in the collapsible section, **When** I review them, **Then** each prompt variant has a checkbox for selection and an inline text editor allowing me to modify the prompt before generation.
+3. **Given** the system generates prompt variants in the collapsible section, **When** I review them, **Then** each prompt variant has a checkbox for selection and an inline text editor allowing me to modify the prompt before generation.
 
 ---
 
@@ -209,6 +213,12 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - What happens when a user cancels a task that has partially completed?
   - System completes the currently running sub-task, stops all pending sub-tasks, retains all already-generated assets, and marks the task as Cancelled. Assets remain accessible in the gallery.
 
+- What happens when the system restarts while tasks are in progress (database/queue recovery)?
+  - On startup, system scans for tasks with status "in_progress" and sub-tasks with status "pending" or "processing". Sub-tasks marked "processing" are reset to "pending" and re-queued. Task progress is recalculated from completed sub-tasks. No duplicate generations occur due to idempotency checks on sub-task IDs.
+
+- What happens when the database connection is temporarily lost during task processing?
+  - Job queue retries database operations with exponential backoff (same parameters as API retry). If connection cannot be restored within 5 minutes, affected sub-tasks are marked as failed with "database_unavailable" error category. Tasks can be retried once database connection is restored.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -219,6 +229,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - **FR-003**: System MUST support optional web search enhancement for prompt optimization
 - **FR-004**: System MUST display a real-time calculation of total expected outputs based on selected parameters (prompts x styles x models x batch size)
 - **FR-005**: System MUST warn users when calculated total exceeds a configurable threshold (configured via `BATCH_WARNING_THRESHOLD` environment variable, default: 500 images)
+- **FR-030**: System MUST allow users to bypass prompt optimization by directly entering one or more prompts in the variant editor, enabling generation without LLM enhancement
 
 **Style Management**
 - **FR-006**: System MUST support creating style templates with positive and negative prompt modifiers
@@ -230,9 +241,22 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 **Model Integration**
 - **FR-012**: System MUST support concurrent generation across multiple AI model providers
-- **FR-013**: System MUST handle model-specific parameter configurations (aspect ratio, inference steps, quality settings)
+- **FR-013**: System MUST handle model-specific parameter configurations as defined in the Model Parameters table below
 - **FR-014**: System MUST automatically map common settings (e.g., aspect ratio) to provider-specific values
 - **FR-015**: System MUST enforce rate limits per provider to prevent API throttling
+
+**Model Parameters by Provider**:
+
+| Provider | Parameter | Type | Values/Range | Default |
+|----------|-----------|------|--------------|---------|
+| Flux (Fal.ai) | aspect_ratio | enum | 1:1, 16:9, 9:16, 4:3, 3:4 | 1:1 |
+| Flux (Fal.ai) | num_inference_steps | integer | 1-50 | 28 |
+| Flux (Fal.ai) | guidance_scale | float | 1.0-20.0 | 3.5 |
+| DALL-E 3 (OpenAI) | size | enum | 1024x1024, 1792x1024, 1024x1792 | 1024x1024 |
+| DALL-E 3 (OpenAI) | quality | enum | standard, hd | standard |
+| DALL-E 3 (OpenAI) | style | enum | vivid, natural | vivid |
+| Nano Banana (Google AI) | aspect_ratio | enum | 1:1, 16:9, 9:16, 4:3, 3:4 | 1:1 |
+| Nano Banana (Google AI) | number_of_images | integer | 1-4 | 1 |
 
 **Task Processing**
 - **FR-016**: System MUST decompose batch tasks into atomic sub-tasks (one prompt + one model = one sub-task)
@@ -247,6 +271,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - **FR-023**: System MUST display assets in a masonry layout supporting mixed aspect ratios
 - **FR-024**: System MUST support virtual scrolling for large image galleries
 - **FR-025**: System MUST provide batch download capability
+- **FR-029**: System MUST display loading states for gallery views: skeleton placeholders during initial load, progressive image loading with blur-up effect, and "Loading more..." indicator during infinite scroll
 
 **Navigation and Interface**
 - **FR-026**: System MUST provide a fixed left navigation with Dashboard, Studio, Task Manager, Asset Library, and Configuration Center
@@ -255,13 +280,13 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 ### Key Entities
 
-- **Task (Parent Task)**: Represents a user's complete generation request. Contains the original theme, list of optimized prompts, selected style names (stored as denormalized text for deletion resilience), selected models, batch configuration, aggregate status, and progress percentage. One Task produces many Sub-Tasks.
+- **Task (Parent Task)**: Represents a user's complete generation request. Contains the original theme, list of prompt variants, selected style names (stored as denormalized text for deletion resilience), selected models, batch configuration, aggregate status, and progress percentage. One Task produces many Sub-Tasks.
 
 - **SubTask (Atomic Execution Unit)**: Represents a single API call to a generation provider. Contains the specific prompt (with style applied), target model, request payload, response data, execution status, and error information. One SubTask produces one or more Assets.
 
 - **Asset (Generated Content)**: Represents a single generated image or video file. Contains the storage URL, source SubTask reference, dimensions, file size, and generation metadata snapshot. Assets are organized by their parent Task.
 
-- **StyleTemplate**: Represents a reusable visual style configuration. Contains a unique identifier, display name (unique, case-insensitive), positive prompt modifiers, and negative prompt modifiers. Styles are selected and applied during Task creation.
+- **StyleTemplate**: Represents a reusable visual style configuration stored in the database. Contains a unique identifier (styleId), display name (unique, case-insensitive), positive prompt modifiers (with `{prompt}` placeholder for base prompt insertion), and negative prompt modifiers. Styles are selected and applied during Task creation. The system is seeded with ~180 pre-defined styles imported from a JSON configuration file; these seeded styles have `isSystem: true` and cannot be deleted. Admins can create additional custom styles with `isSystem: false`.
 
 - **ModelConfiguration**: Represents settings for a specific AI model provider. Contains provider identifier, display name, available parameters, rate limit settings, and default values.
 
@@ -279,6 +304,7 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - **SC-008**: System maintains operation when individual AI provider APIs experience temporary failures (graceful degradation)
 - **SC-009**: Users can compare outputs across different models by filtering gallery results by model within 2 clicks
 - **SC-010**: 90% of admins can complete their first batch generation task without documentation assistance
+- **SC-011**: Prompt optimization (LLM call) completes within 30 seconds for themes under 500 characters; progress stages update at least every 5 seconds during processing
 
 ## Assumptions
 
