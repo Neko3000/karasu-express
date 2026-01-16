@@ -37,9 +37,9 @@ Per plan.md Testing Requirements:
 |--------|------------|-------------------|----------------|
 | Adapters (Flux, DALL-E, Nano Banana) | REQUIRED | N/A | REQUIRED |
 | Lib utilities (prompt-merger, task-fission, error-normalizer) | REQUIRED | N/A | N/A |
-| Services (task-service) | REQUIRED | REQUIRED | N/A |
+| Services (task-service, task-manager) | REQUIRED | REQUIRED | N/A |
 | Jobs (expand-prompt, generate-image) | N/A | REQUIRED | N/A |
-| API Endpoints | N/A | REQUIRED | N/A |
+| API Endpoints (cancel, retry) | N/A | REQUIRED | N/A |
 | Collections (CRUD) | N/A | REQUIRED | N/A |
 
 **Progressive Testing Protocol**:
@@ -446,7 +446,7 @@ Per plan.md Testing Requirements:
 ### Implementation for User Story 3
 
 - [ ] T039 [US3] Add StyleTemplates collection access control in src/collections/StyleTemplates.ts to prevent deletion of system styles (isSystem: true)
-- [ ] T040 [US3] Create admin custom component for style template preview in src/components/StylePreview/index.tsx showing merged prompt example
+- [ ] T040 [US3] Create seed script in src/seed/import-styles.ts to import all style items from src/resources/style-list/sdxl-styles-exp.ts into StyleTemplates collection (map name→name, name→styleId with slugify, prompt→positivePrompt, negative_prompt→negativePrompt, set isSystem: true)
 - [ ] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
 - [ ] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
 
@@ -456,24 +456,109 @@ Per plan.md Testing Requirements:
 
 ## Phase 7: User Story 4 - Task Monitoring and Management (Priority: P2)
 
-**Goal**: Admin can view all generation tasks with progress and status, and manage failed tasks
+**Goal**: Admin can view all generation tasks with progress and status, filter/search tasks, cancel in-progress tasks, and retry failed sub-tasks
 
-**Independent Test**: Create tasks and verify they appear in the task list with accurate status, progress, and filtering capabilities
+**Independent Test**: Create tasks, verify they appear in the task list with accurate status/progress, test filtering by status/date/keyword, verify cancel stops pending sub-tasks, verify retry clears error state
 
-**Unit Tests**: NOT required (UI components, no complex business logic)
-**Integration Tests**: Already covered by Phase 3 task endpoint tests
+**Unit Tests**: REQUIRED for task-manager service (filtering, sorting, search logic)
+**Integration Tests**: REQUIRED for cancel/retry endpoints
 
-**Gate Criteria**: Component renders correctly, manual testing passes
+**Gate Criteria**: All unit tests pass for task-manager service, all integration tests pass for cancel/retry endpoints, manual testing passes
 
-### Implementation for User Story 4
+**Reference**: spec.md Session 2026-01-14 clarifications define:
+- Filter options: Status + date range + search by theme keyword
+- Default sort: Newest first (most recent creation time at top)
+- Cancel behavior: Complete current sub-task, stop pending sub-tasks, keep completed assets
+- Retry behavior: Update existing sub-task in place, clear error state
 
-- [ ] T043 [US4] Create TaskManager custom admin view in src/components/TaskManager/index.tsx with task list, status filters, and progress bars
-- [ ] T044 [P] [US4] Create TaskDetail component in src/components/TaskManager/TaskDetail.tsx showing sub-task breakdown, error logs, and retry buttons
-- [ ] T045 [P] [US4] Create SubTaskList component in src/components/TaskManager/SubTaskList.tsx with status indicators and expandable error details
-- [ ] T046 [US4] Implement task polling hook in src/components/TaskManager/useTaskProgress.ts with 5-second interval for real-time updates
-- [ ] T047 [US4] Add TaskManager to Payload admin panel navigation in payload.config.ts admin.components configuration
+### Backend Services & Endpoints for User Story 4
 
-**Checkpoint**: Task monitoring complete - admin can view and manage all tasks from a centralized dashboard.
+#### Unit Tests (Services)
+
+- [ ] T043a [P] [US4] Write unit tests for task-manager service in tests/unit/services/task-manager.test.ts (test filterTasks with status/date/keyword, test sortTasks with newest-first, test buildTaskQuery)
+
+#### Integration Tests (Endpoints)
+
+- [ ] T043b [P] [US4] Write integration tests for task-cancel endpoint in tests/integration/endpoints/task-cancel.integration.test.ts (test cancel transitions task to cancelled, test pending sub-tasks cancelled, test completed assets retained)
+- [ ] T043c [P] [US4] Write integration tests for subtask-retry endpoint in tests/integration/endpoints/subtask-retry.integration.test.ts (test retry clears error state, test retryCount reset, test sub-task re-queued)
+
+#### Type & Status Updates
+
+- [ ] T043d [P] [US4] Add Cancelled status to TaskStatus enum in src/lib/types.ts per data-model.md
+- [ ] T043e [P] [US4] Add Cancelled status to SubTaskStatus enum in src/lib/types.ts per data-model.md
+
+#### Service Implementation
+
+- [ ] T043f [US4] Implement task-manager service in src/services/task-manager.ts with:
+  - filterTasks(filters: TaskFilters): Filters by status array, date range, keyword search
+  - sortTasks(sortOrder: 'newest' | 'oldest'): Default newest first (-createdAt)
+  - buildTaskQuery(filters, sort, pagination): Construct MongoDB query
+  - getTaskWithSubTasks(taskId): Fetch task with related sub-tasks for detail view
+
+#### Endpoint Implementation
+
+- [ ] T043g [US4] Create POST /api/tasks/{id}/cancel endpoint in src/endpoints/task-cancel.ts that:
+  - Updates Task status to 'cancelled'
+  - Updates all pending SubTasks to 'cancelled' status
+  - Returns CancelTaskResponse with cancelledSubTasks and completedSubTasks counts
+  - Respects: current sub-task completes, only pending sub-tasks cancelled
+- [ ] T043h [US4] Create POST /api/sub-tasks/{id}/retry endpoint in src/endpoints/subtask-retry.ts that:
+  - Clears errorLog, errorCategory on existing sub-task (in-place update)
+  - Resets status to 'pending', retryCount to 0
+  - Re-queues generate-image job for the sub-task
+  - Returns RetrySubTaskResponse with subTaskId and newStatus
+
+#### Job Handler Update
+
+- [ ] T043i [US4] Update generate-image job handler in src/jobs/generate-image.ts to check parent Task status before processing:
+  - If parent Task status is 'cancelled', skip processing and mark SubTask as 'cancelled'
+  - Prevents orphaned job execution after cancellation
+
+### UI Components for User Story 4
+
+> **Path Convention**: Custom admin views in src/app/(payload)/admin/[[...segments]]/custom/task-manager/
+
+#### Task Manager Page
+
+- [ ] T043j [US4] Create TaskManager custom admin view page in src/app/(payload)/admin/[[...segments]]/custom/task-manager/page.tsx as the main Task Manager entry point
+
+#### Filter & List Components
+
+- [ ] T043k [P] [US4] Create TaskFilters component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/TaskFilters.tsx with:
+  - Status multi-select: In Progress, Completed, Failed, Cancelled
+  - Date range selector: Today, Last 7 days, Last 30 days, Custom range
+  - Theme keyword search input
+- [ ] T043l [P] [US4] Create TaskList component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/TaskList.tsx with:
+  - Task rows showing ID, theme, creation time, progress bar, status badge
+  - Default sort: newest first
+  - Pagination controls
+  - Cancel button for in-progress tasks
+  - Click to expand task details
+
+#### Detail Components
+
+- [ ] T043m [P] [US4] Create TaskDetail component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/TaskDetail.tsx showing:
+  - Configuration snapshot (prompts, styles, models, parameters)
+  - Sub-task breakdown with status counts
+  - Error summary for failed tasks
+  - Retry All Failed button
+- [ ] T043n [P] [US4] Create SubTaskList component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/SubTaskList.tsx with:
+  - Status indicators per sub-task
+  - Expandable error details (errorLog, errorCategory)
+  - Individual retry button for failed sub-tasks
+
+#### State Management Hook
+
+- [ ] T043o [US4] Create useTaskProgress hook in src/app/(payload)/admin/[[...segments]]/custom/task-manager/hooks/useTaskProgress.ts with:
+  - 5-second polling interval (PROGRESS_POLL_INTERVAL = 5000ms)
+  - Visibility API integration (pause polling when tab hidden)
+  - Auto-refresh task list on status changes
+
+#### Navigation Integration
+
+- [ ] T043p [US4] Add TaskManager to Payload admin panel navigation in payload.config.ts admin.components configuration with route /admin/custom/task-manager
+
+**Checkpoint**: Task monitoring and management complete - admin can view tasks sorted by newest first, filter by status/date/keyword, cancel in-progress tasks (completing current sub-task), retry failed sub-tasks in place, all tests pass.
 
 ---
 
@@ -663,6 +748,10 @@ Per plan.md Testing Requirements:
 - Phase 5 Style DB Migration tasks T038ag (getStylesFromDB), T038ak (endpoint update), T038am (seed all styles) can run in parallel
 - Phase 5 Style DB Migration cleanup tasks T038ao (remove import) can run in parallel with T038an (remove TS file) after confirming migration works
 - Phase 5 Imported Style Ids task T038ar (useStyleOptions hook) can run in parallel with T038aq (StyleSelector update)
+- Phase 5 UI optimization tasks T038ad (SelectedSettingsSummary borderless), T038ae (PromptsCountSummary borderless), T038af (ImageCountSummary borderless), and T038ag (TaskSummaryStats borderless) can run in parallel
+- Phase 7 tests T043a (task-manager unit), T043b (task-cancel integration), T043c (subtask-retry integration) can run in parallel
+- Phase 7 type updates T043d (TaskStatus Cancelled) and T043e (SubTaskStatus Cancelled) can run in parallel
+- Phase 7 UI components T043k (TaskFilters), T043l (TaskList), T043m (TaskDetail), and T043n (SubTaskList) can run in parallel
 
 ---
 
@@ -676,7 +765,7 @@ Per plan.md Testing Requirements:
 | Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
 | Phase 5: Task Creation Optimization | T038ap | - | - | Manual testing + unit tests pass |
 | Phase 6: US3 | - | T038a | - | Integration tests pass |
-| Phase 7: US4 | - | - | - | Manual testing |
+| Phase 7: US4 | T043a | T043b, T043c | - | All tests pass, UI functional |
 | Phase 8: US5 | - | - | - | Manual testing |
 | Phase 9: US6 | - | - | - | Manual testing |
 | Phase 10: US7 | - | - | - | Manual testing |
@@ -718,6 +807,25 @@ Task: "Write unit tests for asset-manager service in tests/unit/services/asset-m
 Task: "Write integration tests for expand-prompt job in tests/integration/jobs/expand-prompt.integration.test.ts"
 Task: "Write integration tests for generate-image job in tests/integration/jobs/generate-image.integration.test.ts"
 Task: "Write integration tests for task endpoints in tests/integration/endpoints/tasks.integration.test.ts"
+```
+
+## Parallel Example: User Story 4 (Phase 7)
+
+```bash
+# Launch all US4 tests together:
+Task: "Write unit tests for task-manager service in tests/unit/services/task-manager.test.ts"
+Task: "Write integration tests for task-cancel endpoint in tests/integration/endpoints/task-cancel.integration.test.ts"
+Task: "Write integration tests for subtask-retry endpoint in tests/integration/endpoints/subtask-retry.integration.test.ts"
+
+# Launch type updates together:
+Task: "Add Cancelled status to TaskStatus enum in src/lib/types.ts"
+Task: "Add Cancelled status to SubTaskStatus enum in src/lib/types.ts"
+
+# Launch UI components together:
+Task: "Create TaskFilters component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/TaskFilters.tsx"
+Task: "Create TaskList component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/TaskList.tsx"
+Task: "Create TaskDetail component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/TaskDetail.tsx"
+Task: "Create SubTaskList component in src/app/(payload)/admin/[[...segments]]/custom/task-manager/SubTaskList.tsx"
 ```
 
 ---

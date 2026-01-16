@@ -66,6 +66,7 @@ interface ExpandedPrompt {
 | `completed` | All sub-tasks completed successfully |
 | `partial_failed` | Some sub-tasks failed |
 | `failed` | Critical failure, task aborted |
+| `cancelled` | Task cancelled by user (Phase 7) |
 
 **Indexes**:
 - `{ status: 1 }` - Admin filtering
@@ -107,6 +108,7 @@ interface ExpandedPrompt {
 | `processing` | Currently being executed |
 | `success` | Completed successfully |
 | `failed` | Failed after all retries |
+| `cancelled` | Cancelled due to parent task cancellation (Phase 7) |
 
 **Error Category Enum**:
 | Value | Retryable | Description |
@@ -295,51 +297,54 @@ interface GenerationMeta {
        │ submit()
        ▼
   ┌─────────┐
-  │ queued  │
-  └────┬────┘
-       │ startExpansion()
-       ▼
-┌───────────┐
-│ expanding │
-└─────┬─────┘
-      │ expansionComplete()
-      ▼
-┌────────────┐
-│ processing │◄────────────┐
-└─────┬──────┘             │
-      │                    │ retryFailed()
-      ▼                    │
-┌─────────────────────┐    │
-│ completed OR        │────┘
-│ partial_failed OR   │
+  │ queued  │──────────────────────┐
+  └────┬────┘                      │
+       │ startExpansion()          │ cancel()
+       ▼                           │
+┌───────────┐                      │
+│ expanding │──────────────────────┤
+└─────┬─────┘                      │
+      │ expansionComplete()        │
+      ▼                            │
+┌────────────┐                     │
+│ processing │◄────────────┐       │
+└─────┬──────┘             │       │
+      │                    │       │
+      ▼                    │       ▼
+┌─────────────────────┐    │  ┌───────────┐
+│ completed OR        │────┘  │ cancelled │
+│ partial_failed OR   │       └───────────┘
 │ failed              │
 └─────────────────────┘
+        │ retryFailed()
+        └──────────────────► processing
 ```
 
 ### SubTask Status Flow
 
 ```
   ┌─────────┐
-  │ pending │
-  └────┬────┘
-       │ acquire()
-       ▼
-┌────────────┐
-│ processing │
-└─────┬──────┘
-      │
-      ├──success──► ┌─────────┐
-      │             │ success │
-      │             └─────────┘
-      │
-      └──failure──► ┌─────────┐
-        (retries    │ pending │ (if retryable && retryCount < max)
-        exhausted)  └─────────┘
-            │
-            ▼
-       ┌────────┐
-       │ failed │
-       └────────┘
+  │ pending │──────────────────────┐
+  └────┬────┘                      │
+       │ acquire()                 │ parentCancelled()
+       ▼                           │
+┌────────────┐                     │
+│ processing │                     │
+└─────┬──────┘                     │
+      │                            │
+      ├──success──► ┌─────────┐    │
+      │             │ success │    │
+      │             └─────────┘    │
+      │                            │
+      └──failure──► ┌─────────┐    │
+        (retries    │ pending │    │
+        available)  └─────────┘    │
+            │                      │
+            │ (retries exhausted)  │
+            ▼                      ▼
+       ┌────────┐            ┌───────────┐
+       │ failed │            │ cancelled │
+       └────────┘            └───────────┘
 ```
 
 ---

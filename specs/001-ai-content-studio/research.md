@@ -571,3 +571,171 @@ IF test fails THEN
   5. Resume implementation
 END IF
 ```
+
+---
+
+## Phase 7 Research: Task Monitoring and Management
+
+**Date**: 2026-01-14
+
+### 13. Custom Admin Views in PayloadCMS v3
+
+**Context**: Implement Task Manager interface within PayloadCMS admin panel.
+
+**Decision**: Extend existing admin panel with custom Task Manager view using PayloadCMS component replacement mechanism.
+
+**Rationale**:
+- PayloadCMS v3 supports custom admin views via Next.js App Router integration
+- Existing patterns in `src/app/(payload)/admin/` demonstrate proper structure
+- Custom UI field components (TaskOverviewField, SectionHeader) already established
+- Native PayloadCMS hooks (`useFormFields`, `usePayloadAPI`) provide reactive data access
+
+**Alternatives Considered**:
+| Alternative | Rejected Because |
+|------------|------------------|
+| External dashboard application | Violates Constitution Principle I (Payload Native) and adds infrastructure complexity |
+| PayloadCMS list view customization only | Insufficient for complex Task Manager requirements (detail panels, bulk actions) |
+
+---
+
+### 14. Task Cancellation with Graceful Shutdown
+
+**Context**: Allow users to cancel in-progress tasks while preserving generated assets.
+
+**Decision**: Implement cancellation that marks task as "Cancelled", completes current sub-task, and stops pending sub-tasks while retaining generated assets.
+
+**Rationale**:
+- Spec clarification (Session 2026-01-14): "Cancel stops new sub-tasks but completes the current one"
+- Spec clarification: "Keep all completed assets; only pending sub-tasks are stopped"
+- Constitution Principle V (Observability) requires cancellation status to be queryable
+- Generated assets represent completed API costs - deletion wastes resources
+
+**Alternatives Considered**:
+| Alternative | Rejected Because |
+|------------|------------------|
+| Immediate abort (terminate current sub-task) | May leave sub-tasks in unknown state |
+| Delete assets on cancellation | Wastes completed API calls; user may want partial results |
+
+**Implementation Pattern**:
+```typescript
+// Cancel endpoint marks parent task and pending sub-tasks
+await payload.update({
+  collection: 'tasks',
+  id: taskId,
+  data: { status: TaskStatus.Cancelled },
+})
+
+// Job handler checks parent status before processing
+const task = await payload.findByID({ collection: 'tasks', id: input.taskId })
+if (task.status === TaskStatus.Cancelled) {
+  return { output: { success: false, cancelled: true } }
+}
+```
+
+---
+
+### 15. In-Place Retry for Failed Sub-Tasks
+
+**Context**: Allow users to retry failed sub-tasks without creating duplicate records.
+
+**Decision**: Retry updates existing sub-task record in place, clearing error state and resetting retry count to 0.
+
+**Rationale**:
+- Spec clarification (Session 2026-01-14): "Retry updates the existing sub-task in place, clearing the error"
+- Existing pattern in `src/endpoints/retry-failed.ts` demonstrates this approach
+- Constitution Principle II (Infrastructure Minimalism) - no separate retry records needed
+- Preserves sub-task ID for asset linkage and audit trail
+
+**Alternatives Considered**:
+| Alternative | Rejected Because |
+|------------|------------------|
+| Create new sub-task for retry | Duplicates records; complicates asset relationships |
+| Archive failed, create new | Adds complexity without clear benefit |
+
+**Implementation Pattern**:
+```typescript
+await payload.update({
+  collection: 'sub-tasks',
+  id: subTaskId,
+  data: {
+    status: SubTaskStatus.Pending,
+    retryCount: 0,
+    errorLog: null,
+    errorCategory: null,
+    startedAt: null,
+    completedAt: null,
+  },
+})
+```
+
+---
+
+### 16. Task Filtering and Search
+
+**Context**: Provide filtering capabilities for Task Manager list view.
+
+**Decision**: Implement filters for status, date range (predefined + custom), and theme keyword search using PayloadCMS query API.
+
+**Rationale**:
+- Spec clarification (Session 2026-01-14): "Status + date range + search by theme keyword"
+- PayloadCMS query API supports compound `where` conditions
+- MongoDB indexes on `createdAt`, `status`, and `subject` fields provide efficient querying
+- Predefined date ranges (today, 7 days, 30 days) cover common use cases
+
+**Implementation Pattern**:
+```typescript
+interface TaskFilters {
+  status?: TaskStatus[]
+  dateRange?: 'today' | '7days' | '30days' | 'custom'
+  startDate?: Date
+  endDate?: Date
+  searchKeyword?: string
+}
+
+return payload.find({
+  collection: 'tasks',
+  where: { and: conditions },
+  sort: '-createdAt', // Newest first (spec requirement)
+  limit: 50,
+})
+```
+
+---
+
+### 17. Task Status Extension
+
+**Context**: Support cancelled task state in the system.
+
+**Decision**: Add `Cancelled` status to TaskStatus enum.
+
+**Rationale**:
+- Spec clarification requires explicit "Cancelled" state for cancelled tasks
+- Existing TaskStatus enum in `src/lib/types.ts` needs extension
+- SubTask already has patterns for terminal states (success, failed)
+
+**Implementation**:
+```typescript
+export const TaskStatus = {
+  Draft: 'draft',
+  Queued: 'queued',
+  Expanding: 'expanding',
+  Processing: 'processing',
+  Completed: 'completed',
+  PartialFailed: 'partial_failed',
+  Failed: 'failed',
+  Cancelled: 'cancelled', // NEW for Phase 7
+} as const
+```
+
+---
+
+## Phase 7 Resolved Unknowns
+
+| Unknown | Resolution |
+|---------|------------|
+| Task Manager UI location | Custom admin view at `/admin/custom/task-manager/` |
+| Task cancellation behavior | Complete current sub-task, stop pending, retain assets |
+| Sub-task retry behavior | In-place update, clear error state |
+| Task list filters | Status + date range + theme keyword search |
+| Default sort order | Newest first (`-createdAt`) |
+| Cancelled status | Added to TaskStatus enum |

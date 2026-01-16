@@ -38,6 +38,14 @@
 - Q: What should the UI display when no style templates exist yet in the Configuration Center? → A: Blank list with just "No styles found" message
 - Q: Should style templates support editing after creation, and if so, how does this affect tasks currently in progress? → A: Allow editing; in-progress tasks use snapshot captured at task creation
 
+### Session 2026-01-14
+
+- Q: What filter options should the Task Manager provide for the task list? → A: Status + date range + search by theme keyword
+- Q: What should happen when a user retries a failed sub-task? → A: Retry updates the existing sub-task in place, clearing the error
+- Q: Should users be able to cancel in-progress generation tasks? → A: Yes, cancel stops new sub-tasks but completes the current one
+- Q: What should be the default sort order for the Task Manager list? → A: Newest first (most recent creation time at top)
+- Q: What should happen to assets already generated when a task is cancelled? → A: Keep all completed assets; only pending sub-tasks are stopped
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Batch Generation Task (Priority: P1)
@@ -104,11 +112,15 @@ As an **Admin**, I want to view all generation tasks with their progress and sta
 
 **Acceptance Scenarios**:
 
-1. **Given** I have submitted multiple generation tasks, **When** I view the Task Manager, **Then** I see a list of all tasks with ID, theme, creation time, progress bar, and status (In Progress/Completed/Failed).
+1. **Given** I have submitted multiple generation tasks, **When** I view the Task Manager, **Then** I see a list of all tasks sorted by newest first, showing ID, theme, creation time, progress bar, and status (In Progress/Completed/Failed/Cancelled).
 
-2. **Given** a task has failed sub-tasks, **When** I view task details, **Then** I can see which specific sub-tasks failed, their error messages, and retry them individually.
+2. **Given** I want to find specific tasks, **When** I use the Task Manager filters, **Then** I can filter by status (In Progress/Completed/Failed/Cancelled), date range (today, last 7 days, last 30 days, or custom range), and search by theme keyword.
 
-3. **Given** I am viewing a task's details, **When** I check the configuration snapshot, **Then** I can see exactly which prompts, styles, models, and parameters were used for this task.
+3. **Given** a task has failed sub-tasks, **When** I view task details, **Then** I can see which specific sub-tasks failed, their error messages, and retry them individually.
+
+4. **Given** I am viewing a task's details, **When** I check the configuration snapshot, **Then** I can see exactly which prompts, styles, models, and parameters were used for this task.
+
+5. **Given** a task is in progress, **When** I click the cancel button, **Then** the system completes the currently running sub-task, stops processing remaining sub-tasks, keeps all already-generated assets, and marks the task as Cancelled.
 
 ---
 
@@ -192,6 +204,8 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 
 - What happens when a style template is edited while tasks using it are in progress?
   - In-progress tasks continue using the style snapshot captured at task creation; only new tasks use the updated style definition.
+- What happens when a user cancels a task that has partially completed?
+  - System completes the currently running sub-task, stops all pending sub-tasks, retains all already-generated assets, and marks the task as Cancelled. Assets remain accessible in the gallery.
 
 ## Requirements *(mandatory)*
 
