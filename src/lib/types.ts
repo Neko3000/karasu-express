@@ -21,6 +21,7 @@ export enum TaskStatus {
   Completed = 'completed',
   PartialFailed = 'partial_failed',
   Failed = 'failed',
+  Cancelled = 'cancelled', // Phase 7: Task cancellation
 }
 
 /**
@@ -31,6 +32,7 @@ export enum SubTaskStatus {
   Processing = 'processing',
   Success = 'success',
   Failed = 'failed',
+  Cancelled = 'cancelled', // Phase 7: Task cancellation
 }
 
 /**
@@ -176,6 +178,7 @@ export const TASK_STATUS_OPTIONS: SelectOption[] = [
   { label: 'Completed', value: TaskStatus.Completed },
   { label: 'Partial Failed', value: TaskStatus.PartialFailed },
   { label: 'Failed', value: TaskStatus.Failed },
+  { label: 'Cancelled', value: TaskStatus.Cancelled },
 ]
 
 /**
@@ -186,6 +189,7 @@ export const SUBTASK_STATUS_OPTIONS: SelectOption[] = [
   { label: 'Processing', value: SubTaskStatus.Processing },
   { label: 'Success', value: SubTaskStatus.Success },
   { label: 'Failed', value: SubTaskStatus.Failed },
+  { label: 'Cancelled', value: SubTaskStatus.Cancelled },
 ]
 
 /**
@@ -262,3 +266,46 @@ export const MAX_RETRY_ATTEMPTS = 3
  * Polling interval for task progress (in milliseconds)
  */
 export const PROGRESS_POLL_INTERVAL = 5000
+
+// ============================================
+// PHASE 7: TASK MANAGER TYPES
+// ============================================
+
+/**
+ * Date range options for task filtering
+ */
+export type DateRangeOption = 'today' | '7days' | '30days' | 'custom'
+
+/**
+ * Filters for task list queries
+ */
+export interface TaskFilters {
+  status?: TaskStatus[]
+  dateRange?: DateRangeOption
+  startDate?: Date
+  endDate?: Date
+  searchKeyword?: string
+}
+
+/**
+ * Sort order options for task listing
+ */
+export type TaskSortOrder = 'newest' | 'oldest'
+
+/**
+ * Response from cancel task endpoint
+ */
+export interface CancelTaskResponse {
+  message: string
+  cancelledSubTasks: number
+  completedSubTasks: number
+}
+
+/**
+ * Response from retry sub-task endpoint
+ */
+export interface RetrySubTaskResponse {
+  message: string
+  subTaskId: string
+  newStatus: SubTaskStatus
+}
