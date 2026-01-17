@@ -441,18 +441,28 @@ Per plan.md Testing Requirements:
 
 **Gate Criteria**: Integration tests pass for StyleTemplates CRUD
 
-### Tests for User Story 3
+### Optimize Style Template Page (Simplification)
 
-- [ ] T038a [P] [US3] Write integration tests for StyleTemplates collection in tests/integration/collections/style-templates.integration.test.ts (test CRUD, validation of {prompt} placeholder, system style deletion prevention)
+> **Purpose**: Simplify the style template collection to only include essential fields:
+> - styleId (unique identifier)
+> - name (display name)
+> - description (optional)
+> - positivePrompt (with {prompt} placeholder)
+> - negativePrompt (optional)
+>
+> **Remove**: previewImage and sortOrder fields
+
+- [X] T038a [P] [US3] Write integration tests for StyleTemplates collection in tests/integration/collections/style-templates.integration.test.ts (test CRUD, validation of {prompt} placeholder, unique name case-insensitive)
+- [X] T039 [US3] Remove previewImage field from StyleTemplates collection in src/collections/StyleTemplates.ts
+- [X] T039a [US3] Remove sortOrder field from StyleTemplates collection in src/collections/StyleTemplates.ts
+- [X] T039b [US3] Update StyleTemplates admin.defaultColumns to remove sortOrder in src/collections/StyleTemplates.ts (keep: name, styleId, isSystem)
+- [X] T039c [US3] Update data-model.md StyleTemplates section to remove previewImage and sortOrder fields
 
 ### Implementation for User Story 3
 
-- [ ] T039 [US3] Add StyleTemplates collection access control in src/collections/StyleTemplates.ts to prevent deletion of system styles (isSystem: true)
-- [ ] T040 [US3] **SUPERSEDED by T038al-am** - Style import functionality moved to Phase 5 (Style Selection Database Migration). This task is no longer needed as all 180+ styles are seeded via T038al-am from src/resources/original/sdxl_styles_exp.json
-- [ ] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
-- [ ] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
-
-**Checkpoint**: Style management complete - integration tests pass. Admin can create/edit styles and apply them to generations.
+- [X] T040 [US3] Create admin custom component for style template preview in src/components/StylePreview/index.tsx showing merged prompt example
+- [X] T041 [US3] Create seed data for default style templates (Ghibli, Cyberpunk, Film Noir, Watercolor) in src/seed/styles.ts
+- [X] T042 [US3] Update task orchestrator to automatically include Base style when other styles are selected in src/services/task-orchestrator.ts
 
 ---
 
