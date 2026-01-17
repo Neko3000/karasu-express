@@ -5,11 +5,12 @@
  * Executes a single image generation request via the appropriate adapter.
  *
  * Phase 3 (User Story 1): Full implementation with asset management
+ * Phase 7 (User Story 4): Added cancellation signal check
  */
 
 import type { BasePayload } from 'payload'
 
-import { AspectRatio, SubTaskStatus, ErrorCategory, MAX_RETRY_ATTEMPTS, type ExpandedPrompt } from '../lib/types'
+import { AspectRatio, SubTaskStatus, TaskStatus, ErrorCategory, MAX_RETRY_ATTEMPTS, type ExpandedPrompt } from '../lib/types'
 import { getAdapterOrThrow } from '../adapters'
 import { formatErrorForLog } from '../lib/error-normalizer'
 import {
@@ -75,6 +76,48 @@ export async function generateImageHandler({
   console.log(`[generate-image] Prompt: "${finalPrompt.substring(0, 100)}..."`)
 
   try {
+    // Phase 7: Check if parent task has been cancelled before processing
+    // Get the sub-task to find parent task
+    const subTaskCheck = await payload.findByID({
+      collection: 'sub-tasks',
+      id: subTaskId,
+    })
+
+    if (subTaskCheck) {
+      const parentTaskId = typeof subTaskCheck.parentTask === 'string'
+        ? subTaskCheck.parentTask
+        : (subTaskCheck.parentTask as { id?: string })?.id
+
+      if (parentTaskId) {
+        const parentTask = await payload.findByID({
+          collection: 'tasks',
+          id: parentTaskId,
+        })
+
+        if (parentTask && parentTask.status === TaskStatus.Cancelled) {
+          console.log(`[generate-image] Parent task ${parentTaskId} is cancelled. Skipping sub-task ${subTaskId}`)
+
+          // Update sub-task to cancelled
+          await payload.update({
+            collection: 'sub-tasks',
+            id: subTaskId,
+            data: {
+              status: SubTaskStatus.Cancelled,
+              completedAt: new Date().toISOString(),
+            },
+          })
+
+          return {
+            output: {
+              success: false,
+              error: 'Parent task cancelled',
+              errorCategory: 'UNKNOWN',
+            },
+          }
+        }
+      }
+    }
+
     // Update sub-task status to processing
     await payload.update({
       collection: 'sub-tasks',
