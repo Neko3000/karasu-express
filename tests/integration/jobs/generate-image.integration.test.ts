@@ -5,9 +5,14 @@
  * Per Constitution Principle VI (Testing Discipline)
  *
  * Mock adapter, test subtask status, asset creation, progress updates
+ *
+ * Note: Phase 7 (T043x, T043y) changed the image storage workflow:
+ * - Images are downloaded and saved to src/generates/ folder
+ * - filePath option is used for PayloadCMS Media upload instead of file buffer
+ * - Files are retained after upload (no cleanup)
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
 import { SubTaskStatus, AspectRatio, ErrorCategory } from '../../../src/lib/types'
 
 // Mock the adapter registry
@@ -19,6 +24,9 @@ vi.mock('../../../src/adapters', () => ({
 vi.mock('../../../src/lib/error-normalizer', () => ({
   formatErrorForLog: vi.fn((error) => error.message || 'Unknown error'),
 }))
+
+// Mock fetch globally for image downloads
+const mockFetch = vi.fn()
 
 // Import after mocks are set up
 import { generateImageHandler, type GenerateImageJobInput } from '../../../src/jobs/generate-image'
@@ -41,7 +49,28 @@ describe('Generate Image Job Integration', () => {
     normalizeError: ReturnType<typeof vi.fn>
     providerId: string
     modelId: string
+    displayName: string
   }
+
+  // Create a simple PNG buffer for testing
+  const createMockImageBuffer = (): Uint8Array => {
+    return new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+      0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+      0x89, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+      0x44, 0xae, 0x42, 0x60, 0x82,
+    ])
+  }
+
+  beforeAll(() => {
+    vi.stubGlobal('fetch', mockFetch)
+  })
+
+  afterAll(() => {
+    vi.unstubAllGlobals()
+  })
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -59,9 +88,17 @@ describe('Generate Image Job Integration', () => {
       normalizeError: vi.fn(),
       providerId: 'fal',
       modelId: 'flux-pro',
+      displayName: 'Flux Pro',
     }
 
     ;(getAdapterOrThrow as ReturnType<typeof vi.fn>).mockReturnValue(mockAdapter)
+
+    // Default successful fetch mock for image downloads
+    mockFetch.mockResolvedValue({
+      ok: true,
+      headers: new Headers({ 'content-type': 'image/png' }),
+      arrayBuffer: vi.fn().mockResolvedValue(createMockImageBuffer().buffer),
+    })
   })
 
   afterEach(() => {
@@ -92,6 +129,11 @@ describe('Generate Image Job Integration', () => {
     finalPrompt: 'a cat in the rain',
     batchIndex: 0,
     retryCount: 0,
+    expandedPrompt: {
+      variantIndex: 0,
+      subjectSlug: 'cat-rain',
+      prompt: 'a cat in the rain',
+    },
     ...overrides,
   })
 

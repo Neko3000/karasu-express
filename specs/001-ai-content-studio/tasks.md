@@ -704,21 +704,21 @@ Per plan.md Testing Requirements:
 > - Cleaner upload flow using PayloadCMS filePath option
 > - Reduces memory usage by not holding large base64 strings
 
-- [ ] T043x [US4] Update generate-image job in src/jobs/generate-image.ts to remove `deleteFromGeneratesFolder()` call:
+- [X] T043x [US4] Update generate-image job in src/jobs/generate-image.ts to remove `deleteFromGeneratesFolder()` call:
   - Remove the cleanup step after successful Media upload
   - Keep generated images in `src/generates/` for persistence
   - Files will remain until manually cleaned or by scheduled cleanup job
 
-- [ ] T043y [US4] Update Media document creation in src/jobs/generate-image.ts to use file path:
+- [X] T043y [US4] Update Media document creation in src/jobs/generate-image.ts to use file path:
   - Instead of `file: { data: buffer, mimetype, name, size }`, use `filePath` option
   - Update to: `payload.create({ collection: 'media', data: {...}, filePath: savedFile.filePath })`
   - This allows PayloadCMS to read the file directly from disk instead of from memory
 
-- [ ] T043z [P] [US4] Update unit tests in tests/unit/services/image-storage.test.ts:
+- [X] T043z [P] [US4] Update unit tests in tests/unit/services/image-storage.test.ts:
   - Remove or update tests that expect file deletion after upload
   - Update test assertions to reflect files are retained
 
-- [ ] T043za [P] [US4] Update integration tests in tests/integration/jobs/generate-image-storage.integration.test.ts:
+- [X] T043za [P] [US4] Update integration tests in tests/integration/jobs/generate-image-storage.integration.test.ts:
   - Update tests to verify files remain after upload
   - Add test case verifying filePath is used in payload.create call
 

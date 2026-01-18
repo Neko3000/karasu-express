@@ -5,6 +5,10 @@
  * Per Constitution Principle VI (Testing Discipline)
  *
  * Tests downloadImage, saveToGeneratesFolder, getLocalFilePath, cleanupOldFiles
+ *
+ * Note: Per Phase 7 (T043x), generated files are now retained in src/generates/
+ * after successful Media upload. The deleteFromGeneratesFolder function is still
+ * tested here as it's used by cleanupOldFiles for scheduled cleanup.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'

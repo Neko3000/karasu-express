@@ -7,6 +7,7 @@
  * Phase 3 (User Story 1): Full implementation with asset management
  * Phase 7 (User Story 4): Added cancellation signal check
  * Phase 7 (Bug Fix): Download images locally before uploading to PayloadCMS Media collection
+ * Phase 7 (T043x, T043y): Keep generated files and use filePath for PayloadCMS upload
  */
 
 import type { BasePayload } from 'payload'
@@ -18,12 +19,10 @@ import {
   generateFilename,
   generateAltText,
   getExtensionFromMimeType,
-  getMimeTypeFromExtension,
 } from '../services/asset-manager'
 import {
   downloadImage,
   saveToGeneratesFolder,
-  deleteFromGeneratesFolder,
 } from '../services/image-storage'
 
 /**
@@ -228,20 +227,19 @@ export async function generateImageHandler({
 
     // Phase 7 Bug Fix: Download image from API URL and upload to PayloadCMS Media
     // This fixes the "MissingFile: No files were uploaded" error
+    // Phase 7 (T043x, T043y): Keep generated files and use filePath for upload
     console.log(`[generate-image] Downloading image from: ${generatedImage.url}`)
 
     // Download the image from the API response URL
     const downloadedImage = await downloadImage(generatedImage.url)
 
-    // Save to generates folder temporarily
+    // Save to generates folder (files are retained for debugging/persistence)
     const savedFile = await saveToGeneratesFolder(downloadedImage.buffer, filename)
-    console.log(`[generate-image] Saved image temporarily to: ${savedFile.filePath}`)
+    console.log(`[generate-image] Saved image to: ${savedFile.filePath}`)
 
-    // Get MIME type for the upload
-    const mimeType = getMimeTypeFromExtension(extension)
-
-    // Create Media document with file upload
-    // PayloadCMS expects file data in a specific format for upload collections
+    // Create Media document with file path
+    // PayloadCMS reads the file directly from disk using filePath option
+    // This reduces memory usage by not holding large buffers
     const mediaDoc = await payload.create({
       collection: 'media',
       data: {
@@ -254,19 +252,11 @@ export async function generateImageHandler({
         modelId,
         subjectSlug,
       },
-      file: {
-        data: downloadedImage.buffer,
-        mimetype: mimeType,
-        name: filename,
-        size: downloadedImage.buffer.length,
-      },
+      filePath: savedFile.filePath,
     })
 
     console.log(`[generate-image] Created Media document: ${mediaDoc.id}`)
-
-    // Clean up temporary file after successful upload
-    await deleteFromGeneratesFolder(filename)
-    console.log(`[generate-image] Cleaned up temporary file: ${filename}`)
+    console.log(`[generate-image] Image retained at: ${savedFile.filePath}`)
 
     // Update sub-task as successful
     await payload.update({
