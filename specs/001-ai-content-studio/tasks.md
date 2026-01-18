@@ -471,8 +471,8 @@ Per plan.md Testing Requirements:
 #### Integration with Task Creation Page
 
 - [X] T038aw [US1] Create SubmitTaskField component in src/components/Studio/SubmitTaskField.tsx as PayloadCMS UI field wrapper that renders SubmitTaskButton
-- [X] T038ax [US1] Add SubmitTaskField to Tasks collection in src/collections/Tasks.ts as a UI field at the end of the form (after Overview section)
-- [X] T038ay [US1] Update src/components/Studio/index.tsx barrel file to export SubmitTaskButton, useSubmitTask, SubmitConfirmationDialog, and SubmitTaskField components
+- [X] T038ax [US1] Add SubmitTaskAction to Tasks collection in src/collections/Tasks.ts via admin.components.edit.beforeDocumentControls (positioned next to Save button in document header)
+- [X] T038ay [US1] Update src/components/Studio/index.tsx barrel file to export SubmitTaskButton, useSubmitTask, SubmitConfirmationDialog, SubmitTaskField, SubmitTaskAction components
 
 #### Success and Error States
 
@@ -485,7 +485,7 @@ Per plan.md Testing Requirements:
   - Retry button to attempt submission again
   - Styled consistently with OptimizationErrorBanner
 
-**Checkpoint**: Task creation page now has a dedicated "Submit Task" button that saves the task, shows a confirmation dialog with warnings if applicable, submits to the generation queue, and provides clear success/error feedback. Users can now complete the full task creation workflow from a single page.
+**Checkpoint**: Task creation page now has a dedicated "Submit Task" button in the document header (next to the Save button) that saves the task, shows a confirmation dialog with warnings if applicable, submits to the generation queue, and provides clear success/error feedback via toast notifications. Users can now complete the full task creation workflow from a single page.
 
 ---
 

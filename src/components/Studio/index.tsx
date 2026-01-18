@@ -33,6 +33,7 @@ export { SubmitConfirmationDialog } from './SubmitConfirmationDialog'
 export { SubmitSuccessMessage } from './SubmitSuccessMessage'
 export { SubmitErrorMessage } from './SubmitErrorMessage'
 export { SubmitTaskField } from './SubmitTaskField'
+export { SubmitTaskAction } from './SubmitTaskAction'
 export { useSubmitTask } from './hooks/useSubmitTask'
 
 // Type exports

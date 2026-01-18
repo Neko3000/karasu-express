@@ -23,6 +23,12 @@ export const Tasks: CollectionConfig = {
     defaultColumns: ['subject', 'status', 'progress', 'createdAt'],
     group: 'Generation',
     description: 'AI image generation tasks',
+    components: {
+      edit: {
+        // Add Submit Task button before document controls (next to Save button)
+        beforeDocumentControls: ['@/components/Studio/SubmitTaskAction#SubmitTaskAction'],
+      },
+    },
   },
   access: {
     read: () => true,
@@ -300,28 +306,6 @@ export const Tasks: CollectionConfig = {
       admin: {
         components: {
           Field: '@/components/Studio/TaskOverviewField#TaskOverviewField',
-        },
-      },
-    },
-
-    // ============================================
-    // SECTION 4.5: SUBMIT TASK (Action Button)
-    // ============================================
-    {
-      name: 'submitSection',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: '@/components/Admin/SectionDivider#SectionDivider',
-        },
-      },
-    },
-    {
-      name: 'submitTask',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: '@/components/Studio/SubmitTaskField#SubmitTaskField',
         },
       },
     },
