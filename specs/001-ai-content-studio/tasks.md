@@ -654,11 +654,11 @@ Per plan.md Testing Requirements:
 
 #### Unit Tests (Image Storage)
 
-- [ ] T043q [P] [US4] Write unit tests for image-storage service in tests/unit/services/image-storage.test.ts (test downloadImage, saveToGeneratesFolder, getLocalFilePath, cleanupOldFiles)
+- [X] T043q [P] [US4] Write unit tests for image-storage service in tests/unit/services/image-storage.test.ts (test downloadImage, saveToGeneratesFolder, getLocalFilePath, cleanupOldFiles)
 
 #### Service Implementation (Image Storage)
 
-- [ ] T043r [US4] Create image-storage service in src/services/image-storage.ts with:
+- [X] T043r [US4] Create image-storage service in src/services/image-storage.ts with:
   - `downloadImage(imageUrl: string): Promise<Buffer>` - Download image from remote URL
   - `saveToGeneratesFolder(buffer: Buffer, filename: string): Promise<string>` - Save buffer to src/generates/ folder and return absolute path
   - `getLocalFilePath(filename: string): string` - Get absolute path to file in generates folder
@@ -667,25 +667,25 @@ Per plan.md Testing Requirements:
 
 #### Directory Setup
 
-- [ ] T043s [P] [US4] Create src/generates/ directory with .gitkeep file (empty directory for storing downloaded images before upload)
-- [ ] T043t [P] [US4] Add src/generates/*.{png,jpg,jpeg,webp} to .gitignore (keep directory but ignore generated images)
+- [X] T043s [P] [US4] Create src/generates/ directory with .gitkeep file (empty directory for storing downloaded images before upload)
+- [X] T043t [P] [US4] Add src/generates/*.{png,jpg,jpeg,webp} to .gitignore (keep directory but ignore generated images)
 
 #### Generate-Image Job Handler Update
 
-- [ ] T043u [US4] Update generate-image job handler in src/jobs/generate-image.ts to:
+- [X] T043u [US4] Update generate-image job handler in src/jobs/generate-image.ts to:
   - Import image-storage service
   - After successful API generation, call `downloadImage(generatedImage.url)`
   - Save downloaded buffer to generates folder via `saveToGeneratesFolder(buffer, filename)`
   - Use the local file path for PayloadCMS Media upload instead of trying to create without file
 
-- [ ] T043v [US4] Update Media document creation in src/jobs/generate-image.ts to:
+- [X] T043v [US4] Update Media document creation in src/jobs/generate-image.ts to:
   - Use PayloadCMS file upload API: `payload.create({ collection: 'media', data: {...}, file: { data: buffer, mimetype, name } })`
   - Pass the downloaded image buffer directly to payload.create as file data
   - This ensures PayloadCMS processes the upload correctly and generates thumbnails
 
 #### Integration Tests (Image Storage Flow)
 
-- [ ] T043w [P] [US4] Write integration tests for generate-image job with image storage in tests/integration/jobs/generate-image-storage.integration.test.ts:
+- [X] T043w [P] [US4] Write integration tests for generate-image job with image storage in tests/integration/jobs/generate-image-storage.integration.test.ts:
   - Test image download from mock URL
   - Test file saved to generates folder
   - Test Media document created with proper file upload

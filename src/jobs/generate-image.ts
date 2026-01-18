@@ -6,6 +6,7 @@
  *
  * Phase 3 (User Story 1): Full implementation with asset management
  * Phase 7 (User Story 4): Added cancellation signal check
+ * Phase 7 (Bug Fix): Download images locally before uploading to PayloadCMS Media collection
  */
 
 import type { BasePayload } from 'payload'
@@ -17,7 +18,13 @@ import {
   generateFilename,
   generateAltText,
   getExtensionFromMimeType,
+  getMimeTypeFromExtension,
 } from '../services/asset-manager'
+import {
+  downloadImage,
+  saveToGeneratesFolder,
+  deleteFromGeneratesFolder,
+} from '../services/image-storage'
 
 /**
  * Input data for the generate-image job
@@ -219,9 +226,22 @@ export async function generateImageHandler({
       providerParams: providerOptions,
     }
 
-    // Create Media document
-    // Note: In a production environment, you would download the image
-    // and upload it to your own storage. For now, we store the URL.
+    // Phase 7 Bug Fix: Download image from API URL and upload to PayloadCMS Media
+    // This fixes the "MissingFile: No files were uploaded" error
+    console.log(`[generate-image] Downloading image from: ${generatedImage.url}`)
+
+    // Download the image from the API response URL
+    const downloadedImage = await downloadImage(generatedImage.url)
+
+    // Save to generates folder temporarily
+    const savedFile = await saveToGeneratesFolder(downloadedImage.buffer, filename)
+    console.log(`[generate-image] Saved image temporarily to: ${savedFile.filePath}`)
+
+    // Get MIME type for the upload
+    const mimeType = getMimeTypeFromExtension(extension)
+
+    // Create Media document with file upload
+    // PayloadCMS expects file data in a specific format for upload collections
     const mediaDoc = await payload.create({
       collection: 'media',
       data: {
@@ -233,10 +253,20 @@ export async function generateImageHandler({
         styleId,
         modelId,
         subjectSlug,
-        // The URL will be stored in a custom field or we'd handle upload differently
-        // For MVP, we'll store metadata and reference the external URL
+      },
+      file: {
+        data: downloadedImage.buffer,
+        mimetype: mimeType,
+        name: filename,
+        size: downloadedImage.buffer.length,
       },
     })
+
+    console.log(`[generate-image] Created Media document: ${mediaDoc.id}`)
+
+    // Clean up temporary file after successful upload
+    await deleteFromGeneratesFolder(filename)
+    console.log(`[generate-image] Cleaned up temporary file: ${filename}`)
 
     // Update sub-task as successful
     await payload.update({

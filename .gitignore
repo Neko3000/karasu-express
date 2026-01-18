@@ -42,6 +42,13 @@ next-env.d.ts
 
 /media
 
+# Generated images (downloaded from AI APIs before upload)
+/src/generates/*.png
+/src/generates/*.jpg
+/src/generates/*.jpeg
+/src/generates/*.webp
+/src/generates/*.gif
+
 # Playwright
 /test-results/
 /playwright-report/
