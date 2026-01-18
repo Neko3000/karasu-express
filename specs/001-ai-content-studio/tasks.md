@@ -430,6 +430,65 @@ Per plan.md Testing Requirements:
 
 ---
 
+### Submit Button for Task Creation Page
+
+> **Purpose**: Add a prominent "Submit Task" button to the task creation page that saves the task and transitions it from draft to queued status, triggering the image generation workflow.
+>
+> **Context**: Currently, users can only use PayloadCMS's built-in "Save" button which saves as draft. A dedicated submit button is needed to:
+> 1. Save the current form data as a task
+> 2. Call the POST /api/tasks/{id}/submit endpoint to transition to queued status
+> 3. Show loading state during submission
+> 4. Handle success (redirect to task detail or show confirmation) and error states
+> 5. Display validation warnings (e.g., high image count > 500) before submission
+
+#### Submit Button Component
+
+- [ ] T038at [US1] Create SubmitTaskButton component in src/components/Studio/SubmitTaskButton.tsx with:
+  - Prominent button styling (primary color, larger than standard buttons)
+  - "Submit Task" label with optional icon
+  - Loading spinner during submission
+  - Disabled state when form is invalid or already submitted
+  - Integration with PayloadCMS form context to access task ID and form state
+
+#### Submit Button Hook
+
+- [ ] T038au [US1] Create useSubmitTask hook in src/components/Studio/hooks/useSubmitTask.ts to:
+  - Access PayloadCMS form context for task ID and form data
+  - Handle form save via PayloadCMS API before submission
+  - Call POST /api/tasks/{id}/submit endpoint after save completes
+  - Track submission state (idle, saving, submitting, success, error)
+  - Return error messages for validation failures
+  - Handle redirect or success callback after successful submission
+
+#### Confirmation Dialog
+
+- [ ] T038av [P] [US1] Create SubmitConfirmationDialog component in src/components/Studio/SubmitConfirmationDialog.tsx with:
+  - Modal overlay with task summary (total images, selected models, styles)
+  - Warning message when total images exceeds 500 (per FR-005)
+  - "Confirm Submit" and "Cancel" buttons
+  - Accessible modal implementation (focus trap, ESC to close)
+
+#### Integration with Task Creation Page
+
+- [ ] T038aw [US1] Create SubmitTaskField component in src/components/Studio/SubmitTaskField.tsx as PayloadCMS UI field wrapper that renders SubmitTaskButton
+- [ ] T038ax [US1] Add SubmitTaskField to Tasks collection in src/collections/Tasks.ts as a UI field at the end of the form (after Overview section)
+- [ ] T038ay [US1] Update src/components/Studio/index.tsx barrel file to export SubmitTaskButton, useSubmitTask, SubmitConfirmationDialog, and SubmitTaskField components
+
+#### Success and Error States
+
+- [ ] T038az [P] [US1] Create SubmitSuccessMessage component in src/components/Studio/SubmitSuccessMessage.tsx showing:
+  - Success confirmation with task ID
+  - Link to Task Manager to track progress
+  - Option to create another task
+- [ ] T038ba [P] [US1] Create SubmitErrorMessage component in src/components/Studio/SubmitErrorMessage.tsx showing:
+  - Error message from API response
+  - Retry button to attempt submission again
+  - Styled consistently with OptimizationErrorBanner
+
+**Checkpoint**: Task creation page now has a dedicated "Submit Task" button that saves the task, shows a confirmation dialog with warnings if applicable, submits to the generation queue, and provides clear success/error feedback. Users can now complete the full task creation workflow from a single page.
+
+---
+
 ## Phase 6: User Story 3 - Style Configuration and Management (Priority: P2)
 
 **Goal**: Admin can create and manage reusable style templates that can be applied to any generation
@@ -767,6 +826,7 @@ Per plan.md Testing Requirements:
 - Phase 5 Style DB Migration cleanup tasks T038ao (remove import) can run in parallel with T038an (remove TS file) after confirming migration works
 - Phase 5 Imported Style Ids task T038ar (useStyleOptions hook) can run in parallel with T038aq (StyleSelector update)
 - Phase 5 UI optimization tasks T038ad (SelectedSettingsSummary borderless), T038ae (PromptsCountSummary borderless), T038af (ImageCountSummary borderless), and T038ag (TaskSummaryStats borderless) can run in parallel
+- Phase 5 Submit Button tasks T038av (SubmitConfirmationDialog), T038az (SubmitSuccessMessage), and T038ba (SubmitErrorMessage) can run in parallel
 - Phase 7 tests T043a (task-manager unit), T043b (task-cancel integration), T043c (subtask-retry integration) can run in parallel
 - Phase 7 type updates T043d (TaskStatus Cancelled) and T043e (SubTaskStatus Cancelled) can run in parallel
 - Phase 7 UI components T043k (TaskFilters), T043l (TaskList), T043m (TaskDetail), and T043n (SubTaskList) can run in parallel
@@ -781,7 +841,7 @@ Per plan.md Testing Requirements:
 | Phase 2: Foundational | T010a, T011a, T013a, T014a, T015a | - | T016a | All unit + contract tests pass |
 | Phase 3: US1 | T020a, T020b, T020c, T033b, T033k | T020d, T020e, T020f, T033h | - | All tests pass |
 | Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
-| Phase 5: Task Creation Optimization | T038ap | - | - | Manual testing + unit tests pass |
+| Phase 5: Task Creation Optimization | T038ap | - | - | Manual testing + unit tests pass, submit button functional |
 | Phase 6: US3 | - | T038a | - | Integration tests pass |
 | Phase 7: US4 | T043a | T043b, T043c | - | All tests pass, UI functional |
 | Phase 8: US5 | - | - | - | Manual testing |
