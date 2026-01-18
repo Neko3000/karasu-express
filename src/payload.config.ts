@@ -63,6 +63,19 @@ export default buildConfig({
   // Note: Jobs configuration uses inline handlers for development
   // In production, consider using workflow definitions
   jobs: {
+    // Enable automatic job processing with cron schedule
+    // Jobs are processed every second to ensure sub-tasks are created
+    // immediately after task submission
+    autoRun: [
+      {
+        // Process jobs from all queues
+        allQueues: true,
+        // Run every second for near-immediate processing
+        // In production, consider '*/5 * * * * *' (every 5 seconds) or '* * * * *' (every minute)
+        cron: '* * * * * *',
+      },
+    ],
+
     // Task definitions
     tasks: [
       {

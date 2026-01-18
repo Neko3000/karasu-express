@@ -587,7 +587,7 @@ Per plan.md Testing Requirements:
 
 #### Job Queue Runner Configuration
 
-- [ ] T043ia [US4] Configure PayloadCMS jobs queue auto-run in src/payload.config.ts to enable automatic job processing:
+- [X] T043ia [US4] Configure PayloadCMS jobs queue auto-run in src/payload.config.ts to enable automatic job processing:
   - Add `autoRun: true` to jobs configuration so expand-prompt and generate-image jobs run automatically after task submission
   - This ensures sub-tasks are created immediately when a task is submitted (status changes to 'queued')
   - Without this, jobs are queued but never processed, resulting in empty sub-tasks list
