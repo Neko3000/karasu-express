@@ -691,6 +691,37 @@ Per plan.md Testing Requirements:
   - Test Media document created with proper file upload
   - Test cleanup after successful upload (optional)
 
+#### Image Storage Optimization
+
+> **Purpose**: Optimize the image storage workflow for better reliability and debugging.
+>
+> **Changes**:
+> 1. Keep generated files in `src/generates/` instead of deleting them after upload
+> 2. Use file path for PayloadCMS upload instead of passing base64 buffer in imageUrl
+>
+> **Benefits**:
+> - Files persist for debugging and manual inspection
+> - Cleaner upload flow using PayloadCMS filePath option
+> - Reduces memory usage by not holding large base64 strings
+
+- [ ] T043x [US4] Update generate-image job in src/jobs/generate-image.ts to remove `deleteFromGeneratesFolder()` call:
+  - Remove the cleanup step after successful Media upload
+  - Keep generated images in `src/generates/` for persistence
+  - Files will remain until manually cleaned or by scheduled cleanup job
+
+- [ ] T043y [US4] Update Media document creation in src/jobs/generate-image.ts to use file path:
+  - Instead of `file: { data: buffer, mimetype, name, size }`, use `filePath` option
+  - Update to: `payload.create({ collection: 'media', data: {...}, filePath: savedFile.filePath })`
+  - This allows PayloadCMS to read the file directly from disk instead of from memory
+
+- [ ] T043z [P] [US4] Update unit tests in tests/unit/services/image-storage.test.ts:
+  - Remove or update tests that expect file deletion after upload
+  - Update test assertions to reflect files are retained
+
+- [ ] T043za [P] [US4] Update integration tests in tests/integration/jobs/generate-image-storage.integration.test.ts:
+  - Update tests to verify files remain after upload
+  - Add test case verifying filePath is used in payload.create call
+
 **Checkpoint**: Generated images are now properly saved locally then uploaded to Media collection. Task monitoring and management complete - admin can view tasks sorted by newest first, filter by status/date/keyword, cancel in-progress tasks (completing current sub-task), retry failed sub-tasks in place, all tests pass.
 
 ---
@@ -894,6 +925,7 @@ Per plan.md Testing Requirements:
 - Phase 7 UI components T043k (TaskFilters), T043l (TaskList), T043m (TaskDetail), and T043n (SubTaskList) can run in parallel
 - Phase 7 Image Storage tasks T043q (unit tests) and T043w (integration tests) can run in parallel
 - Phase 7 Directory Setup tasks T043s (.gitkeep) and T043t (.gitignore) can run in parallel
+- Phase 7 Image Storage Optimization tasks T043z (unit test updates) and T043za (integration test updates) can run in parallel
 
 ---
 
