@@ -636,7 +636,62 @@ Per plan.md Testing Requirements:
 
 - [X] T043p [US4] Add TaskManager to Payload admin panel navigation (auto-discovered via custom admin view path convention)
 
-**Checkpoint**: Task monitoring and management complete - admin can view tasks sorted by newest first, filter by status/date/keyword, cancel in-progress tasks (completing current sub-task), retry failed sub-tasks in place, all tests pass.
+### Generated Image Storage & Media Creation (Bug Fix)
+
+> **Purpose**: Fix the "MissingFile: No files were uploaded" error when creating Media documents.
+> The Media collection is configured as a PayloadCMS upload collection requiring actual file uploads.
+> Current implementation tries to create Media without uploading a file.
+>
+> **Solution**:
+> 1. Download generated image from API response URL to `src/generates/` folder
+> 2. Upload the local file to PayloadCMS Media collection using file upload API
+>
+> **Reference Error**:
+> ```
+> [generate-image] Error generating image for sub-task: MissingFile: No files were uploaded.
+>     at async generateImageHandler (src/jobs/generate-image.ts:225:21)
+> ```
+
+#### Unit Tests (Image Storage)
+
+- [ ] T043q [P] [US4] Write unit tests for image-storage service in tests/unit/services/image-storage.test.ts (test downloadImage, saveToGeneratesFolder, getLocalFilePath, cleanupOldFiles)
+
+#### Service Implementation (Image Storage)
+
+- [ ] T043r [US4] Create image-storage service in src/services/image-storage.ts with:
+  - `downloadImage(imageUrl: string): Promise<Buffer>` - Download image from remote URL
+  - `saveToGeneratesFolder(buffer: Buffer, filename: string): Promise<string>` - Save buffer to src/generates/ folder and return absolute path
+  - `getLocalFilePath(filename: string): string` - Get absolute path to file in generates folder
+  - `ensureGeneratesFolderExists(): Promise<void>` - Create src/generates/ if not exists
+  - `getExtensionFromUrl(url: string): string` - Extract file extension from URL or content-type
+
+#### Directory Setup
+
+- [ ] T043s [P] [US4] Create src/generates/ directory with .gitkeep file (empty directory for storing downloaded images before upload)
+- [ ] T043t [P] [US4] Add src/generates/*.{png,jpg,jpeg,webp} to .gitignore (keep directory but ignore generated images)
+
+#### Generate-Image Job Handler Update
+
+- [ ] T043u [US4] Update generate-image job handler in src/jobs/generate-image.ts to:
+  - Import image-storage service
+  - After successful API generation, call `downloadImage(generatedImage.url)`
+  - Save downloaded buffer to generates folder via `saveToGeneratesFolder(buffer, filename)`
+  - Use the local file path for PayloadCMS Media upload instead of trying to create without file
+
+- [ ] T043v [US4] Update Media document creation in src/jobs/generate-image.ts to:
+  - Use PayloadCMS file upload API: `payload.create({ collection: 'media', data: {...}, file: { data: buffer, mimetype, name } })`
+  - Pass the downloaded image buffer directly to payload.create as file data
+  - This ensures PayloadCMS processes the upload correctly and generates thumbnails
+
+#### Integration Tests (Image Storage Flow)
+
+- [ ] T043w [P] [US4] Write integration tests for generate-image job with image storage in tests/integration/jobs/generate-image-storage.integration.test.ts:
+  - Test image download from mock URL
+  - Test file saved to generates folder
+  - Test Media document created with proper file upload
+  - Test cleanup after successful upload (optional)
+
+**Checkpoint**: Generated images are now properly saved locally then uploaded to Media collection. Task monitoring and management complete - admin can view tasks sorted by newest first, filter by status/date/keyword, cancel in-progress tasks (completing current sub-task), retry failed sub-tasks in place, all tests pass.
 
 ---
 
@@ -837,6 +892,8 @@ Per plan.md Testing Requirements:
 - Phase 7 tests T043a (task-manager unit), T043b (task-cancel integration), T043c (subtask-retry integration) can run in parallel
 - Phase 7 type updates T043d (TaskStatus Cancelled) and T043e (SubTaskStatus Cancelled) can run in parallel
 - Phase 7 UI components T043k (TaskFilters), T043l (TaskList), T043m (TaskDetail), and T043n (SubTaskList) can run in parallel
+- Phase 7 Image Storage tasks T043q (unit tests) and T043w (integration tests) can run in parallel
+- Phase 7 Directory Setup tasks T043s (.gitkeep) and T043t (.gitignore) can run in parallel
 
 ---
 
@@ -850,7 +907,7 @@ Per plan.md Testing Requirements:
 | Phase 4: US2 | T033a, T038e | T037a | - | All tests pass, UI functional |
 | Phase 5: Task Creation Optimization | T038ap | - | - | Manual testing + unit tests pass, submit button functional |
 | Phase 6: US3 | - | T038a | - | Integration tests pass |
-| Phase 7: US4 | T043a | T043b, T043c | - | All tests pass, UI functional |
+| Phase 7: US4 | T043a, T043q | T043b, T043c, T043w | - | All tests pass, UI functional, image storage works |
 | Phase 8: US5 | - | - | - | Manual testing |
 | Phase 9: US6 | - | - | - | Manual testing |
 | Phase 10: US7 | - | - | - | Manual testing |
@@ -858,7 +915,7 @@ Per plan.md Testing Requirements:
 | Phase 12: Polish | - | - | - | Full suite passes |
 | Phase 13: Veo | T076a | - | - | (Deferred) |
 
-**Total Test Tasks**: 21 (12 unit, 8 integration, 1 contract)
+**Total Test Tasks**: 23 (13 unit, 9 integration, 1 contract)
 
 ---
 
