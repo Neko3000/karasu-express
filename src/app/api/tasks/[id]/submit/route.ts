@@ -41,9 +41,12 @@ export async function POST(
       )
     }
 
-    // Validate task has at least one style
+    // Validate task has at least one style (check both styles relationship and importedStyleIds)
     const styles = Array.isArray(task.styles) ? task.styles : []
-    if (styles.length === 0) {
+    const importedStyleIds = Array.isArray((task as { importedStyleIds?: string[] }).importedStyleIds)
+      ? (task as { importedStyleIds?: string[] }).importedStyleIds
+      : []
+    if (styles.length === 0 && (importedStyleIds?.length ?? 0) === 0) {
       return NextResponse.json(
         {
           error: 'Validation error',
