@@ -227,7 +227,14 @@ describe('SubTask Retry Endpoint Integration', () => {
           .mockResolvedValueOnce({ ...subTask, status: SubTaskStatus.Pending })
           .mockResolvedValueOnce({ ...parentTask, status: TaskStatus.Processing })
 
-        // Update parent task to processing
+        // First update: subtask status to pending (consumes first mock)
+        await mockPayload.update({
+          collection: 'sub-tasks',
+          id: 'subtask-123',
+          data: { status: SubTaskStatus.Pending },
+        })
+
+        // Second update: parent task to processing (consumes second mock)
         const updatedTask = await mockPayload.update({
           collection: 'tasks',
           id: 'task-123',
@@ -371,6 +378,13 @@ describe('SubTask Retry Endpoint Integration', () => {
           .mockResolvedValueOnce(subTask)
           .mockResolvedValueOnce(parentTask)
 
+        // First findByID: get the subtask (consumes first mock)
+        await mockPayload.findByID({
+          collection: 'sub-tasks',
+          id: 'subtask-123',
+        })
+
+        // Second findByID: get the parent task (consumes second mock)
         const foundParentTask = await mockPayload.findByID({
           collection: 'tasks',
           id: 'task-123',
