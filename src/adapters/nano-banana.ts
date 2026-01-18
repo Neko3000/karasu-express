@@ -81,8 +81,11 @@ const NANO_BANANA_SUPPORTED_ASPECT_RATIOS: AspectRatio[] = [
  */
 export class NanoBananaAdapter implements ImageGenerationAdapter {
   readonly providerId = Provider.Google
-  readonly modelId = 'gemini-3-pro-image-preview'
+  readonly modelId = 'nano-banana' // Must match the value in Tasks collection models field
   readonly displayName = 'Nano Banana'
+
+  // Internal model name for API calls
+  private readonly internalModelId = 'gemini-2.0-flash-preview-image-generation'
 
   private readonly config: NanoBananaConfig
   private genAI: GoogleGenAI | null = null
@@ -207,8 +210,9 @@ export class NanoBananaAdapter implements ImageGenerationAdapter {
     const client = this.getClient()
 
     // Use the new @google/genai API: client.models.generateContent()
+    // Note: Use internalModelId for the actual API call (Gemini model name)
     const response = await client.models.generateContent({
-      model: this.modelId,
+      model: this.internalModelId,
       contents: prompt,
       config: {
         responseModalities: [Modality.TEXT, Modality.IMAGE],
