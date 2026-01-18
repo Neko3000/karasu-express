@@ -165,28 +165,95 @@ export function getExtensionFromContentType(contentType: string): string {
 }
 
 // ============================================
+// DATA URL UTILITIES
+// ============================================
+
+/**
+ * Check if a string is a data URL
+ *
+ * @param url - URL to check
+ * @returns True if it's a data URL
+ */
+export function isDataUrl(url: string): boolean {
+  return url.startsWith('data:')
+}
+
+/**
+ * Parse a data URL and extract the buffer and content type
+ *
+ * @param dataUrl - Data URL to parse (e.g., data:image/png;base64,...)
+ * @returns Parsed data with buffer and content type
+ * @throws Error if data URL is invalid
+ */
+export function parseDataUrl(dataUrl: string): { buffer: Buffer; contentType: string } {
+  // Match data URL format: data:[<mediatype>][;base64],<data>
+  const match = dataUrl.match(/^data:([^;,]+)?(?:;base64)?,(.*)$/)
+
+  if (!match) {
+    throw new Error('Invalid data URL format')
+  }
+
+  const contentType = match[1] || 'application/octet-stream'
+  const base64Data = match[2]
+
+  if (!base64Data) {
+    throw new Error('Data URL contains no data')
+  }
+
+  // Decode base64 data
+  const buffer = Buffer.from(base64Data, 'base64')
+
+  if (buffer.length === 0) {
+    throw new Error('Data URL decoded to empty buffer')
+  }
+
+  return { buffer, contentType }
+}
+
+// ============================================
 // IMAGE DOWNLOAD
 // ============================================
 
 /**
- * Download an image from a remote URL
+ * Download an image from a remote URL or parse a data URL
  *
- * Fetches the image and returns it as a Buffer with metadata.
- * Validates that the response is a supported image type.
+ * Supports both HTTP/HTTPS URLs and base64 data URLs.
+ * For HTTP URLs, fetches the image and returns it as a Buffer.
+ * For data URLs, extracts the base64 data directly.
  *
- * @param imageUrl - URL to download the image from
+ * @param imageUrl - URL to download the image from (HTTP/HTTPS or data URL)
  * @returns Downloaded image data with metadata
  * @throws Error if download fails or content type is not supported
  *
  * @example
  * ```typescript
+ * // HTTP URL
  * const image = await downloadImage('https://api.example.com/image.png');
  * console.log(image.contentType); // 'image/png'
+ *
+ * // Data URL (from Nano Banana adapter)
+ * const image = await downloadImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...');
  * console.log(image.buffer.length); // 123456
  * ```
  */
 export async function downloadImage(imageUrl: string): Promise<DownloadedImage> {
-  console.log(`[image-storage] Downloading image from: ${imageUrl}`)
+  // Handle data URLs (base64 encoded images from some APIs like Nano Banana)
+  if (isDataUrl(imageUrl)) {
+    console.log(`[image-storage] Processing data URL (base64 encoded image)`)
+
+    const { buffer, contentType } = parseDataUrl(imageUrl)
+
+    console.log(`[image-storage] Extracted ${buffer.length} bytes from data URL, content-type: ${contentType}`)
+
+    return {
+      buffer,
+      contentType,
+      sourceUrl: 'data-url',
+    }
+  }
+
+  // Handle HTTP/HTTPS URLs
+  console.log(`[image-storage] Downloading image from: ${imageUrl.substring(0, 100)}${imageUrl.length > 100 ? '...' : ''}`)
 
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS)

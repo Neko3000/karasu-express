@@ -24,6 +24,8 @@ import {
   readFromGeneratesFolder,
   getGeneratesDirectory,
   listGeneratedFiles,
+  isDataUrl,
+  parseDataUrl,
 } from '../../../src/services/image-storage'
 
 describe('ImageStorage', () => {
@@ -154,6 +156,71 @@ describe('ImageStorage', () => {
   })
 
   // ============================================
+  // isDataUrl
+  // ============================================
+
+  describe('isDataUrl', () => {
+    it('should return true for data URLs', () => {
+      expect(isDataUrl('data:image/png;base64,iVBORw0KGgo=')).toBe(true)
+      expect(isDataUrl('data:image/jpeg;base64,/9j/4AAQSkZJRg=')).toBe(true)
+      expect(isDataUrl('data:text/plain,Hello')).toBe(true)
+    })
+
+    it('should return false for HTTP URLs', () => {
+      expect(isDataUrl('https://example.com/image.png')).toBe(false)
+      expect(isDataUrl('http://example.com/image.jpg')).toBe(false)
+    })
+
+    it('should return false for other strings', () => {
+      expect(isDataUrl('not a url')).toBe(false)
+      expect(isDataUrl('')).toBe(false)
+    })
+  })
+
+  // ============================================
+  // parseDataUrl
+  // ============================================
+
+  describe('parseDataUrl', () => {
+    it('should parse PNG data URL correctly', () => {
+      // Small PNG (1x1 transparent pixel)
+      const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+      const dataUrl = `data:image/png;base64,${pngBase64}`
+
+      const result = parseDataUrl(dataUrl)
+
+      expect(result.contentType).toBe('image/png')
+      expect(result.buffer).toBeInstanceOf(Buffer)
+      expect(result.buffer.length).toBeGreaterThan(0)
+    })
+
+    it('should parse JPEG data URL correctly', () => {
+      // Minimal valid JPEG
+      const jpegBase64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAB//2Q=='
+      const dataUrl = `data:image/jpeg;base64,${jpegBase64}`
+
+      const result = parseDataUrl(dataUrl)
+
+      expect(result.contentType).toBe('image/jpeg')
+      expect(result.buffer).toBeInstanceOf(Buffer)
+    })
+
+    it('should throw error for invalid data URL format', () => {
+      expect(() => parseDataUrl('not-a-data-url')).toThrow('Invalid data URL format')
+      expect(() => parseDataUrl('data:')).toThrow()
+    })
+
+    it('should throw error for data URL with no data', () => {
+      expect(() => parseDataUrl('data:image/png;base64,')).toThrow('Data URL contains no data')
+    })
+
+    it('should use default content type when not specified', () => {
+      const result = parseDataUrl('data:;base64,SGVsbG8gV29ybGQ=')
+      expect(result.contentType).toBe('application/octet-stream')
+    })
+  })
+
+  // ============================================
   // downloadImage
   // ============================================
 
@@ -238,6 +305,33 @@ describe('ImageStorage', () => {
       const result = await downloadImage('https://api.example.com/noheader')
 
       expect(result.contentType).toBe('image/png')
+    })
+
+    it('should handle data URLs (base64 encoded images)', async () => {
+      // Small PNG (1x1 transparent pixel)
+      const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+      const dataUrl = `data:image/png;base64,${pngBase64}`
+
+      const result = await downloadImage(dataUrl)
+
+      expect(result.buffer).toBeInstanceOf(Buffer)
+      expect(result.buffer.length).toBeGreaterThan(0)
+      expect(result.contentType).toBe('image/png')
+      expect(result.sourceUrl).toBe('data-url')
+      // Should NOT call fetch for data URLs
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    it('should handle JPEG data URLs from Nano Banana adapter', async () => {
+      // Minimal JPEG
+      const jpegBase64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAB//2Q=='
+      const dataUrl = `data:image/jpeg;base64,${jpegBase64}`
+
+      const result = await downloadImage(dataUrl)
+
+      expect(result.buffer).toBeInstanceOf(Buffer)
+      expect(result.contentType).toBe('image/jpeg')
+      expect(result.sourceUrl).toBe('data-url')
     })
   })
 
