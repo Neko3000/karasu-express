@@ -64,7 +64,7 @@ describe('NanoBananaAdapter', () => {
       const adapter = new NanoBananaAdapter()
 
       expect(adapter.providerId).toBe(Provider.Google)
-      expect(adapter.modelId).toBe('gemini-3-pro-image-preview')
+      expect(adapter.modelId).toBe('nano-banana')
       expect(adapter.displayName).toBe('Nano Banana')
     })
 
@@ -445,7 +445,7 @@ describe('NanoBananaAdapter', () => {
     it('should create adapter with default config', () => {
       const adapter = createNanoBananaAdapter()
 
-      expect(adapter.modelId).toBe('gemini-3-pro-image-preview')
+      expect(adapter.modelId).toBe('nano-banana')
       expect(adapter.displayName).toBe('Nano Banana')
     })
 

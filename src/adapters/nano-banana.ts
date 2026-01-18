@@ -1,10 +1,10 @@
 /**
- * Nano Banana Adapter (Google AI - Gemini 3 Pro Image)
+ * Nano Banana Adapter (Google AI - Gemini 2.5 Flash Image)
  *
  * Implementation of the ImageGenerationAdapter for Google's Gemini image generation
  * using the @google/genai SDK with API key authentication.
  *
- * Model: gemini-3-pro-image-preview
+ * Model: gemini-2.5-flash-image (production-ready)
  */
 
 import { GoogleGenAI, Modality } from '@google/genai'
@@ -77,15 +77,15 @@ const NANO_BANANA_SUPPORTED_ASPECT_RATIOS: AspectRatio[] = [
 ]
 
 /**
- * Nano Banana Adapter using Google AI SDK (Gemini 3 Pro Image)
+ * Nano Banana Adapter using Google AI SDK (Gemini 2.5 Flash Image)
  */
 export class NanoBananaAdapter implements ImageGenerationAdapter {
   readonly providerId = Provider.Google
   readonly modelId = 'nano-banana' // Must match the value in Tasks collection models field
   readonly displayName = 'Nano Banana'
 
-  // Internal model name for API calls
-  private readonly internalModelId = 'gemini-2.0-flash-preview-image-generation'
+  // Internal model name for API calls (Gemini 2.5 Flash Image - production-ready)
+  private readonly internalModelId = 'gemini-2.5-flash-image'
 
   private readonly config: NanoBananaConfig
   private genAI: GoogleGenAI | null = null
@@ -117,7 +117,7 @@ export class NanoBananaAdapter implements ImageGenerationAdapter {
   }
 
   /**
-   * Generate images using Nano Banana (Gemini 3 Pro Image)
+   * Generate images using Nano Banana (Gemini 2.5 Flash Image)
    *
    * Uses the @google/genai SDK with models.generateContent API
    * that supports image generation through responseModalities configuration.

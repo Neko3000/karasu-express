@@ -441,7 +441,7 @@ describe('Adapter Registry Contract', () => {
 
       expect(modelIds).toContain('flux-pro')
       expect(modelIds).toContain('dalle-3')
-      expect(modelIds).toContain('gemini-3-pro-image-preview')
+      expect(modelIds).toContain('nano-banana')
     })
   })
 
@@ -477,7 +477,7 @@ describe('Adapter Registry Contract', () => {
     it('should return true for registered models', () => {
       expect(isModelRegistered('flux-pro')).toBe(true)
       expect(isModelRegistered('dalle-3')).toBe(true)
-      expect(isModelRegistered('gemini-3-pro-image-preview')).toBe(true)
+      expect(isModelRegistered('nano-banana')).toBe(true)
     })
 
     it('should return false for unregistered models', () => {
