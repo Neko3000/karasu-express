@@ -443,7 +443,7 @@ Per plan.md Testing Requirements:
 
 #### Submit Button Component
 
-- [ ] T038at [US1] Create SubmitTaskButton component in src/components/Studio/SubmitTaskButton.tsx with:
+- [X] T038at [US1] Create SubmitTaskButton component in src/components/Studio/SubmitTaskButton.tsx with:
   - Prominent button styling (primary color, larger than standard buttons)
   - "Submit Task" label with optional icon
   - Loading spinner during submission
@@ -452,7 +452,7 @@ Per plan.md Testing Requirements:
 
 #### Submit Button Hook
 
-- [ ] T038au [US1] Create useSubmitTask hook in src/components/Studio/hooks/useSubmitTask.ts to:
+- [X] T038au [US1] Create useSubmitTask hook in src/components/Studio/hooks/useSubmitTask.ts to:
   - Access PayloadCMS form context for task ID and form data
   - Handle form save via PayloadCMS API before submission
   - Call POST /api/tasks/{id}/submit endpoint after save completes
@@ -462,7 +462,7 @@ Per plan.md Testing Requirements:
 
 #### Confirmation Dialog
 
-- [ ] T038av [P] [US1] Create SubmitConfirmationDialog component in src/components/Studio/SubmitConfirmationDialog.tsx with:
+- [X] T038av [P] [US1] Create SubmitConfirmationDialog component in src/components/Studio/SubmitConfirmationDialog.tsx with:
   - Modal overlay with task summary (total images, selected models, styles)
   - Warning message when total images exceeds 500 (per FR-005)
   - "Confirm Submit" and "Cancel" buttons
@@ -470,17 +470,17 @@ Per plan.md Testing Requirements:
 
 #### Integration with Task Creation Page
 
-- [ ] T038aw [US1] Create SubmitTaskField component in src/components/Studio/SubmitTaskField.tsx as PayloadCMS UI field wrapper that renders SubmitTaskButton
-- [ ] T038ax [US1] Add SubmitTaskField to Tasks collection in src/collections/Tasks.ts as a UI field at the end of the form (after Overview section)
-- [ ] T038ay [US1] Update src/components/Studio/index.tsx barrel file to export SubmitTaskButton, useSubmitTask, SubmitConfirmationDialog, and SubmitTaskField components
+- [X] T038aw [US1] Create SubmitTaskField component in src/components/Studio/SubmitTaskField.tsx as PayloadCMS UI field wrapper that renders SubmitTaskButton
+- [X] T038ax [US1] Add SubmitTaskField to Tasks collection in src/collections/Tasks.ts as a UI field at the end of the form (after Overview section)
+- [X] T038ay [US1] Update src/components/Studio/index.tsx barrel file to export SubmitTaskButton, useSubmitTask, SubmitConfirmationDialog, and SubmitTaskField components
 
 #### Success and Error States
 
-- [ ] T038az [P] [US1] Create SubmitSuccessMessage component in src/components/Studio/SubmitSuccessMessage.tsx showing:
+- [X] T038az [P] [US1] Create SubmitSuccessMessage component in src/components/Studio/SubmitSuccessMessage.tsx showing:
   - Success confirmation with task ID
   - Link to Task Manager to track progress
   - Option to create another task
-- [ ] T038ba [P] [US1] Create SubmitErrorMessage component in src/components/Studio/SubmitErrorMessage.tsx showing:
+- [X] T038ba [P] [US1] Create SubmitErrorMessage component in src/components/Studio/SubmitErrorMessage.tsx showing:
   - Error message from API response
   - Retry button to attempt submission again
   - Styled consistently with OptimizationErrorBanner

@@ -305,6 +305,28 @@ export const Tasks: CollectionConfig = {
     },
 
     // ============================================
+    // SECTION 4.5: SUBMIT TASK (Action Button)
+    // ============================================
+    {
+      name: 'submitSection',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Admin/SectionDivider#SectionDivider',
+        },
+      },
+    },
+    {
+      name: 'submitTask',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/Studio/SubmitTaskField#SubmitTaskField',
+        },
+      },
+    },
+
+    // ============================================
     // SECTION 5: STATUS (Sidebar or Bottom)
     // ============================================
     {

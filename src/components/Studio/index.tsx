@@ -27,6 +27,14 @@ export { TotalImageCount } from './TotalImageCount'
 export { TaskOverviewField } from './TaskOverviewField'
 export { useCalculatedPrompts } from './hooks/useCalculatedPrompts'
 
+// Phase 5 Submit Button component exports
+export { SubmitTaskButton } from './SubmitTaskButton'
+export { SubmitConfirmationDialog } from './SubmitConfirmationDialog'
+export { SubmitSuccessMessage } from './SubmitSuccessMessage'
+export { SubmitErrorMessage } from './SubmitErrorMessage'
+export { SubmitTaskField } from './SubmitTaskField'
+export { useSubmitTask } from './hooks/useSubmitTask'
+
 // Type exports
 export type { SubjectInputProps } from './SubjectInput'
 export type { VariantCountSelectorProps, VariantCount } from './VariantCountSelector'
@@ -52,3 +60,14 @@ export type {
   CalculatedPromptsSummary,
   UseCalculatedPromptsResult,
 } from './hooks/useCalculatedPrompts'
+
+// Phase 5 Submit Button type exports
+export type { SubmitTaskButtonProps } from './SubmitTaskButton'
+export type { SubmitConfirmationDialogProps, TaskSummary } from './SubmitConfirmationDialog'
+export type { SubmitSuccessMessageProps } from './SubmitSuccessMessage'
+export type { SubmitErrorMessageProps } from './SubmitErrorMessage'
+export type {
+  SubmissionState,
+  SubmitTaskState,
+  SubmitTaskActions,
+} from './hooks/useSubmitTask'

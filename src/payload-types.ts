@@ -250,7 +250,7 @@ export interface SubTask {
   /**
    * Execution status
    */
-  status: 'pending' | 'processing' | 'success' | 'failed';
+  status: 'pending' | 'processing' | 'success' | 'failed' | 'cancelled';
   /**
    * Current worker ID (lock mechanism)
    */
@@ -434,7 +434,7 @@ export interface Task {
   /**
    * Current task status
    */
-  status: 'draft' | 'queued' | 'expanding' | 'processing' | 'completed' | 'partial_failed' | 'failed';
+  status: 'draft' | 'queued' | 'expanding' | 'processing' | 'completed' | 'partial_failed' | 'failed' | 'cancelled';
   /**
    * Completion percentage (0-100)
    */
