@@ -726,7 +726,63 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 8: User Story 5 - Asset Gallery and Management (Priority: P2)
+## Phase 8: Task Creation Page & Workflow Optimization
+
+**Goal**: Improve the user experience on the task creation page by optimizing default values, form behavior, and dialog focus management
+
+**Independent Test**: Create a new task and verify: (1) models default to nano-banana, (2) aspect ratio defaults to 9:16, (3) Total Expected field is not shown, (4) submit button remains visible but disabled after submission, (5) confirmation dialog buttons are properly focused
+
+**Unit Tests**: NOT required (UI behavior changes only)
+**Integration Tests**: NOT required (no new business logic)
+
+**Gate Criteria**: Manual testing passes for all listed improvements
+
+### Submit Button Visibility After Submission
+
+> **Purpose**: Keep the submit button visible but disabled after task submission instead of hiding it completely. This provides visual confirmation that the task was submitted.
+
+- [ ] T044 Update SubmitTaskAction component in src/components/Studio/SubmitTaskAction.tsx to:
+  - Remove the early return `null` for already-submitted tasks (line ~214)
+  - Keep button visible but disabled with "Already Submitted" label
+  - Apply disabled styling (gray background, no hover effects)
+  - Button should show "Submitted!" immediately after success, then "Already Submitted" on subsequent views
+
+### Default Values for Form Fields
+
+> **Purpose**: Set sensible default values for models and aspect ratio to streamline the task creation workflow
+
+- [ ] T045 [P] Update Tasks collection in src/collections/Tasks.ts to set default value for models field:
+  - Add `defaultValue: ['nano-banana']` to the models field configuration
+  - This ensures Nano Banana is pre-selected when creating a new task
+
+- [ ] T046 [P] Update Tasks collection in src/collections/Tasks.ts to change default aspect ratio:
+  - Change `defaultValue: '1:1'` to `defaultValue: '9:16'` for the aspectRatio field
+  - Portrait orientation (9:16) is more commonly used for social media content
+
+### Remove Total Expected Field
+
+> **Purpose**: Remove the redundant "Total Expected" field from the task creation form. The Overview section already displays the total image count calculation, making this field unnecessary.
+
+- [ ] T047 Update Tasks collection in src/collections/Tasks.ts to:
+  - Remove the `totalExpected` field definition (lines ~283-289)
+  - Remove the `totalExpected` calculation logic from the `beforeChange` hook
+  - This simplifies the form and avoids duplicate information display
+
+### Dialog Focus Fix
+
+> **Purpose**: Ensure the confirmation dialog buttons are properly focused when the dialog opens. Currently the buttons may appear gray/unfocused due to focus management issues.
+
+- [ ] T047a Update SubmitConfirmationDialog component in src/components/Studio/SubmitConfirmationDialog.tsx to:
+  - Verify focus trap is working correctly (dialog should trap focus within itself)
+  - Ensure the "Confirm Submit" button receives initial focus when dialog opens
+  - Add `autoFocus` attribute to the confirm button as a fallback
+  - Test with keyboard navigation to ensure Tab cycles through dialog buttons properly
+
+**Checkpoint**: Task creation page is optimized with better defaults (nano-banana model, 9:16 aspect ratio), cleaner form (no Total Expected field), persistent submit button state, and properly focused confirmation dialog.
+
+---
+
+## Phase 9: User Story 5 - Asset Gallery and Management (Priority: P2)
 
 **Goal**: Admin can browse generated images in a visual gallery with filtering, search, and download capabilities
 
@@ -750,7 +806,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 9: User Story 6 - Multi-Model Comparison (Priority: P3)
+## Phase 10: User Story 6 - Multi-Model Comparison (Priority: P3)
 
 **Goal**: Admin can generate the same prompt across different AI **image** models simultaneously and compare results
 
@@ -771,7 +827,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 10: User Story 7 - Dashboard Overview (Priority: P3)
+## Phase 11: User Story 7 - Dashboard Overview (Priority: P3)
 
 **Goal**: Admin can see an overview of system activity including daily generation counts and resource consumption
 
@@ -794,7 +850,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 11: Studio Workspace UI (Supporting All Stories)
+## Phase 12: Studio Workspace UI (Supporting All Stories)
 
 **Goal**: Create the main Studio workspace UI that ties together task creation, prompt optimization, and generation
 
@@ -818,7 +874,7 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 12: Polish & Cross-Cutting Concerns
+## Phase 13: Polish & Cross-Cutting Concerns
 
 **Purpose**: Improvements that affect multiple user stories
 
@@ -837,14 +893,14 @@ Per plan.md Testing Requirements:
 
 ---
 
-## Phase 13: Video Generation - Veo (DEFERRED - Lowest Priority)
+## Phase 14: Video Generation - Veo (DEFERRED - Lowest Priority)
 
 **Purpose**: Video generation capability using Google Veo - explicitly deferred per clarification
 
 **DEFERRED**: Video generation is not required for initial release. Focus on image generation first.
 
-**Implementation Criteria**: Begin Phase 13 implementation ONLY when ALL of the following conditions are met:
-1. All image generation phases (1-12) are complete with passing tests
+**Implementation Criteria**: Begin Phase 14 implementation ONLY when ALL of the following conditions are met:
+1. All image generation phases (1-13) are complete with passing tests
 2. Core image generation workflows are stable in production for at least 2 weeks
 3. Explicit stakeholder request or business requirement for video generation
 4. Google Veo API is generally available (not preview/beta) with documented SLAs
@@ -875,12 +931,14 @@ Per plan.md Testing Requirements:
   - **Gate**: All unit tests for prompt-optimizer MUST pass
 - **Task Creation Optimization (Phase 5)**: Depends on Phase 4 (prompt expansion UI components)
   - **Gate**: Manual testing passes for calculated prompts and total image count
-- **User Stories 3-7 (Phases 6-10)**: All depend on Phase 3 completion but can proceed in parallel
+- **User Stories 3-7 (Phases 6-11)**: All depend on Phase 3 completion but can proceed in parallel
   - **Gate**: Relevant integration tests MUST pass for each story
-- **Studio UI (Phase 11)**: Depends on Phases 3-6 for full functionality
-- **Polish (Phase 12)**: Depends on all desired user stories being complete
+- **Task Creation Page & Workflow Optimization (Phase 8)**: Depends on Phase 7 (US4 Task Monitoring)
+  - **Gate**: Manual testing passes for all UI improvements
+- **Studio UI (Phase 12)**: Depends on Phases 3-6 for full functionality
+- **Polish (Phase 13)**: Depends on all desired user stories being complete
   - **Gate**: Full test suite MUST pass
-- **Video/Veo (Phase 13)**: DEFERRED - Lowest priority, implement only after all image generation features are complete
+- **Video/Veo (Phase 14)**: DEFERRED - Lowest priority, implement only after all image generation features are complete
 
 ### User Story Dependencies
 
@@ -912,7 +970,7 @@ Per plan.md Testing Requirements:
 - Job handlers T027-T028 can run in parallel
 - Unit test files marked [P] can be written in parallel
 - UI components within each story marked [P] can run in parallel
-- Once Phase 3 completes, Phases 6-10 can run in parallel (if team capacity allows)
+- Once Phase 3 completes, Phases 6-11 can run in parallel (if team capacity allows)
 - Phase 5 tasks T038o (CalculatedPromptCard), T038q (TotalImageCount), T038v (SelectedSettingsSummary), T038w (PromptsCountSummary), T038x (ImageCountSummary), and T038y (TaskSummaryStats) can run in parallel
 - Phase 5 UI Enhancement tasks T038ad (OverviewCard) and T038ae (InfoRow) can run in parallel after T038ab (title) and T038ac (grid layout)
 - Phase 5 Style DB Migration tasks T038ag (getStylesFromDB), T038ak (endpoint update), T038am (seed all styles) can run in parallel
@@ -926,6 +984,7 @@ Per plan.md Testing Requirements:
 - Phase 7 Image Storage tasks T043q (unit tests) and T043w (integration tests) can run in parallel
 - Phase 7 Directory Setup tasks T043s (.gitkeep) and T043t (.gitignore) can run in parallel
 - Phase 7 Image Storage Optimization tasks T043z (unit test updates) and T043za (integration test updates) can run in parallel
+- Phase 8 Default Value tasks T045 (models default) and T046 (aspect ratio default) can run in parallel
 
 ---
 
@@ -940,12 +999,13 @@ Per plan.md Testing Requirements:
 | Phase 5: Task Creation Optimization | T038ap | - | - | Manual testing + unit tests pass, submit button functional |
 | Phase 6: US3 | - | T038a | - | Integration tests pass |
 | Phase 7: US4 | T043a, T043q | T043b, T043c, T043w | - | All tests pass, UI functional, image storage works |
-| Phase 8: US5 | - | - | - | Manual testing |
-| Phase 9: US6 | - | - | - | Manual testing |
-| Phase 10: US7 | - | - | - | Manual testing |
-| Phase 11: Studio | - | - | - | Manual testing |
-| Phase 12: Polish | - | - | - | Full suite passes |
-| Phase 13: Veo | T076a | - | - | (Deferred) |
+| Phase 8: Page & Workflow Optimization | - | - | - | Manual testing |
+| Phase 9: US5 | - | - | - | Manual testing |
+| Phase 10: US6 | - | - | - | Manual testing |
+| Phase 11: US7 | - | - | - | Manual testing |
+| Phase 12: Studio | - | - | - | Manual testing |
+| Phase 13: Polish | - | - | - | Full suite passes |
+| Phase 14: Veo | T076a | - | - | (Deferred) |
 
 **Total Test Tasks**: 23 (13 unit, 9 integration, 1 contract)
 
@@ -1030,8 +1090,9 @@ Task: "Create SubTaskList component in src/app/(payload)/admin/[[...segments]]/c
 4. Add Phase 5 (Task Creation Optimization) -> Test independently -> Deploy/Demo (Calculated prompts preview)
 5. Add User Stories 3-5 + Tests -> Test independently -> Deploy/Demo (Management features)
 6. Add User Stories 6-7 -> Test independently -> Deploy/Demo (Advanced features)
-7. Add Studio UI -> Test independently -> Deploy/Demo (Unified experience)
-8. Each story adds value without breaking previous stories
+7. Add Phase 8 (Page & Workflow Optimization) -> Test independently -> Deploy/Demo (Better defaults and UX)
+8. Add Studio UI -> Test independently -> Deploy/Demo (Unified experience)
+9. Each story adds value without breaking previous stories
 
 ### Test Failure Response Protocol
 
@@ -1059,6 +1120,6 @@ END IF
 - Jobs Queue is configured in payload.config.ts, no external queue systems
 - All UI components are React components integrated into PayloadCMS admin
 - TailwindCSS classes must use `.twp` prefix scope
-- **Video generation (Veo) is DEFERRED** - Phase 12 is lowest priority; focus on image generation first
+- **Video generation (Veo) is DEFERRED** - Phase 14 is lowest priority; focus on image generation first
 - **LLM Provider Strategy**: Start with Gemini 3 Flash Preview (`gemini-3-flash-preview`) for prompt expansion; the abstraction layer (T035a) enables future expansion to ChatGPT (GPT-4o) and Claude (Claude 3.5 Sonnet) without refactoring. Supports configurable thinking levels for latency optimization.
 - **Testing Tools**: Vitest + Testing Library + MongoDB Memory Server per plan.md
