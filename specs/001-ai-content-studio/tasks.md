@@ -728,9 +728,9 @@ Per plan.md Testing Requirements:
 
 ## Phase 8: Task Creation Page & Workflow Optimization
 
-**Goal**: Improve the user experience on the task creation page by optimizing default values, form behavior, and dialog focus management
+**Goal**: Improve the user experience on the task creation page by optimizing default values, form behavior, dialog focus management, and Generated Variants UI
 
-**Independent Test**: Create a new task and verify: (1) models default to nano-banana, (2) aspect ratio defaults to 9:16, (3) Total Expected field is not shown, (4) submit button remains visible but disabled after submission, (5) confirmation dialog buttons are properly focused
+**Independent Test**: Create a new task and verify: (1) models default to nano-banana, (2) aspect ratio defaults to 9:16, (3) Total Expected field is not shown, (4) submit button remains visible but disabled after submission, (5) confirmation dialog buttons are properly focused, (6) expandedPrompts field is hidden, (7) Generated Variants displays in 2-column grid, (8) variant cards have compact layout with collapsible negative prompts, (9) character counts displayed, (10) color-coded borders by variant type
 
 **Unit Tests**: NOT required (UI behavior changes only)
 **Integration Tests**: NOT required (no new business logic)
@@ -778,7 +778,47 @@ Per plan.md Testing Requirements:
   - Add `autoFocus` attribute to the confirm button as a fallback
   - Test with keyboard navigation to ensure Tab cycles through dialog buttons properly
 
-**Checkpoint**: Task creation page is optimized with better defaults (nano-banana model, 9:16 aspect ratio), cleaner form (no Total Expected field), persistent submit button state, and properly focused confirmation dialog.
+### Prompt Variants UI Optimization
+
+> **Purpose**: Optimize the Generated Variants section for better space usage, cleaner UI, and improved information display.
+
+- [ ] T048 Hide `expandedPrompts` field from Tasks collection UI in src/collections/Tasks.ts:
+  - Change the `condition` function to always return `false` (never show)
+  - The field data is still stored for backend use, but hidden from admin UI
+  - Generated Variants in PromptOptimizerField already displays this data
+
+- [ ] T049 [P] Update PromptVariantsList to use 2-column grid layout in src/components/Studio/PromptVariantsList.tsx:
+  - Change the variants container from `flexDirection: 'column'` to CSS Grid
+  - Use `display: 'grid'`, `gridTemplateColumns: 'repeat(2, 1fr)'`
+  - Add responsive breakpoint: 1 column on narrow screens, 2 columns on wider screens
+  - Maintain consistent gap between cards
+
+- [ ] T050 [P] Reduce padding/margins in PromptVariantCard for denser layout in src/components/Studio/PromptVariantCard.tsx:
+  - Reduce card padding from `calc(var(--base) * 0.75)` to `calc(var(--base) * 0.5)`
+  - Reduce gap between header and content sections
+  - Reduce margin between label and textarea
+  - Ensure text remains readable at smaller spacing
+
+- [ ] T051 [P] Collapse "Suggested Negative Prompt" section by default in src/components/Studio/PromptVariantCard.tsx:
+  - Add local state `isNegativePromptExpanded` (default: false)
+  - Replace static negative prompt display with collapsible section
+  - Add toggle button/chevron icon to expand/collapse
+  - Show "Negative prompt available" hint when collapsed
+  - Animate expand/collapse transition
+
+- [ ] T052 [P] Add character count display to each variant card in src/components/Studio/PromptVariantCard.tsx:
+  - Display character count below or beside the "Expanded Prompt" label
+  - Format: "X characters" or "X / 1000 chars" if there's a limit
+  - Use muted styling (small font, gray color) to not distract
+  - Update count reactively as user edits the prompt
+
+- [ ] T053 [P] Add color-coded left border to variant cards by type in src/components/Studio/PromptVariantCard.tsx:
+  - Create a color mapping for variant names (e.g., Realistic=blue, Artistic=purple, Cinematic=amber, Abstract=teal, Surreal=pink)
+  - Add 3-4px left border with the mapped color
+  - Use a fallback color (gray) for unknown variant types
+  - Ensure colors have sufficient contrast in both light and dark themes
+
+**Checkpoint**: Task creation page is optimized with better defaults (nano-banana model, 9:16 aspect ratio), cleaner form (no Total Expected field), persistent submit button state, properly focused confirmation dialog, and improved Generated Variants UI (2-column layout, compact cards, collapsible negative prompts, character counts, color-coded borders).
 
 ---
 
@@ -985,6 +1025,7 @@ Per plan.md Testing Requirements:
 - Phase 7 Directory Setup tasks T043s (.gitkeep) and T043t (.gitignore) can run in parallel
 - Phase 7 Image Storage Optimization tasks T043z (unit test updates) and T043za (integration test updates) can run in parallel
 - Phase 8 Default Value tasks T045 (models default) and T046 (aspect ratio default) can run in parallel
+- Phase 8 Prompt Variants UI tasks T049 (2-column grid), T050 (reduce padding), T051 (collapse negative prompt), T052 (character count), and T053 (color-coded borders) can run in parallel
 
 ---
 
