@@ -118,15 +118,25 @@ export function SubmitConfirmationDialog({
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown)
+
       // Focus the confirm button when dialog opens
-      setTimeout(() => {
-        confirmButtonRef.current?.focus()
-      }, 0)
+      // Use multiple attempts to ensure focus is set correctly
+      const focusButton = () => {
+        if (confirmButtonRef.current) {
+          confirmButtonRef.current.focus()
+        }
+      }
+
+      // Immediate focus attempt
+      focusButton()
+      // Delayed focus as fallback for React rendering
+      const timeoutId = setTimeout(focusButton, 50)
 
       // Prevent body scroll
       document.body.style.overflow = 'hidden'
 
       return () => {
+        clearTimeout(timeoutId)
         document.removeEventListener('keydown', handleKeyDown)
         document.body.style.overflow = ''
       }
@@ -301,6 +311,8 @@ export function SubmitConfirmationDialog({
             onClick={onConfirm}
             buttonStyle="primary"
             disabled={isSubmitting}
+            // @ts-expect-error autoFocus is a valid HTML attribute, may not be in PayloadCMS Button types
+            autoFocus
           >
             {isSubmitting ? 'Submitting...' : 'Confirm Submit'}
           </Button>

@@ -188,7 +188,7 @@ export const Tasks: CollectionConfig = {
     {
       name: 'aspectRatio',
       type: 'select',
-      defaultValue: '1:1',
+      defaultValue: '9:16',
       options: [
         { label: 'Square (1:1)', value: '1:1' },
         { label: 'Landscape (16:9)', value: '16:9' },
@@ -205,6 +205,7 @@ export const Tasks: CollectionConfig = {
       type: 'select',
       hasMany: true,
       required: true,
+      defaultValue: ['nano-banana'],
       admin: {
         description: 'Select one or more AI models for image generation',
       },
@@ -279,14 +280,6 @@ export const Tasks: CollectionConfig = {
         description: 'Include Base style (unmodified prompt) in generation',
       },
     },
-    {
-      name: 'totalExpected',
-      type: 'number',
-      admin: {
-        description: 'Total images to generate (prompts × styles × models × count)',
-        readOnly: true,
-      },
-    },
 
     // ============================================
     // SECTION 4: OVERVIEW (Always Visible Summary)
@@ -348,37 +341,6 @@ export const Tasks: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
-      // Calculate totalExpected before saving
-      async ({ data, operation }) => {
-        if (operation === 'create' || operation === 'update') {
-          // Calculate total expected if we have the necessary data
-          const expandedPromptsCount = data?.expandedPrompts?.length || data?.variantCount || DEFAULT_VARIANT_COUNT
-
-          // Count styles from both sources: database styles and imported styles
-          const dbStylesCount = data?.styles?.length || 0
-          const importedStylesCount = data?.importedStyleIds?.length || 0
-          const stylesCount = dbStylesCount + importedStylesCount
-
-          const modelsCount = data?.models?.length || 0
-          const countPerPrompt = data?.countPerPrompt || DEFAULT_BATCH_SIZE
-          const includeBaseStyle = data?.includeBaseStyle ?? true
-
-          // Check if base style is already in importedStyleIds
-          const hasBaseStyle = data?.importedStyleIds?.includes('base') || false
-
-          // Add 1 for base style if includeBaseStyle is true and not already selected
-          const effectiveStylesCount = (includeBaseStyle && !hasBaseStyle) ? stylesCount + 1 : stylesCount
-
-          const totalExpected = expandedPromptsCount * effectiveStylesCount * modelsCount * countPerPrompt
-
-          // Update the data
-          data.totalExpected = totalExpected
-
-          return data
-        }
-      },
-    ],
     beforeValidate: [
       // Ensure at least one style is selected (from either source)
       async ({ data }) => {

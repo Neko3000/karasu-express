@@ -210,10 +210,8 @@ export function SubmitTaskAction() {
     return <RocketIcon />
   }
 
-  // Don't render if task is already submitted and not in success state
-  if (isAlreadySubmitted && submitState.state !== 'success') {
-    return null
-  }
+  // Keep button visible but disabled when already submitted
+  // Previously returned null for already-submitted tasks, but we now keep it visible for visual confirmation
 
   return (
     <>

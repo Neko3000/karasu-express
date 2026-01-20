@@ -741,7 +741,7 @@ Per plan.md Testing Requirements:
 
 > **Purpose**: Keep the submit button visible but disabled after task submission instead of hiding it completely. This provides visual confirmation that the task was submitted.
 
-- [ ] T044 Update SubmitTaskAction component in src/components/Studio/SubmitTaskAction.tsx to:
+- [X] T044 Update SubmitTaskAction component in src/components/Studio/SubmitTaskAction.tsx to:
   - Remove the early return `null` for already-submitted tasks (line ~214)
   - Keep button visible but disabled with "Already Submitted" label
   - Apply disabled styling (gray background, no hover effects)
@@ -751,11 +751,11 @@ Per plan.md Testing Requirements:
 
 > **Purpose**: Set sensible default values for models and aspect ratio to streamline the task creation workflow
 
-- [ ] T045 [P] Update Tasks collection in src/collections/Tasks.ts to set default value for models field:
+- [X] T045 [P] Update Tasks collection in src/collections/Tasks.ts to set default value for models field:
   - Add `defaultValue: ['nano-banana']` to the models field configuration
   - This ensures Nano Banana is pre-selected when creating a new task
 
-- [ ] T046 [P] Update Tasks collection in src/collections/Tasks.ts to change default aspect ratio:
+- [X] T046 [P] Update Tasks collection in src/collections/Tasks.ts to change default aspect ratio:
   - Change `defaultValue: '1:1'` to `defaultValue: '9:16'` for the aspectRatio field
   - Portrait orientation (9:16) is more commonly used for social media content
 
@@ -763,7 +763,7 @@ Per plan.md Testing Requirements:
 
 > **Purpose**: Remove the redundant "Total Expected" field from the task creation form. The Overview section already displays the total image count calculation, making this field unnecessary.
 
-- [ ] T047 Update Tasks collection in src/collections/Tasks.ts to:
+- [X] T047 Update Tasks collection in src/collections/Tasks.ts to:
   - Remove the `totalExpected` field definition (lines ~283-289)
   - Remove the `totalExpected` calculation logic from the `beforeChange` hook
   - This simplifies the form and avoids duplicate information display
@@ -772,7 +772,7 @@ Per plan.md Testing Requirements:
 
 > **Purpose**: Ensure the confirmation dialog buttons are properly focused when the dialog opens. Currently the buttons may appear gray/unfocused due to focus management issues.
 
-- [ ] T047a Update SubmitConfirmationDialog component in src/components/Studio/SubmitConfirmationDialog.tsx to:
+- [X] T047a Update SubmitConfirmationDialog component in src/components/Studio/SubmitConfirmationDialog.tsx to:
   - Verify focus trap is working correctly (dialog should trap focus within itself)
   - Ensure the "Confirm Submit" button receives initial focus when dialog opens
   - Add `autoFocus` attribute to the confirm button as a fallback

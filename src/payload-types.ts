@@ -428,10 +428,6 @@ export interface Task {
    */
   includeBaseStyle?: boolean | null;
   /**
-   * Total images to generate (prompts × styles × models × count)
-   */
-  totalExpected?: number | null;
-  /**
    * Current task status
    */
   status: 'draft' | 'queued' | 'expanding' | 'processing' | 'completed' | 'partial_failed' | 'failed' | 'cancelled';
@@ -845,7 +841,6 @@ export interface TasksSelect<T extends boolean = true> {
   countPerPrompt?: T;
   variantCount?: T;
   includeBaseStyle?: T;
-  totalExpected?: T;
   status?: T;
   progress?: T;
   updatedAt?: T;
