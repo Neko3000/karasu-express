@@ -80,10 +80,9 @@ export const Tasks: CollectionConfig = {
       admin: {
         description: 'LLM-optimized prompt variants',
         readOnly: true,
-        condition: (data) => {
-          // Show only if there are expanded prompts (for viewing existing tasks)
-          return data?.expandedPrompts?.length > 0
-        },
+        // Hidden from UI - PromptOptimizerField already displays this data visually
+        // The field data is still stored for backend use
+        condition: () => false,
       },
       fields: [
         {

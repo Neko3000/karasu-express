@@ -113,8 +113,14 @@ function PromptVariantsListComponent({
         </Button>
       </div>
 
-      {/* Variant cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--base) * 0.5)' }}>
+      {/* Variant cards - 2-column responsive grid layout */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+          gap: 'calc(var(--base) * 0.5)',
+        }}
+      >
         {variants.map((variant) => (
           <PromptVariantCard
             key={variant.variantId}
