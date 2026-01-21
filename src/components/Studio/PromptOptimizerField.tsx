@@ -12,11 +12,13 @@
  * - "Optimize Prompt" button with sparkle icon
  * - Collapsible section with progress bar
  * - Selectable/editable prompt variants
+ * - Editable negative prompts (T053c)
  * - Error handling with retry
  *
  * Uses PayloadCMS styling patterns for consistent appearance.
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
+ * Updated in Phase 8: T053c - Added negative prompt editing support
  */
 
 import React, { useEffect, useCallback, useMemo } from 'react'
@@ -198,6 +200,7 @@ export const PromptOptimizerField: UIFieldClientComponent = () => {
               variants={state.variants}
               onSelectionChange={actions.toggleSelection}
               onPromptChange={actions.updatePrompt}
+              onNegativePromptChange={actions.updateNegativePrompt}
               disabled={isLoading}
             />
 

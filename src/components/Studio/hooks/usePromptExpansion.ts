@@ -10,9 +10,11 @@
  * - Progress stage tracking (idle/analyzing/enhancing/formatting/complete/error)
  * - Generated variants array with selection state
  * - User modifications to generated prompts
+ * - User modifications to negative prompts (T053c)
  * - Error state and retry logic
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
+ * Updated in Phase 8: T053c - Added negative prompt edit tracking
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react'
@@ -73,6 +75,8 @@ export interface PromptExpansionActions {
   toggleSelection: (variantId: string, selected: boolean) => void
   /** Update a variant's prompt text */
   updatePrompt: (variantId: string, newPrompt: string) => void
+  /** Update a variant's negative prompt text (T053c) */
+  updateNegativePrompt: (variantId: string, newNegativePrompt: string) => void
   /** Reset to initial state */
   reset: () => void
   /** Close the collapsible section */
@@ -111,6 +115,9 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
 
   // Track user edits to prompts (persisted across re-renders)
   const editedPromptsRef = useRef<Map<string, string>>(new Map())
+
+  // T053c: Track user edits to negative prompts (persisted across re-renders)
+  const editedNegativePromptsRef = useRef<Map<string, string>>(new Map())
 
   // AbortController for cancelling in-flight requests
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -154,6 +161,7 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
    */
   const reset = useCallback(() => {
     editedPromptsRef.current.clear()
+    editedNegativePromptsRef.current.clear()
     setState(initialState)
   }, [])
 
@@ -180,6 +188,21 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
       ...prev,
       variants: prev.variants.map((v) =>
         v.variantId === variantId ? { ...v, expandedPrompt: newPrompt } : v
+      ),
+    }))
+  }, [])
+
+  /**
+   * T053c: Update a variant's negative prompt text (with edit persistence)
+   */
+  const updateNegativePrompt = useCallback((variantId: string, newNegativePrompt: string) => {
+    // Store the edit for persistence
+    editedNegativePromptsRef.current.set(variantId, newNegativePrompt)
+
+    setState((prev) => ({
+      ...prev,
+      variants: prev.variants.map((v) =>
+        v.variantId === variantId ? { ...v, suggestedNegativePrompt: newNegativePrompt } : v
       ),
     }))
   }, [])
@@ -284,6 +307,8 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
           ...variant,
           // Restore any user edits
           expandedPrompt: editedPromptsRef.current.get(variant.variantId) ?? variant.expandedPrompt,
+          // T053c: Restore any negative prompt edits
+          suggestedNegativePrompt: editedNegativePromptsRef.current.get(variant.variantId) ?? variant.suggestedNegativePrompt,
           isSelected: true, // Select all by default
         })
       )
@@ -327,6 +352,7 @@ export function usePromptExpansion(): [PromptExpansionState, PromptExpansionActi
       retry,
       toggleSelection,
       updatePrompt,
+      updateNegativePrompt,
       reset,
       close,
     },

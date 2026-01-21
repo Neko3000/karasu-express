@@ -814,19 +814,19 @@ Per plan.md Testing Requirements:
 
 > **Purpose**: Ensure all prompt variant cards have consistent heights for their sections (tags, expanded prompt, negative prompt) to create a uniform grid appearance when displayed in 2-column layout.
 
-- [ ] T053a [P] Add fixed height for tag area in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
+- [X] T053a [P] Add fixed height for tag area in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
   - Component hierarchy: PromptOptimizerField → PromptVariantsList → PromptVariantCard
   - Set a minimum height for the tag/label area (e.g., `minHeight: '40px'`)
   - Ensure tags wrap properly if multiple tags exist
   - All variant cards should have the same tag area height regardless of content
 
-- [ ] T053b [P] Add fixed height for Expanded Prompt textarea in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
+- [X] T053b [P] Add fixed height for Expanded Prompt textarea in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
   - Component hierarchy: PromptOptimizerField → PromptVariantsList → PromptVariantCard
   - Set a fixed height for the textarea (e.g., `height: '120px'` or similar)
   - Enable vertical scrolling for overflow content
   - All variant cards should have the same prompt textarea height
 
-- [ ] T053c [P] Make negative prompt always visible, same height, and editable in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
+- [X] T053c [P] Make negative prompt always visible, same height, and editable in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
   - Component hierarchy: PromptOptimizerField → PromptVariantsList → PromptVariantCard
   - Remove collapsible behavior - negative prompt section is always visible
   - Set a fixed height for the negative prompt area (e.g., `height: '80px'`)

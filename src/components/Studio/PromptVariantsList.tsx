@@ -8,6 +8,7 @@
  * Uses PayloadCMS styling patterns for consistency.
  *
  * Part of Phase 4: User Story 2 - Intelligent Prompt Optimization
+ * Updated in Phase 8: T053c - Added negative prompt change callback
  */
 
 import React, { memo, useMemo, useCallback } from 'react'
@@ -26,6 +27,8 @@ export interface PromptVariantsListProps {
   onSelectionChange: (variantId: string, selected: boolean) => void
   /** Callback when a variant's prompt is edited */
   onPromptChange: (variantId: string, newPrompt: string) => void
+  /** Callback when a variant's negative prompt is edited (T053c) */
+  onNegativePromptChange?: (variantId: string, newNegativePrompt: string) => void
   /** Whether editing is disabled */
   disabled?: boolean
   /** Additional CSS classes */
@@ -41,6 +44,7 @@ function PromptVariantsListComponent({
   variants,
   onSelectionChange,
   onPromptChange,
+  onNegativePromptChange,
   disabled = false,
   className = '',
 }: PromptVariantsListProps) {
@@ -128,6 +132,7 @@ function PromptVariantsListComponent({
             isSelected={variant.isSelected}
             onSelectionChange={onSelectionChange}
             onPromptChange={onPromptChange}
+            onNegativePromptChange={onNegativePromptChange}
             disabled={disabled}
           />
         ))}
