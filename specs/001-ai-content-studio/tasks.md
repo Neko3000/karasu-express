@@ -728,9 +728,9 @@ Per plan.md Testing Requirements:
 
 ## Phase 8: Task Creation Page & Workflow Optimization
 
-**Goal**: Improve the user experience on the task creation page by optimizing default values, form behavior, dialog focus management, and Generated Variants UI
+**Goal**: Improve the user experience on the task creation page by optimizing default values, form behavior, dialog focus management, and Generated Variants UI with consistent card heights
 
-**Independent Test**: Create a new task and verify: (1) models default to nano-banana, (2) aspect ratio defaults to 9:16, (3) Total Expected field is not shown, (4) submit button remains visible but disabled after submission, (5) confirmation dialog buttons are properly focused, (6) expandedPrompts field is hidden, (7) Generated Variants displays in 2-column grid, (8) variant cards have compact layout with collapsible negative prompts, (9) character counts displayed, (10) color-coded borders by variant type
+**Independent Test**: Create a new task and verify: (1) models default to nano-banana, (2) aspect ratio defaults to 9:16, (3) Total Expected field is not shown, (4) submit button remains visible but disabled after submission, (5) confirmation dialog buttons are properly focused, (6) expandedPrompts field is hidden, (7) Generated Variants displays in 2-column grid, (8) variant cards have compact layout, (9) all variant cards have same height for tag area, (10) all variant cards have same height for expanded prompt textarea, (11) negative prompts are always visible (not collapsible), same height, and editable, (12) character counts displayed, (13) color-coded borders by variant type
 
 **Unit Tests**: NOT required (UI behavior changes only)
 **Integration Tests**: NOT required (no new business logic)
@@ -808,13 +808,32 @@ Per plan.md Testing Requirements:
   - Reduce margin between label and textarea
   - Ensure text remains readable at smaller spacing
 
-- [X] T051 [P] Collapse "Suggested Negative Prompt" section by default in PromptVariantCard (rendered inside PromptOptimizerField) in src/components/Studio/PromptVariantCard.tsx:
+- [X] T051 [P] REMOVED - Replaced by T054, T055, T056 below (negative prompt is now always visible, not collapsible)
+
+### Prompt Variant Card Layout Consistency
+
+> **Purpose**: Ensure all prompt variant cards have consistent heights for their sections (tags, expanded prompt, negative prompt) to create a uniform grid appearance when displayed in 2-column layout.
+
+- [ ] T053a [P] Add fixed height for tag area in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
   - Component hierarchy: PromptOptimizerField → PromptVariantsList → PromptVariantCard
-  - Add local state `isNegativePromptExpanded` (default: false)
-  - Replace static negative prompt display with collapsible section
-  - Add toggle button/chevron icon to expand/collapse
-  - Show "Negative prompt available" hint when collapsed
-  - Animate expand/collapse transition
+  - Set a minimum height for the tag/label area (e.g., `minHeight: '40px'`)
+  - Ensure tags wrap properly if multiple tags exist
+  - All variant cards should have the same tag area height regardless of content
+
+- [ ] T053b [P] Add fixed height for Expanded Prompt textarea in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
+  - Component hierarchy: PromptOptimizerField → PromptVariantsList → PromptVariantCard
+  - Set a fixed height for the textarea (e.g., `height: '120px'` or similar)
+  - Enable vertical scrolling for overflow content
+  - All variant cards should have the same prompt textarea height
+
+- [ ] T053c [P] Make negative prompt always visible, same height, and editable in PromptVariantCard in src/components/Studio/PromptVariantCard.tsx:
+  - Component hierarchy: PromptOptimizerField → PromptVariantsList → PromptVariantCard
+  - Remove collapsible behavior - negative prompt section is always visible
+  - Set a fixed height for the negative prompt area (e.g., `height: '80px'`)
+  - Change from read-only display to editable textarea
+  - Enable vertical scrolling for overflow content
+  - All variant cards should have the same negative prompt area height
+  - Update usePromptExpansion hook to track negative prompt edits if needed
 
 - [X] T052 [P] Add character count display to each variant card in PromptVariantCard (rendered inside PromptOptimizerField) in src/components/Studio/PromptVariantCard.tsx:
   - Component hierarchy: PromptOptimizerField → PromptVariantsList → PromptVariantCard
@@ -830,7 +849,7 @@ Per plan.md Testing Requirements:
   - Use a fallback color (gray) for unknown variant types
   - Ensure colors have sufficient contrast in both light and dark themes
 
-**Checkpoint**: Task creation page is optimized with better defaults (nano-banana model, 9:16 aspect ratio), cleaner form (no Total Expected field), persistent submit button state, properly focused confirmation dialog, and improved Generated Variants UI (2-column layout, compact cards, collapsible negative prompts, character counts, color-coded borders).
+**Checkpoint**: Task creation page is optimized with better defaults (nano-banana model, 9:16 aspect ratio), cleaner form (no Total Expected field), persistent submit button state, properly focused confirmation dialog, and improved Generated Variants UI (2-column layout, compact cards, fixed-height sections for tags/prompts/negative prompts, always-visible editable negative prompts, character counts, color-coded borders).
 
 ---
 
@@ -1037,7 +1056,8 @@ Per plan.md Testing Requirements:
 - Phase 7 Directory Setup tasks T043s (.gitkeep) and T043t (.gitignore) can run in parallel
 - Phase 7 Image Storage Optimization tasks T043z (unit test updates) and T043za (integration test updates) can run in parallel
 - Phase 8 Default Value tasks T045 (models default) and T046 (aspect ratio default) can run in parallel
-- Phase 8 Prompt Variants UI tasks T049 (2-column grid), T050 (reduce padding), T051 (collapse negative prompt), T052 (character count), and T053 (color-coded borders) can run in parallel
+- Phase 8 Prompt Variants UI tasks T049 (2-column grid), T050 (reduce padding), T052 (character count), and T053 (color-coded borders) can run in parallel
+- Phase 8 Prompt Variant Card Layout tasks T053a (tag area fixed height), T053b (expanded prompt fixed height), and T053c (negative prompt visible/editable) can run in parallel
 
 ---
 
