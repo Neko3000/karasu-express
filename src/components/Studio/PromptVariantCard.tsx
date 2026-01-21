@@ -194,7 +194,10 @@ function PromptVariantCardComponent({
         // T050: Reduced padding for denser layout
         padding: 'calc(var(--base) * 0.5)',
         borderRadius: 'var(--style-radius-s)',
-        border: `1px solid ${isSelected ? 'var(--theme-success-500)' : 'var(--theme-elevation-150)'}`,
+        // Use non-shorthand border properties to avoid React warning about conflicting properties
+        borderTop: `1px solid ${isSelected ? 'var(--theme-success-500)' : 'var(--theme-elevation-150)'}`,
+        borderRight: `1px solid ${isSelected ? 'var(--theme-success-500)' : 'var(--theme-elevation-150)'}`,
+        borderBottom: `1px solid ${isSelected ? 'var(--theme-success-500)' : 'var(--theme-elevation-150)'}`,
         // T053: Color-coded left border
         borderLeft: `4px solid ${borderColor}`,
         backgroundColor: isSelected ? 'var(--theme-success-50)' : 'var(--theme-elevation-50)',
