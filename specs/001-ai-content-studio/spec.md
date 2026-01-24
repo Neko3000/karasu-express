@@ -50,6 +50,14 @@
 
 - Q: What is the scope of the Configuration Center? → A: Configuration Center includes: (1) Style Templates management (CRUD for visual styles), (2) Model Configurations (view-only display of available AI models with their parameters and rate limits), (3) System Settings (batch warning threshold, default variant count). Style Templates is the primary focus; Model Configurations and System Settings are read-mostly administrative views.
 
+### Session 2026-01-24
+
+- Q: What filtering approach should the Asset Gallery use to help users "quickly find and download the best images" as stated in the user story? → A: Server-side filtering (API endpoints filter before sending data)
+- Q: What specific filter criteria should the Asset Gallery provide to users browsing generated images? → A: Task + Model + Style + Date range
+- Q: How should the batch download feature work when users select multiple images or an entire batch for download? → A: Client-side ZIP creation (JSZip in browser, fetch images and bundle)
+- Q: What should happen in the Asset Gallery when an image fails to load from object storage (e.g., network error, deleted file, CORS issue)? → A: Show error overlay on thumbnail with error details
+- Q: What should be the default sort order for images displayed in the Asset Gallery? → A: Newest first (most recent generation time)
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create Batch Generation Task (Priority: P1)
@@ -144,6 +152,10 @@ As an **Admin**, I want to browse generated images in a visual gallery with filt
 
 3. **Given** I want to download images, **When** I select multiple images or an entire batch, **Then** I can download them as a package with preserved file naming conventions.
 
+4. **Given** I want to find specific images in the gallery, **When** I use the filter controls, **Then** I can filter by parent task (dropdown of task themes), AI model (multi-select of available models), style template (multi-select of applied styles), and date range (today, last 7 days, last 30 days, or custom range).
+
+5. **Given** I open the Asset Gallery, **When** images are displayed, **Then** they are sorted by newest first (most recent generation time at the top), matching the Task Manager's default sort order for consistency.
+
 ---
 
 ### User Story 6 - Multi-Model Comparison (Priority: P3)
@@ -219,6 +231,9 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - What happens when the database connection is temporarily lost during task processing?
   - Job queue retries database operations with exponential backoff (same parameters as API retry). If connection cannot be restored within 5 minutes, affected sub-tasks are marked as failed with "database_unavailable" error category. Tasks can be retried once database connection is restored.
 
+- What happens when an image fails to load in the Asset Gallery (network error, deleted file, CORS issue)?
+  - Gallery displays an error overlay on the affected thumbnail showing the error type; user can click to view details or attempt a retry. Failed images remain in the gallery layout and can still be selected for metadata viewing.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -270,8 +285,11 @@ As an **Admin**, I want to see an overview of system activity including daily ge
 - **FR-022**: System MUST store generation metadata with each asset (prompts, parameters, seed, model)
 - **FR-023**: System MUST display assets in a masonry layout supporting mixed aspect ratios
 - **FR-024**: System MUST support virtual scrolling for large image galleries
-- **FR-025**: System MUST provide batch download capability
+- **FR-025**: System MUST provide batch download capability using client-side ZIP creation (browser fetches images from object storage and bundles via JSZip)
 - **FR-029**: System MUST display loading states for gallery views: skeleton placeholders during initial load, progressive image loading with blur-up effect, and "Loading more..." indicator during infinite scroll
+- **FR-031**: System MUST implement server-side filtering for the Asset Gallery via API endpoints that filter data before transmission to the client, supporting filters by: parent task, AI model, style template, and date range
+- **FR-032**: System MUST display an error overlay on gallery thumbnails when images fail to load, showing error type with option to retry or view details
+- **FR-033**: System MUST display assets in the gallery sorted by newest first (most recent generation time) by default
 
 **Navigation and Interface**
 - **FR-026**: System MUST provide a fixed left navigation with Dashboard, Studio, Task Manager, Asset Library, and Configuration Center
