@@ -855,25 +855,48 @@ Per plan.md Testing Requirements:
 
 ## Phase 9: User Story 5 - Asset Gallery and Management (Priority: P2)
 
-**Goal**: Admin can browse generated images in a visual gallery with filtering, search, and download capabilities
+**Goal**: Admin can browse generated images using the existing Media collection page (`/admin/collections/media`) with enhanced preview and optimized display settings
 
-**Independent Test**: Generate images and verify they appear in the gallery with proper masonry layout, metadata display, and download functionality
+**Approach**: Reuse PayloadCMS's built-in Media collection list view instead of creating a custom Gallery page. Enhance the existing page with hover preview and increase default item count.
 
-**Unit Tests**: NOT required (UI components with library-based rendering)
-**Integration Tests**: Already covered by media endpoints in Phase 3
+**Independent Test**: Navigate to `/admin/collections/media`, verify images display with 100 items per page by default, hover over an image row to see enlarged preview
 
-**Gate Criteria**: Gallery renders 500+ images without performance issues, manual testing passes
+**Unit Tests**: NOT required (configuration and custom Cell component only)
+**Integration Tests**: NOT required (uses existing PayloadCMS infrastructure)
+
+**Gate Criteria**: Media list shows 100 items by default, hover preview displays larger image, manual testing passes
 
 ### Implementation for User Story 5
 
-- [ ] T048 [US5] Create Gallery custom admin view in src/components/Gallery/index.tsx with masonry layout using Masonic library
-- [ ] T049 [P] [US5] Create GalleryFilters component in src/components/Gallery/GalleryFilters.tsx with taskId, styleId, modelId filters
-- [ ] T050 [P] [US5] Create ImageLightbox component in src/components/Gallery/ImageLightbox.tsx showing full-size image with generation metadata panel
-- [ ] T051 [US5] Implement virtual scrolling in Gallery component for 500+ items performance (FR-024)
-- [ ] T052 [US5] Create batch download functionality in src/components/Gallery/BatchDownload.tsx with selection and ZIP generation
-- [ ] T053 [US5] Add Gallery to Payload admin panel navigation in payload.config.ts admin.components configuration
+#### Pagination Configuration (Default 100 Items)
 
-**Checkpoint**: Gallery complete - admin can browse, filter, view details, and download generated assets.
+- [ ] T054 [US5] Update Media collection pagination in src/collections/Media.ts to set `admin.pagination.defaultLimit: 100` and `limits: [25, 50, 100, 200]` for increased default display count
+
+#### Image Hover Preview Enhancement
+
+- [ ] T055 [P] [US5] Create MediaThumbnailCell custom component in src/components/Media/MediaThumbnailCell.tsx that:
+  - Displays the thumbnail image in the list row (existing behavior)
+  - On hover, shows an enlarged preview overlay (e.g., 400x400px) positioned near the cursor
+  - Uses the `card` image size (768x1024) for the hover preview
+  - Implements smooth fade-in/fade-out transition for the preview overlay
+  - Handles edge cases (image loading, positioning near screen edges)
+
+- [ ] T056 [US5] Register MediaThumbnailCell as custom Cell component for the upload field in src/collections/Media.ts using `admin.components.Cell` configuration
+
+- [ ] T057 [P] [US5] Add CSS styles for hover preview overlay in src/components/Media/MediaThumbnailCell.module.css with:
+  - Fixed positioning for preview overlay
+  - Z-index to ensure overlay appears above other elements
+  - Shadow/border for visual distinction
+  - Responsive positioning to avoid overflow at screen edges
+
+#### Optional Enhancements (If PayloadCMS Supports)
+
+- [ ] T058 [P] [US5] Research PayloadCMS built-in upload collection features for image preview:
+  - Check if PayloadCMS v3 has built-in hover preview for upload collections
+  - Document findings in research.md
+  - If built-in support exists, simplify T055-T057 to use native feature instead of custom component
+
+**Checkpoint**: Media list page enhanced - displays 100 items by default, image hover shows enlarged preview, admin can efficiently browse generated assets using existing PayloadCMS infrastructure.
 
 ---
 
@@ -890,9 +913,9 @@ Per plan.md Testing Requirements:
 
 ### Implementation for User Story 6
 
-- [ ] T054 [US6] Update task orchestrator in src/services/task-orchestrator.ts to generate sub-tasks for all selected model combinations
-- [ ] T055 [US6] Add model-specific parameter configuration UI in src/components/Studio/ModelParams.tsx for per-model settings (inference steps, quality level)
-- [ ] T056 [US6] Add model filter to Gallery in src/components/Gallery/GalleryFilters.tsx to isolate and compare outputs by model
+- [ ] T059 [US6] Update task orchestrator in src/services/task-orchestrator.ts to generate sub-tasks for all selected model combinations
+- [ ] T060 [US6] Add model-specific parameter configuration UI in src/components/Studio/ModelParams.tsx for per-model settings (inference steps, quality level)
+- [ ] T061 [US6] Add model filter to Media collection list view filters to isolate and compare outputs by model
 
 **Checkpoint**: Multi-model comparison complete - admin can generate across image models and compare results side-by-side.
 
@@ -911,11 +934,11 @@ Per plan.md Testing Requirements:
 
 ### Implementation for User Story 7
 
-- [ ] T057 [US7] Create Dashboard custom admin view in src/components/Dashboard/index.tsx with overview metrics layout
-- [ ] T058 [P] [US7] Create DailyStats component in src/components/Dashboard/DailyStats.tsx showing today's generation count and total images
-- [ ] T059 [P] [US7] Create RecentActivity component in src/components/Dashboard/RecentActivity.tsx showing recent task completions
-- [ ] T060 [P] [US7] Create UsageStats component in src/components/Dashboard/UsageStats.tsx showing most used styles and models
-- [ ] T061 [US7] Add Dashboard to Payload admin panel as default landing page in payload.config.ts admin configuration
+- [ ] T062 [US7] Create Dashboard custom admin view in src/components/Dashboard/index.tsx with overview metrics layout
+- [ ] T063 [P] [US7] Create DailyStats component in src/components/Dashboard/DailyStats.tsx showing today's generation count and total images
+- [ ] T064 [P] [US7] Create RecentActivity component in src/components/Dashboard/RecentActivity.tsx showing recent task completions
+- [ ] T065 [P] [US7] Create UsageStats component in src/components/Dashboard/UsageStats.tsx showing most used styles and models
+- [ ] T066 [US7] Add Dashboard to Payload admin panel as default landing page in payload.config.ts admin configuration
 
 **Checkpoint**: Dashboard complete - admin has visibility into system activity and usage patterns.
 
@@ -934,12 +957,12 @@ Per plan.md Testing Requirements:
 
 ### Implementation for Studio Workspace
 
-- [ ] T062 Create Studio custom admin view in src/components/Studio/index.tsx as the main generation workspace (integrates Phase 4 prompt components)
-- [ ] T064 [P] Create StyleSelector component in src/components/Studio/StyleSelector.tsx with multi-select grid and preview thumbnails
-- [ ] T065 [P] Create ModelSelector component in src/components/Studio/ModelSelector.tsx with provider grouping and feature badges
-- [ ] T066 [P] Create BatchConfig component in src/components/Studio/BatchConfig.tsx with countPerPrompt input and total calculation display
-- [ ] T068 Implement task submission flow in src/components/Studio/index.tsx with confirmation dialog when total > 500
-- [ ] T069 Add Studio to Payload admin panel navigation in payload.config.ts admin.components configuration
+- [ ] T067 Create Studio custom admin view in src/components/Studio/index.tsx as the main generation workspace (integrates Phase 4 prompt components)
+- [ ] T068 [P] Create StyleSelector component in src/components/Studio/StyleSelector.tsx with multi-select grid and preview thumbnails
+- [ ] T069 [P] Create ModelSelector component in src/components/Studio/ModelSelector.tsx with provider grouping and feature badges
+- [ ] T070 [P] Create BatchConfig component in src/components/Studio/BatchConfig.tsx with countPerPrompt input and total calculation display
+- [ ] T071 Implement task submission flow in src/components/Studio/index.tsx with confirmation dialog when total > 500
+- [ ] T072 Add Studio to Payload admin panel navigation in payload.config.ts admin.components configuration
 
 **Checkpoint**: Studio workspace complete - admin has a unified interface for the entire generation workflow.
 
@@ -954,13 +977,13 @@ Per plan.md Testing Requirements:
 
 **Gate Criteria**: Full test suite passes, quickstart.md validation passes
 
-- [ ] T070 Add admin panel left navigation with Dashboard, Studio, Task Manager, Gallery, and Configuration Center in payload.config.ts (FR-026)
-- [ ] T071 [P] Create MongoDB indexes per data-model.md specifications in src/seed/indexes.ts
-- [ ] T072 [P] Add input validation across all collections using Payload field validation
-- [ ] T073 Implement configurable warning threshold (default 500) for large batch submissions
-- [ ] T074 Add error boundary and loading states to all custom admin components
-- [ ] T075 Run quickstart.md validation to ensure all documented workflows function correctly
-- [ ] T075a Run full test suite (pnpm test) and verify all tests pass with no regressions
+- [ ] T073 Add admin panel left navigation with Dashboard, Studio, Task Manager, Media, and Configuration Center in payload.config.ts (FR-026)
+- [ ] T074 [P] Create MongoDB indexes per data-model.md specifications in src/seed/indexes.ts
+- [ ] T075 [P] Add input validation across all collections using Payload field validation
+- [ ] T076 Implement configurable warning threshold (default 500) for large batch submissions
+- [ ] T077 Add error boundary and loading states to all custom admin components
+- [ ] T078 Run quickstart.md validation to ensure all documented workflows function correctly
+- [ ] T078a Run full test suite (pnpm test) and verify all tests pass with no regressions
 
 ---
 
@@ -979,11 +1002,11 @@ Per plan.md Testing Requirements:
 **Unit Tests**: REQUIRED when implemented (Veo adapter)
 **Integration Tests**: REQUIRED when implemented (video job handler)
 
-- [ ] T076 Implement Veo video adapter in src/adapters/veo.ts for Google Veo integration with long-running operation polling
-- [ ] T076a [P] Write unit tests for Veo adapter in tests/unit/adapters/veo.adapter.test.ts (mock Google client, test polling logic)
-- [ ] T077 Add video-specific UI components in src/components/Studio/VideoConfig.tsx for video generation parameters
-- [ ] T078 Update Media collection in src/collections/Media.ts to handle video assets with duration metadata
-- [ ] T079 Add video playback support in src/components/Gallery/VideoPlayer.tsx
+- [ ] T079 Implement Veo video adapter in src/adapters/veo.ts for Google Veo integration with long-running operation polling
+- [ ] T079a [P] Write unit tests for Veo adapter in tests/unit/adapters/veo.adapter.test.ts (mock Google client, test polling logic)
+- [ ] T080 Add video-specific UI components in src/components/Studio/VideoConfig.tsx for video generation parameters
+- [ ] T081 Update Media collection in src/collections/Media.ts to handle video assets with duration metadata
+- [ ] T082 Add video playback support in src/components/Media/VideoPlayer.tsx
 
 **Checkpoint**: Video generation complete - admin can generate videos using Google Veo (future enhancement)
 
@@ -1018,7 +1041,7 @@ Per plan.md Testing Requirements:
 - **Task Creation Optimization (Phase 5)**: Builds on US2's prompt expansion UI
 - **User Story 3 (P2)**: Can start after Foundational - StyleTemplates are independent
 - **User Story 4 (P2)**: Can start after US1 - Task monitoring requires Tasks/SubTasks
-- **User Story 5 (P2)**: Can start after US1 - Gallery requires Media collection
+- **User Story 5 (P2)**: Can start after US1 - Media page enhancements require Media collection with generated images
 - **User Story 6 (P3)**: Can start after US1 - Multi-model (image) comparison requires adapter infrastructure
 - **User Story 7 (P3)**: Can start after US1 - Dashboard requires Task data
 - **Video Generation (Deferred)**: Requires all core image generation infrastructure complete
@@ -1058,6 +1081,7 @@ Per plan.md Testing Requirements:
 - Phase 8 Default Value tasks T045 (models default) and T046 (aspect ratio default) can run in parallel
 - Phase 8 Prompt Variants UI tasks T049 (2-column grid), T050 (reduce padding), T052 (character count), and T053 (color-coded borders) can run in parallel
 - Phase 8 Prompt Variant Card Layout tasks T053a (tag area fixed height), T053b (expanded prompt fixed height), and T053c (negative prompt visible/editable) can run in parallel
+- Phase 9 Media page enhancement tasks T055 (MediaThumbnailCell), T057 (CSS styles), and T058 (research PayloadCMS features) can run in parallel
 
 ---
 
@@ -1073,12 +1097,12 @@ Per plan.md Testing Requirements:
 | Phase 6: US3 | - | T038a | - | Integration tests pass |
 | Phase 7: US4 | T043a, T043q | T043b, T043c, T043w | - | All tests pass, UI functional, image storage works |
 | Phase 8: Page & Workflow Optimization | - | - | - | Manual testing |
-| Phase 9: US5 | - | - | - | Manual testing |
+| Phase 9: US5 | - | - | - | Pagination 100 default, hover preview works |
 | Phase 10: US6 | - | - | - | Manual testing |
 | Phase 11: US7 | - | - | - | Manual testing |
 | Phase 12: Studio | - | - | - | Manual testing |
 | Phase 13: Polish | - | - | - | Full suite passes |
-| Phase 14: Veo | T076a | - | - | (Deferred) |
+| Phase 14: Veo | T079a | - | - | (Deferred) |
 
 **Total Test Tasks**: 23 (13 unit, 9 integration, 1 contract)
 
