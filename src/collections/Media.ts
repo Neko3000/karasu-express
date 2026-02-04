@@ -14,9 +14,13 @@ export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
     useAsTitle: 'filename',
-    defaultColumns: ['filename', 'assetType', 'relatedSubtask', 'createdAt'],
+    defaultColumns: ['preview', 'filename', 'assetType', 'relatedSubtask', 'createdAt'],
     group: 'Generation',
     description: 'Generated images and videos',
+    pagination: {
+      defaultLimit: 100,
+      limits: [25, 50, 100, 200],
+    },
   },
   access: {
     read: () => true,
@@ -25,6 +29,20 @@ export const Media: CollectionConfig = {
     delete: ({ req }) => !!req.user,
   },
   fields: [
+    // ============================================
+    // Preview Field (Hover Preview in List View)
+    // ============================================
+    {
+      name: 'preview',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/Media/MediaThumbnailCell#MediaThumbnailCell',
+          Cell: '/components/Media/MediaThumbnailCell#MediaThumbnailCell',
+        },
+      },
+    },
+
     {
       name: 'alt',
       type: 'text',

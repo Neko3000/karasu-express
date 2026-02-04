@@ -870,20 +870,20 @@ Per plan.md Testing Requirements:
 
 #### Pagination Configuration (Default 100 Items)
 
-- [ ] T054 [US5] Update Media collection pagination in src/collections/Media.ts to set `admin.pagination.defaultLimit: 100` and `limits: [25, 50, 100, 200]` for increased default display count
+- [X] T054 [US5] Update Media collection pagination in src/collections/Media.ts to set `admin.pagination.defaultLimit: 100` and `limits: [25, 50, 100, 200]` for increased default display count
 
 #### Image Hover Preview Enhancement
 
-- [ ] T055 [P] [US5] Create MediaThumbnailCell custom component in src/components/Media/MediaThumbnailCell.tsx that:
+- [X] T055 [P] [US5] Create MediaThumbnailCell custom component in src/components/Media/MediaThumbnailCell.tsx that:
   - Displays the thumbnail image in the list row (existing behavior)
   - On hover, shows an enlarged preview overlay (e.g., 400x400px) positioned near the cursor
   - Uses the `card` image size (768x1024) for the hover preview
   - Implements smooth fade-in/fade-out transition for the preview overlay
   - Handles edge cases (image loading, positioning near screen edges)
 
-- [ ] T056 [US5] Register MediaThumbnailCell as custom Cell component for the upload field in src/collections/Media.ts using `admin.components.Cell` configuration
+- [X] T056 [US5] Register MediaThumbnailCell as custom Cell component for the upload field in src/collections/Media.ts using `admin.components.Cell` configuration
 
-- [ ] T057 [P] [US5] Add CSS styles for hover preview overlay in src/components/Media/MediaThumbnailCell.module.css with:
+- [X] T057 [P] [US5] Add CSS styles for hover preview overlay in src/components/Media/MediaThumbnailCell.module.css with:
   - Fixed positioning for preview overlay
   - Z-index to ensure overlay appears above other elements
   - Shadow/border for visual distinction
@@ -891,7 +891,7 @@ Per plan.md Testing Requirements:
 
 #### Optional Enhancements (If PayloadCMS Supports)
 
-- [ ] T058 [P] [US5] Research PayloadCMS built-in upload collection features for image preview:
+- [X] T058 [P] [US5] Research PayloadCMS built-in upload collection features for image preview:
   - Check if PayloadCMS v3 has built-in hover preview for upload collections
   - Document findings in research.md
   - If built-in support exists, simplify T055-T057 to use native feature instead of custom component

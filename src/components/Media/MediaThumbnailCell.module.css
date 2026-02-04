@@ -1,0 +1,144 @@
+/**
+ * MediaThumbnailCell Styles
+ *
+ * Styles for the Media collection list view thumbnail with hover preview.
+ * Follows PayloadCMS admin panel design patterns.
+ *
+ * Per Phase 9 - Asset Gallery and Management (US5)
+ */
+
+/* ============================================
+   Container
+   ============================================ */
+
+.container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* ============================================
+   Thumbnail
+   ============================================ */
+
+.thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--theme-elevation-150);
+  transition: border-color 0.2s ease;
+}
+
+.container:hover .thumbnail {
+  border-color: var(--theme-elevation-400);
+}
+
+/* ============================================
+   Placeholder
+   ============================================ */
+
+.placeholder {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--theme-elevation-100);
+  border-radius: 4px;
+  border: 1px dashed var(--theme-elevation-200);
+}
+
+.placeholderText {
+  font-size: 0.625rem;
+  color: var(--theme-elevation-400);
+  text-align: center;
+}
+
+/* ============================================
+   Preview Overlay
+   ============================================ */
+
+.previewOverlay {
+  position: fixed;
+  z-index: 10000;
+  width: 400px;
+  max-height: 533px;
+  background-color: var(--theme-bg);
+  border-radius: 8px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--theme-elevation-200);
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  pointer-events: none;
+}
+
+.previewOverlay.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ============================================
+   Preview Image
+   ============================================ */
+
+.previewImage {
+  width: 100%;
+  height: auto;
+  max-height: 533px;
+  object-fit: contain;
+  display: block;
+}
+
+/* ============================================
+   Loading Indicator
+   ============================================ */
+
+.loadingIndicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--theme-elevation-50);
+  min-height: 200px;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--theme-elevation-200);
+  border-top-color: var(--theme-elevation-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   Dark Theme Adjustments
+   ============================================ */
+
+:global([data-theme='dark']) .previewOverlay {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0 20px 25px -5px rgba(0, 0, 0, 0.4),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}

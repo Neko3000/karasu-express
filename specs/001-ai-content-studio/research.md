@@ -739,3 +739,78 @@ export const TaskStatus = {
 | Task list filters | Status + date range + theme keyword search |
 | Default sort order | Newest first (`-createdAt`) |
 | Cancelled status | Added to TaskStatus enum |
+
+---
+
+## Phase 9 Research: Asset Gallery and Management
+
+**Date**: 2026-02-04
+
+### 18. PayloadCMS Upload Collection List View Customization
+
+**Context**: Enhance Media collection list view with larger pagination defaults and image hover preview.
+
+**Decision**: Use PayloadCMS admin.pagination config for pagination limits and create custom Cell component for hover preview.
+
+**Rationale**:
+- PayloadCMS v3 supports `admin.pagination.defaultLimit` and `admin.pagination.limits` for pagination configuration
+- PayloadCMS does NOT have built-in hover preview for upload collections
+- Custom Cell components can be created via `admin.components.Cell` path configuration
+- The `adminThumbnail` config only controls which image size is shown in the list, not hover behavior
+
+**Research Findings**:
+
+1. **Pagination Configuration**:
+   - `admin.pagination.defaultLimit: 100` sets default items per page
+   - `admin.pagination.limits: [25, 50, 100, 200]` defines available options
+   - This is documented in PayloadCMS collection configuration
+
+2. **Custom Cell Components**:
+   - Cell components receive `cellData` and `data` props
+   - Path format: `'/path/to/Component'` or `'/path/to/Component#ExportName'`
+   - For upload fields, use the filename field's Cell component to add hover preview
+   - Component must be a React component that renders the cell content
+
+3. **Built-in Upload Features**:
+   - `adminThumbnail` config specifies which image size to display in list view
+   - No native hover preview functionality exists
+   - Custom implementation required for hover preview overlay
+
+**Alternatives Considered**:
+| Alternative | Rejected Because |
+|------------|------------------|
+| Use built-in PayloadCMS hover preview | Does not exist - feature must be custom built |
+| Modify adminThumbnail only | Only changes displayed size, no hover behavior |
+
+**Implementation Pattern**:
+```typescript
+// Media collection pagination config
+admin: {
+  pagination: {
+    defaultLimit: 100,
+    limits: [25, 50, 100, 200],
+  },
+}
+
+// Custom Cell component registration
+{
+  name: 'filename',
+  // ... other config
+  admin: {
+    components: {
+      Cell: '/components/Media/MediaThumbnailCell',
+    },
+  },
+}
+```
+
+---
+
+## Phase 9 Resolved Unknowns
+
+| Unknown | Resolution |
+|---------|------------|
+| Built-in hover preview | Does NOT exist in PayloadCMS v3 - requires custom Cell component |
+| Pagination configuration | `admin.pagination.defaultLimit` and `admin.pagination.limits` |
+| Custom Cell component path | `'/components/Media/MediaThumbnailCell'` |
+| Image size for preview | Use `card` size (768x1024) defined in upload.imageSizes |
