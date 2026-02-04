@@ -2,6 +2,9 @@
 
 Auto-generated from all feature plans. Last updated: 2025-12-16
 
+## MCP
+Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
+
 ## Active Technologies
 - MongoDB (single data store per Constitution Principle II) (001-ai-content-studio)
 - TypeScript 5.7.3 (strict mode enabled) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (001-phase-07)
