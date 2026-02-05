@@ -27,6 +27,9 @@
 |------|----------|
 | **框架** | PayloadCMS v3.68.3 + Next.js 15.4.9 (App Router) |
 | **前端** | React 19.2.1 + TailwindCSS 4.1.18 (`.twp` 作用域前缀) |
+| **UI 组件库** | shadcn/ui |
+| **图标库** | FontAwesome |
+| **Gallery 组件** | LightGallery |
 | **语言** | TypeScript 5.7.3 (严格模式) |
 | **数据库** | MongoDB (via @payloadcms/db-mongodb) |
 | **LLM 提示词优化** | Gemini 3 Flash Preview (主力) |
@@ -284,7 +287,8 @@
 - [ ] 用户偏好持久化（localStorage）
 - [ ] 响应式布局适配
 
-**技术参考**: [payload-custom-listview-1-2025](https://github.com/aaronksaunders/payload-custom-listview-1-2025)
+**技术参考**: 
+- [LightGallery](https://github.com/sachinchoolur/lightGallery)
 
 **优先级**: P0
 
@@ -471,3 +475,6 @@ $$Total\_Tasks = (N_{prompts}) \times (N_{styles}) \times (N_{models}) \times (S
 - [Fal.ai Flux API](https://fal.ai/)
 - [OpenAI DALL-E 3 API](https://platform.openai.com/docs/guides/images)
 - [SDXL Prompt Styler](https://github.com/twri/sdxl_prompt_styler)
+- [LightGallery](https://github.com/sachinchoolur/lightGallery)
+- [shadcn/ui](https://github.com/shadcn-ui/ui)
+- [FontAwesome](https://fontawesome.com/)
