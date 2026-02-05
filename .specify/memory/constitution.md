@@ -1,18 +1,17 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.1.0 → 1.2.0
+Version change: 1.2.0 → 1.3.0
 Modified principles:
   - None renamed
 Added sections:
-  - Core Principle VII: Admin Panel UI Standards (管理面板UI标准)
-  - Heading Hierarchy specifications (H1-H4)
-  - Section divider rules
-  - Form field organization guidelines
+  - Expanded Technology Stack table with detailed version pinning
+  - Added UI Component Libraries subsection (shadcn/ui, FontAwesome, LightGallery)
+  - Added AI Services subsection (LLM Prompt Optimization, Image Generation providers)
 Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md: ✅ No updates needed (Constitution Check section exists)
-  - .specify/templates/spec-template.md: ✅ No updates needed (UI requirements can reference this principle)
+  - .specify/templates/plan-template.md: ✅ No updates needed (Technical Context already captures stack)
+  - .specify/templates/spec-template.md: ✅ No updates needed (technology-agnostic by design)
   - .specify/templates/tasks-template.md: ✅ No updates needed (task structure unchanged)
 Follow-up TODOs: None
 -->
@@ -161,13 +160,29 @@ sections prevents visual clutter while maintaining clear content separation.
 
 ### Technology Stack
 
-| Layer | Choice | Justification |
-|-------|--------|---------------|
-| Framework | PayloadCMS v3 (Next.js App Router) | Native Jobs Queue, Server Components integration |
-| Database | MongoDB | Document model suits heterogeneous payloads, native Jobs backend |
-| Styling | TailwindCSS (scoped with `.twp`) | Isolation from Payload Admin styles |
-| AI Providers | Flux, DALL-E 3, Nano Banana, Veo | Coverage of image/video generation use cases |
-| Testing | Vitest + Testing Library | Fast unit tests, React component testing, TypeScript native |
+| Layer | Choice | Version | Justification |
+|-------|--------|---------|---------------|
+| Framework | PayloadCMS + Next.js (App Router) | v3.68.3 / 15.4.9 | Native Jobs Queue, Server Components integration |
+| Frontend | React | 19.2.1 | Latest stable, concurrent features |
+| Styling | TailwindCSS (scoped with `.twp`) | 4.1.18 | Isolation from Payload Admin styles |
+| Language | TypeScript (strict mode) | 5.7.3 | Type safety, latest language features |
+| Database | MongoDB (via @payloadcms/db-mongodb) | - | Document model suits heterogeneous payloads, native Jobs backend |
+| Testing | Vitest + Testing Library | - | Fast unit tests, React component testing, TypeScript native |
+
+### UI Component Libraries
+
+| Category | Library | Purpose |
+|----------|---------|---------|
+| Component System | shadcn/ui | Accessible, customizable UI primitives |
+| Icons | FontAwesome | Comprehensive icon set |
+| Gallery | LightGallery | Image/video gallery with lightbox |
+
+### AI Services
+
+| Category | Provider(s) | Purpose |
+|----------|-------------|---------|
+| LLM Prompt Optimization | Gemini 3 Flash Preview (Primary) | Prompt enhancement and expansion |
+| Image Generation | Flux (Fal.ai), DALL-E 3 (OpenAI), Nano Banana (Google AI) | Multi-provider image generation with fallback |
 
 ### Performance Requirements
 
@@ -258,4 +273,4 @@ MUST be documented in the Complexity Tracking section of the relevant plan docum
 - PRs without adequate test coverage MUST be rejected per Principle VI
 - Admin panel PRs MUST verify UI Standards compliance per Principle VII
 
-**Version**: 1.2.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2025-12-30
+**Version**: 1.3.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2026-02-05
