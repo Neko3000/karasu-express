@@ -1,0 +1,951 @@
+openapi: 3.0.3
+info:
+  title: Karasu-Express AI Content Generation API
+  description: |
+    Enterprise-grade AI content generation and asset management platform.
+    This API provides endpoints for batch image generation with intelligent
+    prompt optimization and multi-model parallel processing.
+  version: 1.0.0
+  contact:
+    name: Karasu-Express Team
+
+servers:
+  - url: /api
+    description: PayloadCMS API base path
+
+tags:
+  - name: Tasks
+    description: Generation task management
+  - name: SubTasks
+    description: Atomic execution unit operations
+  - name: Styles
+    description: Style template management
+  - name: Models
+    description: AI model configuration
+  - name: Assets
+    description: Generated asset management
+  - name: Studio
+    description: Studio workspace operations
+
+paths:
+  # ============================================
+  # TASKS
+  # ============================================
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: List all tasks
+      description: Retrieve paginated list of generation tasks
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/TaskStatus'
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: '-createdAt'
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+
+    post:
+      tags: [Tasks]
+      summary: Create new task
+      description: Create a new generation task (draft status)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+  /tasks/{id}:
+    get:
+      tags: [Tasks]
+      summary: Get task by ID
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Tasks]
+      summary: Update task
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+    delete:
+      tags: [Tasks]
+      summary: Delete task
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Task deleted
+
+  /tasks/{id}/submit:
+    post:
+      tags: [Tasks]
+      summary: Submit task for processing
+      description: |
+        Transitions task from draft to queued status and triggers
+        the expand-prompt job to optimize prompts via LLM.
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Task submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid task state
+
+  /tasks/{id}/retry-failed:
+    post:
+      tags: [Tasks]
+      summary: Retry failed sub-tasks
+      description: Re-queue all failed sub-tasks for retry
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Failed sub-tasks re-queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  retriedCount:
+                    type: integer
+
+  /tasks/{id}/cancel:
+    post:
+      tags: [Tasks]
+      summary: Cancel task (Phase 7)
+      description: |
+        Cancel an in-progress task. The currently executing sub-task will
+        complete, but all pending sub-tasks will be cancelled. Already
+        generated assets are retained.
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Task cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  cancelledSubTasks:
+                    type: integer
+                    description: Number of pending sub-tasks that were cancelled
+                  completedSubTasks:
+                    type: integer
+                    description: Number of sub-tasks that completed before cancellation
+        '400':
+          description: Task cannot be cancelled (not in cancellable state)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+  # ============================================
+  # SUB-TASKS
+  # ============================================
+  /sub-tasks:
+    get:
+      tags: [SubTasks]
+      summary: List sub-tasks
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: parentTask
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/SubTaskStatus'
+      responses:
+        '200':
+          description: SubTask list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubTaskListResponse'
+
+  /sub-tasks/{id}:
+    get:
+      tags: [SubTasks]
+      summary: Get sub-task details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SubTask details including request/response payloads
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubTask'
+
+  /sub-tasks/{id}/retry:
+    post:
+      tags: [SubTasks]
+      summary: Retry individual sub-task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SubTask re-queued
+
+  # ============================================
+  # STYLES
+  # ============================================
+  /style-templates:
+    get:
+      tags: [Styles]
+      summary: List style templates
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Style template list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleListResponse'
+
+    post:
+      tags: [Styles]
+      summary: Create style template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStyleRequest'
+      responses:
+        '201':
+          description: Style created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleTemplate'
+
+  /style-templates/{id}:
+    get:
+      tags: [Styles]
+      summary: Get style template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Style template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleTemplate'
+
+    patch:
+      tags: [Styles]
+      summary: Update style template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStyleRequest'
+      responses:
+        '200':
+          description: Style updated
+
+    delete:
+      tags: [Styles]
+      summary: Delete style template
+      description: Cannot delete system styles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Style deleted
+        '403':
+          description: Cannot delete system style
+
+  # ============================================
+  # MODELS
+  # ============================================
+  /model-configs:
+    get:
+      tags: [Models]
+      summary: List AI model configurations
+      parameters:
+        - name: isEnabled
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Model configuration list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelConfigListResponse'
+
+  # ============================================
+  # ASSETS (MEDIA)
+  # ============================================
+  /media:
+    get:
+      tags: [Assets]
+      summary: List generated assets
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: relatedSubtask
+          in: query
+          schema:
+            type: string
+        - name: taskId
+          in: query
+          description: Filter by parent task
+          schema:
+            type: string
+        - name: styleId
+          in: query
+          schema:
+            type: string
+        - name: modelId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Asset list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetListResponse'
+
+  /media/{id}:
+    get:
+      tags: [Assets]
+      summary: Get asset details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Asset details with generation metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+
+  # ============================================
+  # STUDIO OPERATIONS
+  # ============================================
+  /studio/expand-prompt:
+    post:
+      tags: [Studio]
+      summary: Expand prompt (preview)
+      description: |
+        Preview LLM prompt expansion without creating a task.
+        Useful for testing prompt optimization before submission.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject]
+              properties:
+                subject:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+                variantCount:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  default: 3
+                webSearchEnabled:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Expanded prompts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpandedPromptResult'
+
+  /studio/calculate-fission:
+    post:
+      tags: [Studio]
+      summary: Calculate task fission
+      description: |
+        Calculate total sub-tasks based on configuration.
+        Returns count and cost estimate.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [promptCount, styleCount, modelCount, batchSize]
+              properties:
+                promptCount:
+                  type: integer
+                styleCount:
+                  type: integer
+                modelCount:
+                  type: integer
+                batchSize:
+                  type: integer
+      responses:
+        '200':
+          description: Fission calculation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalSubTasks:
+                    type: integer
+                  warning:
+                    type: string
+                    description: Warning if total > 500
+
+components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    TaskIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+  schemas:
+    # ============================================
+    # TASK SCHEMAS
+    # ============================================
+    TaskStatus:
+      type: string
+      enum: [draft, queued, expanding, processing, completed, partial_failed, failed, cancelled]
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        subject:
+          type: string
+        expandedPrompts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExpandedPrompt'
+        styles:
+          type: array
+          items:
+            type: string
+        models:
+          type: array
+          items:
+            type: string
+        batchConfig:
+          $ref: '#/components/schemas/BatchConfig'
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+        webSearchEnabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ExpandedPrompt:
+      type: object
+      properties:
+        variantId:
+          type: string
+        variantName:
+          type: string
+        originalPrompt:
+          type: string
+        expandedPrompt:
+          type: string
+        subjectSlug:
+          type: string
+
+    BatchConfig:
+      type: object
+      properties:
+        countPerPrompt:
+          type: integer
+          minimum: 1
+          maximum: 50
+        totalExpected:
+          type: integer
+          readOnly: true
+
+    CreateTaskRequest:
+      type: object
+      required: [subject, styles, models, batchConfig]
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        styles:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        models:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        batchConfig:
+          type: object
+          required: [countPerPrompt]
+          properties:
+            countPerPrompt:
+              type: integer
+              minimum: 1
+              maximum: 50
+        webSearchEnabled:
+          type: boolean
+          default: false
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+        styles:
+          type: array
+          items:
+            type: string
+        models:
+          type: array
+          items:
+            type: string
+        batchConfig:
+          type: object
+          properties:
+            countPerPrompt:
+              type: integer
+
+    TaskListResponse:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        totalDocs:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        hasNextPage:
+          type: boolean
+        hasPrevPage:
+          type: boolean
+
+    # ============================================
+    # SUB-TASK SCHEMAS
+    # ============================================
+    SubTaskStatus:
+      type: string
+      enum: [pending, processing, success, failed, cancelled]
+
+    ErrorCategory:
+      type: string
+      enum: [RATE_LIMITED, CONTENT_FILTERED, INVALID_INPUT, PROVIDER_ERROR, NETWORK_ERROR, TIMEOUT, UNKNOWN]
+
+    SubTask:
+      type: object
+      properties:
+        id:
+          type: string
+        parentTask:
+          type: string
+        status:
+          $ref: '#/components/schemas/SubTaskStatus'
+        styleId:
+          type: string
+        modelId:
+          type: string
+        expandedPrompt:
+          $ref: '#/components/schemas/ExpandedPrompt'
+        finalPrompt:
+          type: string
+        negativePrompt:
+          type: string
+        batchIndex:
+          type: integer
+        requestPayload:
+          type: object
+          additionalProperties: true
+        responseData:
+          type: object
+          additionalProperties: true
+        errorLog:
+          type: string
+        errorCategory:
+          $ref: '#/components/schemas/ErrorCategory'
+        retryCount:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    SubTaskListResponse:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubTask'
+        totalDocs:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+
+    # ============================================
+    # STYLE SCHEMAS
+    # ============================================
+    StyleTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        styleId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        positivePrompt:
+          type: string
+        negativePrompt:
+          type: string
+        previewImage:
+          type: string
+        isSystem:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateStyleRequest:
+      type: object
+      required: [styleId, name, positivePrompt]
+      properties:
+        styleId:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        positivePrompt:
+          type: string
+          description: Must contain {prompt} placeholder
+        negativePrompt:
+          type: string
+        sortOrder:
+          type: integer
+
+    UpdateStyleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        positivePrompt:
+          type: string
+        negativePrompt:
+          type: string
+        sortOrder:
+          type: integer
+
+    StyleListResponse:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/StyleTemplate'
+        totalDocs:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+
+    # ============================================
+    # MODEL CONFIG SCHEMAS
+    # ============================================
+    ModelConfig:
+      type: object
+      properties:
+        id:
+          type: string
+        modelId:
+          type: string
+        displayName:
+          type: string
+        provider:
+          type: string
+          enum: [fal, openai, google]
+        isEnabled:
+          type: boolean
+        rateLimit:
+          type: integer
+        defaultParams:
+          type: object
+          additionalProperties: true
+        supportedAspectRatios:
+          type: array
+          items:
+            type: string
+        supportedFeatures:
+          type: array
+          items:
+            type: string
+
+    ModelConfigListResponse:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelConfig'
+        totalDocs:
+          type: integer
+
+    # ============================================
+    # ASSET SCHEMAS
+    # ============================================
+    Asset:
+      type: object
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        url:
+          type: string
+        mimeType:
+          type: string
+        filesize:
+          type: integer
+        width:
+          type: integer
+        height:
+          type: integer
+        relatedSubtask:
+          type: string
+        generationMeta:
+          $ref: '#/components/schemas/GenerationMeta'
+        assetType:
+          type: string
+          enum: [image, video]
+        createdAt:
+          type: string
+          format: date-time
+
+    GenerationMeta:
+      type: object
+      properties:
+        taskId:
+          type: string
+        subjectSlug:
+          type: string
+        styleId:
+          type: string
+        modelId:
+          type: string
+        batchIndex:
+          type: integer
+        finalPrompt:
+          type: string
+        negativePrompt:
+          type: string
+        seed:
+          type: integer
+        aspectRatio:
+          type: string
+        providerParams:
+          type: object
+          additionalProperties: true
+
+    AssetListResponse:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        totalDocs:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+
+    # ============================================
+    # STUDIO SCHEMAS
+    # ============================================
+    ExpandedPromptResult:
+      type: object
+      properties:
+        variants:
+          type: array
+          items:
+            type: object
+            properties:
+              variantId:
+                type: string
+              variantName:
+                type: string
+              expandedPrompt:
+                type: string
+              suggestedNegativePrompt:
+                type: string
+              keywords:
+                type: array
+                items:
+                  type: string
+        subjectSlug:
+          type: string
+        searchContext:
+          type: string
+          description: Web search context if RAG was enabled
