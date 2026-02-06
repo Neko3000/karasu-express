@@ -6,29 +6,37 @@
 ## Prerequisites
 
 - Node.js 18+ installed
-- Project dependencies installed (`npm install`)
+- Project dependencies installed (`pnpm install`)
 - MongoDB running locally or connection string configured
 - PayloadCMS dev server running
 
 ## Quick Setup
 
-### 1. Install Additional Dependencies
+### 1. Install Dependencies
 
 ```bash
-# Masonry grid layout (if not already installed)
-npm install react-masonry-css
+# Core dependencies (none installed yet)
+pnpm add lightgallery react-masonry-css lucide-react
+
+# shadcn/ui (init + components)
+pnpm dlx shadcn@latest init --yes
+pnpm dlx shadcn@latest add badge button tooltip sonner --yes --overwrite
 ```
 
-> **Note**: LightGallery is already part of the project per constitution.
+> **Note**: shadcn/ui init also installs `class-variance-authority`, `clsx`, `tailwind-merge`, and `@radix-ui/*`.
 
-### 2. Verify Existing Dependencies
+### 2. Verify Installed Dependencies
 
-Check `package.json` for:
+After install, check `package.json` for:
 ```json
 {
   "dependencies": {
     "lightgallery": "^2.x",
-    "react-masonry-css": "^1.x"
+    "react-masonry-css": "^1.x",
+    "lucide-react": "^0.x",
+    "class-variance-authority": "^0.x",
+    "clsx": "^2.x",
+    "tailwind-merge": "^3.x"
   }
 }
 ```
@@ -36,7 +44,7 @@ Check `package.json` for:
 ### 3. Start Development Server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ### 4. Access Admin Panel
@@ -104,14 +112,17 @@ export function MyComponent({ ...props }: MyComponentProps) {
 ### Testing During Development
 
 ```bash
-# Run unit tests
-npm test
+# Run all tests
+pnpm test
+
+# Run unit tests only
+pnpm test:unit
 
 # Run specific test file
-npm test -- useViewPreference.test.ts
+pnpm test -- useViewPreference.test.ts
 
 # Run tests in watch mode
-npm test -- --watch
+pnpm test:watch
 ```
 
 ---

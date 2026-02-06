@@ -95,9 +95,9 @@ Follow heading hierarchy: H1 (`text-2xl font-bold mb-6`) → H2 (`text-xl font-s
 - `src/lib/utils.ts` — `cn()` utility (clsx + tailwind-merge)
 
 ## Recent Changes
+- 001-media-page-refinement: Added TypeScript 5.7.3 (strict mode) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (`.twp` scope), shadcn/ui, LightGallery, Lucide Reac
 - 001-media-page-refinement: Added TypeScript 5.7.3 (strict mode) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (`.twp` scope), shadcn/ui, LightGallery, Lucide React
 - 001-phase-07: Added TypeScript 5.7.3 (strict mode enabled) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18
-- 001-ai-content-studio: Added TypeScript 5.x (strict mode enabled) + PayloadCMS v3 (Next.js App Router), React 18+, TailwindCSS (scoped with `.twp`)
 
 
 ## Dependency-First Development (Constitution Principle VIII)

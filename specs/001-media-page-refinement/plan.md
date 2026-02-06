@@ -23,6 +23,20 @@ Technical approach: Extend PayloadCMS admin UI using custom React components, le
 **Performance Goals**: Gallery view renders 100 items in <2s, view toggle <1s response
 **Constraints**: MUST use PayloadCMS component replacement pattern, MUST scope TailwindCSS with `.twp`
 **Scale/Scope**: ~100-500 media items typical page, up to 1000+ in collection
+**Package Manager**: pnpm
+
+### Dependencies to Install
+
+These dependencies are **not yet installed** and must be added before implementation:
+
+| Package | Purpose | Install Command |
+|---------|---------|-----------------|
+| `lightgallery` | Gallery lightbox (constitution-approved) | `pnpm add lightgallery` |
+| `react-masonry-css` | Masonry grid layout for gallery view | `pnpm add react-masonry-css` |
+| `lucide-react` | Icon library (via shadcn/ui, Principle VIII) | `pnpm add lucide-react` |
+| shadcn/ui suite | UI primitives (Principle VIII) | `pnpm dlx shadcn@latest init --yes` |
+
+**Note**: shadcn/ui init will also install `class-variance-authority`, `clsx`, `tailwind-merge`, and `@radix-ui/*` packages. Additional shadcn/ui components (badge, button, tooltip, sonner) are added individually via `pnpm dlx shadcn@latest add <component>`.
 
 ## Constitution Check
 
@@ -37,6 +51,7 @@ Technical approach: Extend PayloadCMS admin UI using custom React components, le
 | **V. Observability by Default** | ✅ PASS | Displaying existing generationMeta data, improving visibility |
 | **VI. Testing Discipline** | ✅ PASS | Unit tests for utilities, component tests per Testing Strategy |
 | **VII. Admin Panel UI Standards** | ✅ PASS | Will follow heading hierarchy (H1-H4), spacing standards, section organization |
+| **VIII. Dependency-First Development** | ✅ PASS | Using LightGallery (approved), shadcn/ui (approved), Lucide React (approved). No new unapproved libraries. UI resolution: PayloadCMS → shadcn/ui → Custom. Icons: Lucide React only. |
 
 **Post-Design Re-check**: All principles remain compliant after design phase.
 
@@ -62,23 +77,32 @@ src/
 ├── collections/
 │   └── Media.ts                 # Extend with custom admin.components
 ├── components/
-│   └── Media/
-│       ├── index.ts             # Export barrel (existing)
-│       ├── MediaThumbnailCell.tsx      # Enhance hover preview (existing)
-│       ├── MediaThumbnailCell.module.css
-│       ├── MediaGalleryView.tsx        # NEW: Gallery view component
-│       ├── MediaGalleryView.module.css
-│       ├── MediaListHeader.tsx         # NEW: View toggle toolbar
-│       ├── MediaDetailView.tsx         # NEW: Custom detail page layout
-│       ├── MediaDetailView.module.css
-│       ├── ExpandableText.tsx          # NEW: Expand/collapse text
-│       ├── FormattedJson.tsx           # NEW: JSON syntax display
-│       ├── RelativeTime.tsx            # NEW: Relative timestamp
-│       └── MetadataBadge.tsx           # NEW: Enum badge display
+│   ├── Media/
+│   │   ├── index.ts             # Export barrel (existing)
+│   │   ├── types.ts             # Shared types (existing)
+│   │   ├── MediaThumbnailCell.tsx      # Enhance hover preview (existing)
+│   │   ├── MediaThumbnailCell.module.css
+│   │   ├── MediaGalleryView.tsx        # NEW: Gallery view component
+│   │   ├── MediaGalleryView.module.css
+│   │   ├── MediaListHeader.tsx         # NEW: View toggle toolbar
+│   │   ├── MediaDetailView.tsx         # NEW: Custom detail page layout
+│   │   ├── MediaDetailView.module.css
+│   │   ├── ExpandableText.tsx          # NEW: Expand/collapse text
+│   │   ├── FormattedJson.tsx           # NEW: JSON syntax display
+│   │   ├── RelativeTime.tsx            # NEW: Relative timestamp
+│   │   └── MetadataBadge.tsx           # NEW: Enum badge display
+│   └── ui/                      # shadcn/ui components (auto-generated)
+│       ├── badge.tsx
+│       ├── button.tsx
+│       ├── tooltip.tsx
+│       └── sonner.tsx
 ├── hooks/
 │   └── useViewPreference.ts     # NEW: localStorage persistence hook
-└── lib/
-    └── clipboard.ts             # NEW: Copy to clipboard utility
+├── lib/
+│   ├── utils.ts                 # cn() utility (clsx + tailwind-merge)
+│   └── clipboard.ts             # NEW: Copy to clipboard utility
+└── app/
+    └── tailwind.css             # TailwindCSS v4 config with shadcn/ui theme vars
 
 tests/
 ├── unit/
@@ -89,7 +113,7 @@ tests/
     └── MediaGalleryView.integration.test.tsx
 ```
 
-**Structure Decision**: Single project structure following existing PayloadCMS layout. New components under `src/components/Media/`, new hooks under `src/hooks/`, new utilities under `src/lib/`.
+**Structure Decision**: Single project structure following existing PayloadCMS layout. New components under `src/components/Media/`, shadcn/ui components under `src/components/ui/`, new hooks under `src/hooks/`, new utilities under `src/lib/`.
 
 ## Complexity Tracking
 

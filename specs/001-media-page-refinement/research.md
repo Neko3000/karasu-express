@@ -26,9 +26,9 @@ This document captures research findings for implementing the Media page gallery
 ### Installation
 
 ```bash
-# Already installed per constitution
-npm install lightgallery
-npm install react-masonry-css  # For masonry grid layout
+# Constitution-approved dependencies (not yet installed)
+pnpm add lightgallery
+pnpm add react-masonry-css  # For masonry grid layout
 ```
 
 ### Required Imports
