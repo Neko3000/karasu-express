@@ -28,7 +28,6 @@ This document captures research findings for implementing the Media page gallery
 ```bash
 # Constitution-approved dependencies (not yet installed)
 pnpm add lightgallery
-pnpm add react-masonry-css  # For masonry grid layout
 ```
 
 ### Required Imports
@@ -81,25 +80,30 @@ const lightGallerySettings = {
 
 ## 2. Masonry Grid Layout
 
-### Decision: Use react-masonry-css
+### Decision: Use TailwindCSS CSS Columns
 
 **Rationale**:
-- Lightweight CSS-based masonry (no JavaScript layout calculations)
-- Works well with responsive breakpoints
-- Simple integration with LightGallery dynamic mode
+- TailwindCSS is already in the stack (Principle VIII — use existing deps first)
+- CSS columns (`columns-*` + `break-inside-avoid`) produce native masonry layout
+- No additional JavaScript library needed (Principle II — infrastructure minimalism)
+- Responsive via TailwindCSS breakpoint variants
 
-**Pattern**: Separate masonry grid from LightGallery, use programmatic `openGallery(index)` on click.
+**Alternatives Rejected**:
+- `react-masonry-css`: Adds unnecessary dependency when CSS columns suffice
+- `masonic`: Overkill for <500 items; virtualization not needed at this scale
 
-### Responsive Breakpoints
+**Pattern**: Separate CSS columns grid from LightGallery, use programmatic `openGallery(index)` on click.
 
-```typescript
-const breakpointColumns = {
-  default: 4,  // 4 columns on large screens
-  1280: 3,     // 3 columns on xl
-  1024: 3,     // 3 columns on lg
-  768: 2,      // 2 columns on md
-  640: 1,      // 1 column on sm
-};
+### Responsive Layout
+
+```tsx
+<div className="twp:columns-1 twp:sm:columns-2 twp:lg:columns-3 twp:xl:columns-4 twp:gap-4">
+  {images.map((img, i) => (
+    <div key={img.id} className="twp:break-inside-avoid twp:mb-4">
+      <img src={img.thumbnailURL} onClick={() => openGallery(i)} />
+    </div>
+  ))}
+</div>
 ```
 
 ---
@@ -344,7 +348,7 @@ Per Constitution Principle VI:
 
 1. **Phase 1 - Utilities**: useViewPreference hook, clipboard utility
 2. **Phase 2 - Reusable Components**: ExpandableText, FormattedJson, RelativeTime, MetadataBadge
-3. **Phase 3 - Gallery View**: MediaGalleryView with LightGallery + Masonry
+3. **Phase 3 - Gallery View**: MediaGalleryView with LightGallery + CSS columns
 4. **Phase 4 - List Header**: View toggle toolbar
 5. **Phase 5 - Enhanced Hover**: Metadata overlay, debounce, keyboard
 6. **Phase 6 - Detail Page**: MediaDetailView with sections
@@ -356,6 +360,5 @@ Per Constitution Principle VI:
 
 - [LightGallery React Documentation](https://www.lightgalleryjs.com/docs/react-image-video-gallery/)
 - [LightGallery Settings](https://www.lightgalleryjs.com/docs/settings/)
-- [react-masonry-css](https://github.com/paulcollett/react-masonry-css)
 - [PayloadCMS Custom Components](https://payloadcms.com/docs/admin/components)
 - [TailwindCSS with PayloadCMS](https://payloadcms.com/posts/guides/how-to-theme-the-payload-admin-panel-with-tailwind-css-4)

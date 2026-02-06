@@ -32,9 +32,10 @@ These dependencies are **not yet installed** and must be added before implementa
 | Package | Purpose | Install Command |
 |---------|---------|-----------------|
 | `lightgallery` | Gallery lightbox (constitution-approved) | `pnpm add lightgallery` |
-| `react-masonry-css` | Masonry grid layout for gallery view | `pnpm add react-masonry-css` |
 | `lucide-react` | Icon library (via shadcn/ui, Principle VIII) | `pnpm add lucide-react` |
 | shadcn/ui suite | UI primitives (Principle VIII) | `pnpm dlx shadcn@latest init --yes` |
+
+**Note**: Gallery masonry layout uses TailwindCSS CSS columns (`columns-*` + `break-inside-avoid`) — no additional library needed.
 
 **Note**: shadcn/ui init will also install `class-variance-authority`, `clsx`, `tailwind-merge`, and `@radix-ui/*` packages. Additional shadcn/ui components (badge, button, tooltip, sonner) are added individually via `pnpm dlx shadcn@latest add <component>`.
 

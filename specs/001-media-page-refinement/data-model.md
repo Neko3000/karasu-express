@@ -110,7 +110,7 @@ Payload API → Media documents → MediaGalleryView
                                     ↓
                               LightGallery dynamicEl
                                     ↓
-                              Masonry grid render
+                              CSS columns grid render
                                     ↓
                               Click → openGallery(index)
 ```

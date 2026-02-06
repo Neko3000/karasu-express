@@ -16,7 +16,7 @@
 
 ```bash
 # Core dependencies (none installed yet)
-pnpm add lightgallery react-masonry-css lucide-react
+pnpm add lightgallery lucide-react
 
 # shadcn/ui (init + components)
 pnpm dlx shadcn@latest init --yes
@@ -24,6 +24,7 @@ pnpm dlx shadcn@latest add badge button tooltip sonner --yes --overwrite
 ```
 
 > **Note**: shadcn/ui init also installs `class-variance-authority`, `clsx`, `tailwind-merge`, and `@radix-ui/*`.
+> Gallery masonry layout uses TailwindCSS CSS columns — no additional library needed.
 
 ### 2. Verify Installed Dependencies
 
@@ -32,7 +33,6 @@ After install, check `package.json` for:
 {
   "dependencies": {
     "lightgallery": "^2.x",
-    "react-masonry-css": "^1.x",
     "lucide-react": "^0.x",
     "class-variance-authority": "^0.x",
     "clsx": "^2.x",
@@ -133,7 +133,7 @@ pnpm test:watch
 
 - [ ] View toggle button visible in Media list toolbar
 - [ ] Clicking toggle switches between List and Gallery view
-- [ ] Gallery displays images in masonry grid
+- [ ] Gallery displays images in CSS columns grid (masonry-style)
 - [ ] Clicking image opens LightGallery lightbox
 - [ ] View preference persists after page refresh
 - [ ] Responsive layout (test at 768px, 1024px, 1280px widths)

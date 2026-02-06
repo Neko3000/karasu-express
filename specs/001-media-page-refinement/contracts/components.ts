@@ -103,7 +103,7 @@ export type FormatRelativeTime = (date: Date | string) => string;
 // =============================================================================
 
 /**
- * MediaGalleryView - Masonry grid gallery with LightGallery lightbox
+ * MediaGalleryView - CSS columns gallery with LightGallery lightbox
  */
 export interface MediaGalleryViewProps {
   /** Array of media documents to display */
