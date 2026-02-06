@@ -1,6 +1,6 @@
 # karasu-express Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2025-12-16
+Auto-generated from all feature plans. Last updated: 2026-02-06
 
 ## MCP
 Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
@@ -23,17 +23,91 @@ tests/
 
 ## Commands
 
-npm test && npm run lint
+```bash
+pnpm test          # Run all tests (unit + integration + contract)
+pnpm test:unit     # Unit tests only
+pnpm test:integration  # Integration tests only
+pnpm test:contract # Contract tests only
+pnpm test:watch    # Watch mode
+pnpm test:coverage # With coverage report
+pnpm test:e2e      # Playwright end-to-end tests
+pnpm lint          # ESLint via Next.js
+pnpm dev           # Dev server
+pnpm devsafe       # Dev server (clears .next cache first)
+```
 
 ## Code Style
 
-TypeScript 5.x (strict mode enabled): Follow standard conventions
+TypeScript 5.7.3 (strict mode enabled): Follow standard conventions
+
+## TailwindCSS `.twp` Scoping
+
+TailwindCSS is scoped with a `.twp` prefix to avoid conflicts with PayloadCMS admin styles. ALL UI components MUST:
+
+- Wrap the component root in a `<div className="twp">` container
+- Use `twp:` prefixed classes: `twp:bg-blue-500`, `twp:text-sm`, etc.
+- shadcn/ui components already use the `twp:` prefix (configured in `components.json`)
+
+## Component Patterns
+
+All interactive admin panel components MUST use the `'use client'` directive at the top of the file. Example:
+
+```typescript
+'use client';
+import { useState } from 'react';
+
+export function MyComponent() {
+  return (
+    <div className="twp">
+      {/* twp: prefixed TailwindCSS classes work inside */}
+    </div>
+  );
+}
+```
+
+## Testing Conventions
+
+- **Package manager**: `pnpm` (NOT npm)
+- **Framework**: Vitest + Testing Library
+- **Config**: `vitest.config.mts` (environment: node, setupFiles: `tests/setup.ts`)
+- **Unit tests**: `tests/unit/[module].test.ts`
+- **Integration tests**: `tests/integration/[flow].integration.test.ts`
+- **Contract tests**: `tests/contract/[api].contract.test.ts`
+- Tests MUST pass before committing. Phase N tests MUST pass before advancing to Phase N+1.
+
+## Commit Conventions
+
+Follow Conventional Commits format:
+- `feat:` new feature, `fix:` bug fix, `refactor:` code restructuring
+- `test:` test-only changes, `style:` UI/styling-only changes, `docs:` documentation
+- `BREAKING CHANGE:` footer for backward-incompatible changes
+
+## Admin Panel UI Standards (Constitution Principle VII)
+
+Follow heading hierarchy: H1 (`text-2xl font-bold mb-6`) → H2 (`text-xl font-semibold mb-4`) → H3 (`text-lg font-medium mb-3`) → H4 (`text-base font-medium mb-2`). Section dividers only between H2-level sections. See `.specify/memory/constitution.md` Principle VII for full details.
+
+## Key Config Files
+
+- `components.json` — shadcn/ui config (project root)
+- `src/app/tailwind.css` — TailwindCSS v4 config with `@theme` and CSS variables
+- `postcss.config.mjs` — PostCSS config
+- `vitest.config.mts` — Vitest test runner config
+- `src/lib/utils.ts` — `cn()` utility (clsx + tailwind-merge)
 
 ## Recent Changes
 - 001-media-page-refinement: Added TypeScript 5.7.3 (strict mode) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (`.twp` scope), shadcn/ui, LightGallery, Lucide React
 - 001-phase-07: Added TypeScript 5.7.3 (strict mode enabled) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18
 - 001-ai-content-studio: Added TypeScript 5.x (strict mode enabled) + PayloadCMS v3 (Next.js App Router), React 18+, TailwindCSS (scoped with `.twp`)
 
+
+## Dependency-First Development (Constitution Principle VIII)
+
+Before writing any UI code, MUST check existing dependencies for available solutions in this order:
+
+- **UI components**: PayloadCMS built-in → shadcn/ui → Custom (last resort)
+- **Icons**: Lucide React (via shadcn/ui) → Custom SVG (with justification only)
+
+Do NOT add new UI or icon libraries. Do NOT build custom components when an approved dependency already provides one.
 
 <!-- MANUAL ADDITIONS START -->
 
