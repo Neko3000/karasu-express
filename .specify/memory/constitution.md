@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.2.0 → 1.4.0
+Version change: 1.2.0 → 1.5.0
 Modified principles:
   - None renamed
 Added sections:
@@ -10,6 +10,10 @@ Added sections:
   - Added AI Services subsection (LLM Prompt Optimization, Image Generation providers)
 Changes in 1.4.0:
   - Replaced FontAwesome with Lucide React (via shadcn/ui) as icon library
+Changes in 1.5.0:
+  - Added Principle VIII: Dependency-First Development (依赖优先开发)
+  - UI resolution order: PayloadCMS → shadcn/ui → Custom
+  - Icon resolution order: Lucide React → Custom SVG (with justification)
 Removed sections: None
 Templates requiring updates:
   - .specify/templates/plan-template.md: ✅ No updates needed (Technical Context already captures stack)
@@ -158,6 +162,43 @@ development friction when creating new views. A clear heading hierarchy with pre
 creates visual rhythm that guides users through complex forms. Limiting dividers to major
 sections prevents visual clutter while maintaining clear content separation.
 
+### VIII. Dependency-First Development (依赖优先开发)
+
+**Non-Negotiable Rules:**
+- Before writing any component or UI code, MUST check existing dependencies for available solutions in the following resolution order
+- MUST NOT introduce custom implementations when an approved dependency already provides the needed functionality
+- MUST NOT add new UI or icon dependencies without documenting why the approved stack is insufficient
+
+#### UI Component Resolution Order
+
+When implementing any UI element, MUST check for an existing solution in this order:
+
+| Priority | Source | When to Use |
+|----------|--------|-------------|
+| 1st | PayloadCMS built-in components | Admin panel primitives (buttons, fields, modals, navigation) already provided by Payload |
+| 2nd | shadcn/ui | General-purpose UI components (dialogs, dropdowns, tabs, cards, badges, tooltips, etc.) |
+| 3rd | Custom implementation | Only when neither PayloadCMS nor shadcn/ui provides the needed component |
+
+#### Icon Resolution Order
+
+When using icons, MUST use Lucide React (shadcn/ui's icon library):
+
+| Priority | Source | When to Use |
+|----------|--------|-------------|
+| 1st | Lucide React (via shadcn/ui) | All icon needs — this is the single approved icon library |
+| 2nd | Custom SVG | Only when Lucide React does not have a suitable icon, with documented justification |
+
+#### Verification Gate
+
+- Before writing UI code, developer MUST search the approved dependency's documentation/API for existing components
+- If a custom component is created that duplicates approved dependency functionality, it MUST be flagged in code review and replaced
+- New third-party UI or icon libraries MUST NOT be added to `package.json` without a Complexity Tracking entry justifying why the approved stack is insufficient
+
+**Rationale:** Reusing approved dependencies ensures visual consistency, reduces bundle size, and
+prevents fragmentation across the codebase. Checking dependencies before coding avoids wasted
+effort building components that already exist. A strict resolution order eliminates ambiguity
+about which library to reach for first.
+
 ## Technical Constraints
 
 ### Technology Stack
@@ -275,4 +316,4 @@ MUST be documented in the Complexity Tracking section of the relevant plan docum
 - PRs without adequate test coverage MUST be rejected per Principle VI
 - Admin panel PRs MUST verify UI Standards compliance per Principle VII
 
-**Version**: 1.4.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2026-02-06
+**Version**: 1.5.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2026-02-06
