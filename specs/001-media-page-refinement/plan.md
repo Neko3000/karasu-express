@@ -10,12 +10,12 @@ Optimize the Media collection admin pages with two core improvements:
 1. **List Page**: Add Gallery/List view toggle using LightGallery for visual browsing, enhance hover preview with metadata overlay, persist view preference in localStorage
 2. **Detail Page**: Restructure into organized sections (Image Preview, Basic Info, Generation Info, Actions) with expandable prompts, formatted JSON, clickable links, and quick actions (download, copy prompt)
 
-Technical approach: Extend PayloadCMS admin UI using custom React components, leverage constitution-approved libraries (LightGallery, shadcn/ui, FontAwesome), and follow Principle VII UI Standards for consistent styling.
+Technical approach: Extend PayloadCMS admin UI using custom React components, leverage constitution-approved libraries (LightGallery, shadcn/ui, Lucide React), and follow Principle VII UI Standards for consistent styling.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.7.3 (strict mode)
-**Primary Dependencies**: PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (`.twp` scope), shadcn/ui, LightGallery, FontAwesome
+**Primary Dependencies**: PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (`.twp` scope), shadcn/ui, LightGallery, Lucide React
 **Storage**: MongoDB (existing Media, SubTasks collections - no schema changes)
 **Testing**: Vitest + Testing Library
 **Target Platform**: Web (Admin panel - desktop primary, responsive)

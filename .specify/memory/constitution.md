@@ -1,13 +1,15 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.2.0 → 1.3.0
+Version change: 1.2.0 → 1.4.0
 Modified principles:
   - None renamed
 Added sections:
   - Expanded Technology Stack table with detailed version pinning
-  - Added UI Component Libraries subsection (shadcn/ui, FontAwesome, LightGallery)
+  - Added UI Component Libraries subsection (shadcn/ui, Lucide React, LightGallery)
   - Added AI Services subsection (LLM Prompt Optimization, Image Generation providers)
+Changes in 1.4.0:
+  - Replaced FontAwesome with Lucide React (via shadcn/ui) as icon library
 Removed sections: None
 Templates requiring updates:
   - .specify/templates/plan-template.md: ✅ No updates needed (Technical Context already captures stack)
@@ -174,7 +176,7 @@ sections prevents visual clutter while maintaining clear content separation.
 | Category | Library | Purpose |
 |----------|---------|---------|
 | Component System | shadcn/ui | Accessible, customizable UI primitives |
-| Icons | FontAwesome | Comprehensive icon set |
+| Icons | Lucide React (via shadcn/ui) | Comprehensive icon set |
 | Gallery | LightGallery | Image/video gallery with lightbox |
 
 ### AI Services
@@ -273,4 +275,4 @@ MUST be documented in the Complexity Tracking section of the relevant plan docum
 - PRs without adequate test coverage MUST be rejected per Principle VI
 - Admin panel PRs MUST verify UI Standards compliance per Principle VII
 
-**Version**: 1.3.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2026-02-05
+**Version**: 1.4.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2026-02-06

@@ -28,7 +28,7 @@
 | **框架** | PayloadCMS v3.68.3 + Next.js 15.4.9 (App Router) |
 | **前端** | React 19.2.1 + TailwindCSS 4.1.18 (`.twp` 作用域前缀) |
 | **UI 组件库** | shadcn/ui |
-| **图标库** | FontAwesome |
+| **图标库** | Lucide React (via shadcn/ui) |
 | **Gallery 组件** | LightGallery |
 | **语言** | TypeScript 5.7.3 (严格模式) |
 | **数据库** | MongoDB (via @payloadcms/db-mongodb) |
@@ -477,4 +477,4 @@ $$Total\_Tasks = (N_{prompts}) \times (N_{styles}) \times (N_{models}) \times (S
 - [SDXL Prompt Styler](https://github.com/twri/sdxl_prompt_styler)
 - [LightGallery](https://github.com/sachinchoolur/lightGallery)
 - [shadcn/ui](https://github.com/shadcn-ui/ui)
-- [FontAwesome](https://fontawesome.com/)
+- [Lucide React](https://lucide.dev/)

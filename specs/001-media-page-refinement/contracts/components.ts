@@ -221,7 +221,7 @@ export interface ImagePreviewProps {
 export interface ActionButtonProps {
   /** Button label */
   label: string;
-  /** Icon name (FontAwesome) */
+  /** Icon name (Lucide React) */
   icon: string;
   /** Click handler */
   onClick: () => void;
