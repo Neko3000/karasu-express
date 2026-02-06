@@ -9,6 +9,8 @@ Always use Context7 MCP when I need library/API documentation, code generation, 
 - MongoDB (single data store per Constitution Principle II) (001-ai-content-studio)
 - TypeScript 5.7.3 (strict mode enabled) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (001-phase-07)
 - MongoDB (via @payloadcms/db-mongodb) (001-phase-07)
+- TypeScript 5.7.3 (strict mode) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (`.twp` scope), shadcn/ui, LightGallery, FontAwesome (001-media-page-refinement)
+- MongoDB (existing Media, SubTasks collections - no schema changes) (001-media-page-refinement)
 
 - TypeScript 5.x (strict mode enabled) + PayloadCMS v3 (Next.js App Router), React 18+, TailwindCSS (scoped with `.twp`) (001-ai-content-studio)
 
@@ -28,10 +30,10 @@ npm test && npm run lint
 TypeScript 5.x (strict mode enabled): Follow standard conventions
 
 ## Recent Changes
+- 001-media-page-refinement: Added TypeScript 5.7.3 (strict mode) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18 (`.twp` scope), shadcn/ui, LightGallery, FontAwesome
 - 001-phase-07: Added TypeScript 5.7.3 (strict mode enabled) + PayloadCMS v3.68.3, Next.js 15.4.9, React 19.2.1, TailwindCSS 4.1.18
 - 001-ai-content-studio: Added TypeScript 5.x (strict mode enabled) + PayloadCMS v3 (Next.js App Router), React 18+, TailwindCSS (scoped with `.twp`)
 
-- 001-ai-content-studio: Added TypeScript 5.x (strict mode enabled) + PayloadCMS v3 (Next.js App Router), React 18+, TailwindCSS (scoped with `.twp`)
 
 <!-- MANUAL ADDITIONS START -->
 
