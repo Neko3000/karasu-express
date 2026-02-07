@@ -15,6 +15,7 @@
  */
 
 import React, { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import type { CalculatedPrompt } from './hooks/useCalculatedPrompts'
 
 // ============================================
@@ -65,13 +66,13 @@ export function CalculatedPromptCard({
       <div className="twp flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
         {/* Variant Badge */}
         <div className="twp flex items-center gap-2">
-          <span className="twp inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
+          <Badge variant="secondary" className="twp:bg-blue-100 twp:dark:bg-blue-900/50 twp:text-blue-800 twp:dark:text-blue-200">
             {prompt.variantName}
-          </span>
-          <span className="twp text-gray-400 dark:text-gray-500">×</span>
-          <span className="twp inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200">
+          </Badge>
+          <span className="twp:text-gray-400 twp:dark:text-gray-500">×</span>
+          <Badge variant="secondary" className="twp:bg-purple-100 twp:dark:bg-purple-900/50 twp:text-purple-800 twp:dark:text-purple-200">
             {prompt.styleName}
-          </span>
+          </Badge>
         </div>
 
         {/* Expand/Collapse for long prompts */}

@@ -7,3 +7,4 @@
  */
 
 export { MediaThumbnailCell } from './MediaThumbnailCell'
+export type { MediaDocument, GenerationMeta, ImageSize, ViewMode } from './types'

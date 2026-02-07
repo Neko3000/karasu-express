@@ -12,6 +12,7 @@
  */
 
 import React from 'react'
+import { AlertCircle } from 'lucide-react'
 import { Button } from '@payloadcms/ui'
 
 export interface OptimizationErrorBannerProps {
@@ -55,20 +56,7 @@ export function OptimizationErrorBanner({
     >
       {/* Error icon */}
       <div style={{ flexShrink: 0 }}>
-        <svg
-          width="16"
-          height="16"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="var(--theme-error-500)"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <AlertCircle size={16} style={{ color: 'var(--theme-error-500)' }} />
       </div>
 
       {/* Error message and retry button */}

@@ -14,6 +14,7 @@
  */
 
 import React from 'react'
+import { Check } from 'lucide-react'
 
 /**
  * Optimization progress stages
@@ -169,9 +170,7 @@ export function OptimizationProgressBar({ stage, className = '', style }: Optimi
             color: 'var(--theme-success-500)',
           }}
         >
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+          <Check size={14} />
           <span>Optimization complete</span>
         </div>
       )}

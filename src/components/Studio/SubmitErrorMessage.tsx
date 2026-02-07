@@ -14,6 +14,7 @@
  */
 
 import React from 'react'
+import { AlertCircle } from 'lucide-react'
 import { Button } from '@payloadcms/ui'
 
 export interface SubmitErrorMessageProps {
@@ -53,20 +54,7 @@ export function SubmitErrorMessage({
     >
       {/* Error icon */}
       <div style={{ flexShrink: 0 }}>
-        <svg
-          width="24"
-          height="24"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="var(--theme-error-500)"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-          />
-        </svg>
+        <AlertCircle size={24} style={{ color: 'var(--theme-error-500)' }} />
       </div>
 
       {/* Error message and retry button */}

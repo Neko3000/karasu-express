@@ -14,7 +14,10 @@
  */
 
 import React from 'react'
+import { X } from 'lucide-react'
 import { TaskStatus, SubTaskStatus } from '@/lib/types'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { TaskDetail as TaskDetailType, SubTaskListItem } from './hooks/useTaskProgress'
 import { SubTaskList } from './SubTaskList'
 
@@ -107,14 +110,13 @@ export function TaskDetail({
             ID: {task.id}
           </p>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="icon-xs"
           onClick={onClose}
-          className="twp p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
-          <svg className="twp w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          <X className="twp:size-5" />
+        </Button>
       </div>
 
       {isLoading ? (
@@ -192,12 +194,13 @@ export function TaskDetail({
                 </h4>
                 <div className="twp flex flex-wrap gap-1">
                   {task.models.map((model) => (
-                    <span
+                    <Badge
                       key={model}
-                      className="twp px-2 py-0.5 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded"
+                      variant="secondary"
+                      className="twp:bg-blue-100 twp:text-blue-800 twp:dark:bg-blue-900 twp:dark:text-blue-300"
                     >
                       {model}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -246,12 +249,12 @@ export function TaskDetail({
           {/* Retry All Failed Button */}
           {canRetryFailed && (
             <div className="twp">
-              <button
+              <Button
                 onClick={onRetryAllFailed}
-                className="twp w-full py-2 px-4 bg-orange-600 text-white font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="twp:w-full twp:bg-orange-600 twp:hover:bg-orange-700 twp:text-white"
               >
                 Retry All Failed ({statusCounts.failed})
-              </button>
+              </Button>
             </div>
           )}
 

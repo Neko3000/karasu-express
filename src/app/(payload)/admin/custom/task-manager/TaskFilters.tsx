@@ -14,6 +14,8 @@
 
 import React, { useState, useCallback } from 'react'
 import { TaskStatus, type TaskFilters as TaskFiltersType, type DateRangeOption } from '@/lib/types'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 // ============================================
 // TYPES
@@ -147,13 +149,13 @@ export function TaskFilters({
             className="twp flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm"
             disabled={isLoading}
           />
-          <button
+          <Button
             onClick={handleSearch}
             disabled={isLoading}
-            className="twp px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 text-sm font-medium"
+            size="sm"
           >
             Search
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -166,21 +168,23 @@ export function TaskFilters({
           {STATUS_OPTIONS.map(({ value, label, color }) => {
             const isSelected = filters.status?.includes(value)
             return (
-              <button
+              <Badge
                 key={value}
-                onClick={() => handleStatusToggle(value)}
-                disabled={isLoading}
-                className={`
-                  twp px-3 py-1 rounded-full text-xs font-medium transition-all
-                  ${isSelected
-                    ? `${color} ring-2 ring-offset-1 ring-blue-500`
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }
-                  disabled:opacity-50
-                `}
+                variant="outline"
+                asChild
               >
-                {label}
-              </button>
+                <button
+                  onClick={() => handleStatusToggle(value)}
+                  disabled={isLoading}
+                  className={`twp:cursor-pointer twp:transition-all ${
+                    isSelected
+                      ? `${color} twp:ring-2 twp:ring-offset-1 twp:ring-blue-500`
+                      : 'twp:bg-gray-100 twp:text-gray-600 twp:dark:bg-gray-700 twp:dark:text-gray-400 twp:hover:bg-gray-200 twp:dark:hover:bg-gray-600'
+                  } twp:disabled:opacity-50`}
+                >
+                  {label}
+                </button>
+              </Badge>
             )
           })}
         </div>
@@ -195,21 +199,15 @@ export function TaskFilters({
           {DATE_RANGE_OPTIONS.map(({ value, label }) => {
             const isSelected = filters.dateRange === value
             return (
-              <button
+              <Button
                 key={value}
+                variant={isSelected ? 'default' : 'outline'}
+                size="xs"
                 onClick={() => handleDateRangeChange(value)}
                 disabled={isLoading}
-                className={`
-                  twp px-3 py-1 rounded-md text-xs font-medium transition-all
-                  ${isSelected
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }
-                  disabled:opacity-50
-                `}
               >
                 {label}
-              </button>
+              </Button>
             )
           })}
         </div>
@@ -248,13 +246,14 @@ export function TaskFilters({
       {/* Clear Filters */}
       {hasActiveFilters && (
         <div className="twp pt-2 border-t border-gray-200 dark:border-gray-700">
-          <button
+          <Button
+            variant="link"
+            size="sm"
             onClick={handleClearFilters}
             disabled={isLoading}
-            className="twp text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50"
           >
             Clear all filters
-          </button>
+          </Button>
         </div>
       )}
     </div>

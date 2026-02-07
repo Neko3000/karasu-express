@@ -14,6 +14,7 @@
  */
 
 import React, { useCallback, useState } from 'react'
+import { AlertCircle, X } from 'lucide-react'
 import { TaskFilters } from './TaskFilters'
 import { TaskList } from './TaskList'
 import { TaskDetail } from './TaskDetail'
@@ -146,9 +147,7 @@ export default function TaskManagerPage() {
         <div className="twp mx-6 mt-4">
           <div className="twp bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center justify-between">
             <div className="twp flex items-center gap-2">
-              <svg className="twp w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <AlertCircle className="twp w-5 h-5 text-red-600" />
               <span className="twp text-red-700 dark:text-red-300">{error || actionError}</span>
             </div>
             <button
@@ -158,9 +157,7 @@ export default function TaskManagerPage() {
               }}
               className="twp text-red-600 hover:text-red-800"
             >
-              <svg className="twp w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="twp w-4 h-4" />
             </button>
           </div>
         </div>

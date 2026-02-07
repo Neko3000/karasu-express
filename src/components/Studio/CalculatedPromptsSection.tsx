@@ -11,6 +11,8 @@
  */
 
 import React, { useState } from 'react'
+import { ChevronUp, ChevronDown } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { CalculatedPromptCard } from './CalculatedPromptCard'
 import type { CalculatedPrompt, CalculatedPromptsSummary } from './hooks/useCalculatedPrompts'
 
@@ -88,9 +90,9 @@ export function CalculatedPromptsSection({
         </div>
 
         {/* Total count badge */}
-        <span className="twp inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+        <Badge variant="secondary">
           {summary.totalPrompts} {summary.totalPrompts === 1 ? 'prompt' : 'prompts'}
-        </span>
+        </Badge>
       </div>
 
       {/* Prompts Grid */}
@@ -113,36 +115,12 @@ export function CalculatedPromptsSection({
           >
             {isExpanded ? (
               <>
-                <svg
-                  className="twp w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 15l7-7 7 7"
-                  />
-                </svg>
+                <ChevronUp className="twp w-4 h-4" />
                 Show less
               </>
             ) : (
               <>
-                <svg
-                  className="twp w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                <ChevronDown className="twp w-4 h-4" />
                 Show {hiddenCount} more
               </>
             )}

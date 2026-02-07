@@ -94,7 +94,7 @@ As an administrator viewing long prompts and JSON data, I want collapsible text 
 - **FR-001**: System MUST provide a toggle control to switch between List view (table) and Gallery view (masonry grid)
 - **FR-002**: System MUST persist the user's view preference in browser local storage
 - **FR-003**: Gallery view MUST display images in a responsive masonry/grid layout that adapts to viewport width
-- **FR-004**: Gallery view MUST support clicking an image to navigate to its detail page
+- **FR-004**: Gallery view MUST support navigating to an image's detail page (via a detail-link icon on each card); clicking the image itself opens a lightbox for quick browsing
 - **FR-005**: Hover preview MUST display an enlarged image with metadata overlay (dimensions, format, model)
 - **FR-006**: Hover preview MUST use smart positioning to avoid viewport overflow
 - **FR-007**: Hover preview MUST be accessible via keyboard navigation

@@ -17,29 +17,11 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import styles from './MediaThumbnailCell.module.css'
+import type { MediaDocument } from './types'
 
 // ============================================
 // TYPES
 // ============================================
-
-interface MediaDocument {
-  id: string
-  filename?: string
-  url?: string
-  thumbnailURL?: string | null
-  sizes?: {
-    thumbnail?: {
-      url?: string | null
-      width?: number | null
-      height?: number | null
-    }
-    card?: {
-      url?: string | null
-      width?: number | null
-      height?: number | null
-    }
-  }
-}
 
 interface MediaThumbnailCellProps {
   cellData?: string

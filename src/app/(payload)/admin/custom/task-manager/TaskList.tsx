@@ -16,6 +16,8 @@
 
 import React from 'react'
 import { TaskStatus } from '@/lib/types'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { TaskListItem } from './hooks/useTaskProgress'
 
 // ============================================
@@ -220,38 +222,41 @@ export function TaskList({
 
                   {/* Status */}
                   <td className="twp px-4 py-4">
-                    <span
-                      className={`twp inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        task.status
-                      )}`}
+                    <Badge
+                      variant="outline"
+                      className={getStatusColor(task.status)}
                     >
                       {getStatusLabel(task.status)}
-                    </span>
+                    </Badge>
                   </td>
 
                   {/* Actions */}
                   <td className="twp px-4 py-4">
                     <div className="twp flex gap-2">
                       {canCancelTask(task.status) && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="xs"
                           onClick={(e) => {
                             e.stopPropagation()
                             onCancelTask(task.id)
                           }}
-                          className="twp px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                          className="twp:text-red-600 twp:dark:text-red-400 twp:hover:bg-red-50 twp:dark:hover:bg-red-900/20"
                         >
                           Cancel
-                        </button>
+                        </Button>
                       )}
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="xs"
                         onClick={(e) => {
                           e.stopPropagation()
                           onSelectTask(task.id)
                         }}
-                        className="twp px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                        className="twp:text-blue-600 twp:dark:text-blue-400 twp:hover:bg-blue-50 twp:dark:hover:bg-blue-900/20"
                       >
                         View Details
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -266,24 +271,26 @@ export function TaskList({
         <div className="twp text-sm text-gray-500 dark:text-gray-400">
           Showing {tasks.length} of {totalDocs} tasks
         </div>
-        <div className="twp flex gap-2">
-          <button
+        <div className="twp flex gap-2 items-center">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onPageChange(page - 1)}
             disabled={!hasPrevPage || isLoading}
-            className="twp px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
-          </button>
-          <span className="twp px-3 py-1 text-sm text-gray-500 dark:text-gray-400">
+          </Button>
+          <span className="twp:px-3 twp:py-1 twp:text-sm twp:text-gray-500 twp:dark:text-gray-400">
             Page {page} of {totalPages}
           </span>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onPageChange(page + 1)}
             disabled={!hasNextPage || isLoading}
-            className="twp px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
     </div>
