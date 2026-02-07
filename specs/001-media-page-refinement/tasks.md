@@ -24,10 +24,10 @@
 
 **Purpose**: Install dependencies and initialize tooling. No code written yet.
 
-- [ ] T001 Install lightgallery and lucide-react: `pnpm add lightgallery lucide-react`
-- [ ] T002 Initialize shadcn/ui with twp prefix: `pnpm dlx shadcn@latest init --yes` (configure `components.json` with prefix `twp`, paths `src/components/ui`, utils `src/lib/utils.ts`)
-- [ ] T003 Add shadcn/ui components: `pnpm dlx shadcn@latest add badge button tooltip sonner --yes --overwrite`
-- [ ] T004 Verify setup: confirm `src/components/ui/` contains badge.tsx, button.tsx, tooltip.tsx, sonner.tsx; confirm `src/lib/utils.ts` has `cn()` utility; confirm all deps in `package.json`
+- [X] T001 Install lightgallery and lucide-react: `pnpm add lightgallery lucide-react`
+- [X] T002 Initialize shadcn/ui with twp prefix: `pnpm dlx shadcn@latest init --yes` (configure `components.json` with prefix `twp`, paths `src/components/ui`, utils `src/lib/utils.ts`)
+- [X] T003 Add shadcn/ui components: `pnpm dlx shadcn@latest add badge button tooltip sonner --yes --overwrite`
+- [X] T004 Verify setup: confirm `src/components/ui/` contains badge.tsx, button.tsx, tooltip.tsx, sonner.tsx; confirm `src/lib/utils.ts` has `cn()` utility; confirm all deps in `package.json`
 
 ---
 
