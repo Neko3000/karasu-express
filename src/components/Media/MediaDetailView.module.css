@@ -2,8 +2,8 @@
 /* Per Constitution Principle VII heading hierarchy */
 
 .container {
-  max-width: 960px;
-  padding: 0 1rem 2rem;
+  width: 100%;
+  padding: 0 0 1.5rem;
 }
 
 /* Section spacing per Principle VII */

@@ -27,11 +27,6 @@ export const Media: CollectionConfig = {
           Component: '/components/Media/MediaListView#MediaListView',
         },
       },
-      edit: {
-        beforeDocumentControls: [
-          '/components/Media/MediaDetailView#MediaDetailView',
-        ],
-      },
     },
   },
   access: {
@@ -51,6 +46,19 @@ export const Media: CollectionConfig = {
         components: {
           Field: '/components/Media/MediaThumbnailCell#MediaThumbnailCell',
           Cell: '/components/Media/MediaThumbnailCell#MediaThumbnailCell',
+        },
+      },
+    },
+
+    // ============================================
+    // Detail View (Rendered in Edit Page Main Content)
+    // ============================================
+    {
+      name: 'mediaDetail',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/Media/MediaDetailView#MediaDetailView',
         },
       },
     },
