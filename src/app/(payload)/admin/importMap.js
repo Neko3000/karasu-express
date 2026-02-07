@@ -1,4 +1,5 @@
 import { MediaThumbnailCell as MediaThumbnailCell_d39851c93c482a2fc1959562bca13629 } from '../../../components/Media/MediaThumbnailCell'
+import { MediaListView as MediaListView_7507571f85dd6c8f67bd5d673817ab8d } from '../../../components/Media/MediaListView'
 import { SectionHeader as SectionHeader_0743a290259f16d71e2ded31e6fa6951 } from '@/components/Admin/SectionHeader'
 import { PromptOptimizerField as PromptOptimizerField_5166f46260a90f8ff6aeb4b4b5e0a928 } from '@/components/Studio/PromptOptimizerField'
 import { StyleSelectorField as StyleSelectorField_31f2aaf4d9786496be57a74d4edeb20b } from '@/components/Studio/StyleSelectorField'
@@ -8,6 +9,7 @@ import { SubmitTaskAction as SubmitTaskAction_b36f385d695db913d35b3606dfc0e498 }
 
 export const importMap = {
   "/components/Media/MediaThumbnailCell#MediaThumbnailCell": MediaThumbnailCell_d39851c93c482a2fc1959562bca13629,
+  "/components/Media/MediaListView#MediaListView": MediaListView_7507571f85dd6c8f67bd5d673817ab8d,
   "@/components/Admin/SectionHeader#SectionHeader": SectionHeader_0743a290259f16d71e2ded31e6fa6951,
   "@/components/Studio/PromptOptimizerField#PromptOptimizerField": PromptOptimizerField_5166f46260a90f8ff6aeb4b4b5e0a928,
   "@/components/Studio/StyleSelectorField#StyleSelectorField": StyleSelectorField_31f2aaf4d9786496be57a74d4edeb20b,

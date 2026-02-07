@@ -1,0 +1,111 @@
+/* MediaGalleryView — CSS columns masonry grid */
+
+.galleryGrid {
+  columns: 1;
+  column-gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .galleryGrid {
+    columns: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .galleryGrid {
+    columns: 3;
+  }
+}
+
+@media (min-width: 1280px) {
+  .galleryGrid {
+    columns: 4;
+  }
+}
+
+.galleryItem {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+.imageWrapper {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--theme-elevation-50, #f8f8f8);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.imageWrapper:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.2s ease;
+}
+
+.imageWrapper:hover .image {
+  transform: scale(1.02);
+}
+
+/* Hover overlay with detail link */
+.overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.imageWrapper:hover .overlay {
+  opacity: 1;
+}
+
+.detailLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.detailLink:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+/* Bottom filename caption */
+.caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.imageWrapper:hover .caption {
+  opacity: 1;
+}
+
+.captionText {
+  color: white;
+  font-size: 0.75rem;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}

@@ -21,6 +21,13 @@ export const Media: CollectionConfig = {
       defaultLimit: 100,
       limits: [25, 50, 100, 200],
     },
+    components: {
+      views: {
+        list: {
+          Component: '/components/Media/MediaListView#MediaListView',
+        },
+      },
+    },
   },
   access: {
     read: () => true,
