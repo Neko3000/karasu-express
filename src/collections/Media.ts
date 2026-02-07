@@ -27,6 +27,11 @@ export const Media: CollectionConfig = {
           Component: '/components/Media/MediaListView#MediaListView',
         },
       },
+      edit: {
+        beforeDocumentControls: [
+          '/components/Media/MediaDetailView#MediaDetailView',
+        ],
+      },
     },
   },
   access: {

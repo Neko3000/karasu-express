@@ -1,0 +1,108 @@
+/* MediaDetailView — Structured detail page layout */
+/* Per Constitution Principle VII heading hierarchy */
+
+.container {
+  max-width: 960px;
+  padding: 0 1rem 2rem;
+}
+
+/* Section spacing per Principle VII */
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--theme-text, #333);
+}
+
+/* Dividers between H2-level sections */
+.divider {
+  margin: 1.5rem 0;
+  border: none;
+  border-top: 1px solid var(--theme-elevation-150, #e0e0e0);
+}
+
+/* Image preview section */
+.previewSection {
+  margin-bottom: 1.5rem;
+}
+
+/* Info grid */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--theme-elevation-500, #888);
+}
+
+.infoValue {
+  font-size: 0.875rem;
+  color: var(--theme-text, #333);
+  word-break: break-word;
+}
+
+/* Seed monospace */
+.mono {
+  font-family: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  background: var(--theme-elevation-50, #f5f5f5);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+/* Badges row */
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+/* Actions section */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Prompt text */
+.promptText {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--theme-text, #333);
+}
+
+/* JSON display */
+.jsonBlock {
+  font-family: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  background: var(--theme-elevation-50, #f5f5f5);
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* SubTask link */
+.subtaskLink {
+  color: var(--theme-success-500, #22c55e);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.subtaskLink:hover {
+  text-decoration: underline;
+}
