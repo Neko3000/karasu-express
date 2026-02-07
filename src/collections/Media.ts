@@ -37,14 +37,13 @@ export const Media: CollectionConfig = {
   },
   fields: [
     // ============================================
-    // Preview Field (Hover Preview in List View)
+    // Preview Field (List View Cell only)
     // ============================================
     {
       name: 'preview',
       type: 'ui',
       admin: {
         components: {
-          Field: '/components/Media/MediaThumbnailCell#MediaThumbnailCell',
           Cell: '/components/Media/MediaThumbnailCell#MediaThumbnailCell',
         },
       },
@@ -69,6 +68,7 @@ export const Media: CollectionConfig = {
       required: true,
       admin: {
         description: 'Alt text for accessibility',
+        hidden: true,
       },
     },
 
@@ -81,6 +81,7 @@ export const Media: CollectionConfig = {
       relationTo: 'sub-tasks',
       admin: {
         description: 'Source SubTask reference',
+        hidden: true,
       },
       index: true,
     },
@@ -91,7 +92,7 @@ export const Media: CollectionConfig = {
       defaultValue: AssetType.Image,
       admin: {
         description: 'Asset type (image or video)',
-        position: 'sidebar',
+        hidden: true,
       },
     },
 
@@ -104,6 +105,7 @@ export const Media: CollectionConfig = {
       admin: {
         description: 'Generation parameters snapshot',
         readOnly: true,
+        hidden: true,
       },
     },
 
@@ -116,6 +118,7 @@ export const Media: CollectionConfig = {
       admin: {
         description: 'Parent task ID for quick filtering',
         readOnly: true,
+        hidden: true,
       },
       index: true,
     },
@@ -125,6 +128,7 @@ export const Media: CollectionConfig = {
       admin: {
         description: 'Style ID for quick filtering',
         readOnly: true,
+        hidden: true,
       },
       index: true,
     },
@@ -134,6 +138,7 @@ export const Media: CollectionConfig = {
       admin: {
         description: 'Model ID for quick filtering',
         readOnly: true,
+        hidden: true,
       },
       index: true,
     },
@@ -143,6 +148,7 @@ export const Media: CollectionConfig = {
       admin: {
         description: 'Subject slug for quick filtering',
         readOnly: true,
+        hidden: true,
       },
       index: true,
     },
