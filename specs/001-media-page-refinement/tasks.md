@@ -37,13 +37,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T005 [P] Create useViewPreference hook in `src/hooks/useViewPreference.ts` — localStorage persistence for ViewMode ('list' | 'gallery'), key `karasu-media-view-preference`, default 'list'. Implement per contracts/components.ts `UseViewPreferenceReturn` interface and research.md §4 pattern.
-- [ ] T006 [P] Create clipboard utility in `src/lib/clipboard.ts` — async `copyToClipboard(text: string): Promise<boolean>` with navigator.clipboard API + textarea fallback. Implement per contracts/components.ts `CopyToClipboard` type.
-- [ ] T007 [P] Create format utilities in `src/lib/format.ts` — `formatFileSize(bytes: number): string` (KB/MB/GB) and `formatRelativeTime(date: Date | string): string` (uses `Intl.RelativeTimeFormat`). Implement per contracts/components.ts `FormatFileSize` and `FormatRelativeTime` types.
-- [ ] T008 [P] Create MetadataBadge component in `src/components/Media/MetadataBadge.tsx` — wraps shadcn/ui Badge with variant mapping (default/primary/secondary/success/warning/error). Implement per contracts/components.ts `MetadataBadgeProps`. Use `'use client'` directive and `.twp` wrapper.
-- [ ] T009 [P] Create RelativeTime component in `src/components/Media/RelativeTime.tsx` — displays relative time string with full ISO timestamp in tooltip (uses shadcn/ui Tooltip). Implement per contracts/components.ts `RelativeTimeProps`. Uses `formatRelativeTime` from `src/lib/format.ts`.
-- [ ] T010 [P] Unit test for useViewPreference in `tests/unit/useViewPreference.test.ts` — mock localStorage, test: default value, read stored value, write on setView, invalid stored value fallback.
-- [ ] T011 [P] Unit test for clipboard and format utilities in `tests/unit/clipboard.test.ts` and `tests/unit/format.test.ts` — mock `navigator.clipboard`, test: success, fallback, formatFileSize edge cases (0, KB, MB, GB), formatRelativeTime (seconds, minutes, hours, days).
+- [X] T005 [P] Create useViewPreference hook in `src/hooks/useViewPreference.ts` — localStorage persistence for ViewMode ('list' | 'gallery'), key `karasu-media-view-preference`, default 'list'. Implement per contracts/components.ts `UseViewPreferenceReturn` interface and research.md §4 pattern.
+- [X] T006 [P] Create clipboard utility in `src/lib/clipboard.ts` — async `copyToClipboard(text: string): Promise<boolean>` with navigator.clipboard API + textarea fallback. Implement per contracts/components.ts `CopyToClipboard` type.
+- [X] T007 [P] Create format utilities in `src/lib/format.ts` — `formatFileSize(bytes: number): string` (KB/MB/GB) and `formatRelativeTime(date: Date | string): string` (uses `Intl.RelativeTimeFormat`). Implement per contracts/components.ts `FormatFileSize` and `FormatRelativeTime` types.
+- [X] T008 [P] Create MetadataBadge component in `src/components/Media/MetadataBadge.tsx` — wraps shadcn/ui Badge with variant mapping (default/primary/secondary/success/warning/error). Implement per contracts/components.ts `MetadataBadgeProps`. Use `'use client'` directive and `.twp` wrapper.
+- [X] T009 [P] Create RelativeTime component in `src/components/Media/RelativeTime.tsx` — displays relative time string with full ISO timestamp in tooltip (uses shadcn/ui Tooltip). Implement per contracts/components.ts `RelativeTimeProps`. Uses `formatRelativeTime` from `src/lib/format.ts`.
+- [X] T010 [P] Unit test for useViewPreference in `tests/unit/useViewPreference.test.ts` — mock localStorage, test: default value, read stored value, write on setView, invalid stored value fallback.
+- [X] T011 [P] Unit test for clipboard and format utilities in `tests/unit/clipboard.test.ts` and `tests/unit/format.test.ts` — mock `navigator.clipboard`, test: success, fallback, formatFileSize edge cases (0, KB, MB, GB), formatRelativeTime (seconds, minutes, hours, days).
 
 **Checkpoint**: Foundation ready — hooks, utilities, and primitive components available for all stories.
 
