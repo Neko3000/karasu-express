@@ -2,9 +2,8 @@
  * MediaThumbnailCell Styles
  *
  * Styles for the Media collection list view thumbnail with hover preview.
+ * Includes metadata overlay, keyboard focus styles, and dark theme support.
  * Follows PayloadCMS admin panel design patterns.
- *
- * Per Phase 9 - Asset Gallery and Management (US5)
  */
 
 /* ============================================
@@ -16,6 +15,14 @@
   display: inline-flex;
   align-items: center;
   cursor: pointer;
+  outline: none;
+}
+
+/* Keyboard focus-visible outline */
+.container:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--theme-elevation-500);
+  outline-offset: 2px;
 }
 
 /* ============================================
@@ -31,7 +38,8 @@
   transition: border-color 0.2s ease;
 }
 
-.container:hover .thumbnail {
+.container:hover .thumbnail,
+.container:focus-visible .thumbnail {
   border-color: var(--theme-elevation-400);
 }
 
@@ -97,6 +105,39 @@
   max-height: 533px;
   object-fit: contain;
   display: block;
+}
+
+/* ============================================
+   Metadata Overlay
+   ============================================ */
+
+.metadataOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: #fff;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  opacity: 0;
+  animation: fadeInMetadata 0.2s ease 0.1s forwards;
+}
+
+.metadataOverlay span {
+  white-space: nowrap;
+}
+
+@keyframes fadeInMetadata {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ============================================

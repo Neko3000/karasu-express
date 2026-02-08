@@ -105,8 +105,8 @@
 
 ### Part 2: Enhanced Hover Preview with Metadata
 
-- [ ] T025 [US3] Enhance MediaThumbnailCell in `src/components/Media/MediaThumbnailCell.tsx` — add metadata overlay to the hover preview showing `{width}×{height}`, format (extracted from mimeType), and modelId (or "N/A"). Add 100ms debounce on mouseenter to prevent flash on quick mouse movements. Add `tabIndex={0}`, `onKeyDown` handler for Enter/Space to toggle preview. Ensure `data` typing includes MediaDocument fields per contracts/components.ts `MediaThumbnailCellProps`.
-- [ ] T026 [US3] Update `src/components/Media/MediaThumbnailCell.module.css` — add styles for metadata overlay (semi-transparent background, white text, positioned at bottom of preview), smooth fade-in animation, focus-visible outline for keyboard accessibility.
+- [X] T025 [US3] Enhance MediaThumbnailCell in `src/components/Media/MediaThumbnailCell.tsx` — add metadata overlay to the hover preview showing `{width}×{height}`, format (extracted from mimeType), and modelId (or "N/A"). Add 100ms debounce on mouseenter to prevent flash on quick mouse movements. Add `tabIndex={0}`, `onKeyDown` handler for Enter/Space to toggle preview. Ensure `data` typing includes MediaDocument fields per contracts/components.ts `MediaThumbnailCellProps`.
+- [X] T026 [US3] Update `src/components/Media/MediaThumbnailCell.module.css` — add styles for metadata overlay (semi-transparent background, white text, positioned at bottom of preview), smooth fade-in animation, focus-visible outline for keyboard accessibility.
 
 **Checkpoint**: Thumbnail and filename display as separate columns in the Media list table. Hover previews show metadata, don't flash on quick movements, and are keyboard accessible.
 
