@@ -160,6 +160,7 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
+    displayPreview: false,
     staticDir: 'media',
     imageSizes: [
       {
