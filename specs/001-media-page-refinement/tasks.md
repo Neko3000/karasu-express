@@ -114,20 +114,18 @@
 
 ## Phase 6: User Story 4 — Optimized Metadata Controls (Priority: P2)
 
-**Goal**: Long prompts (>200 chars) collapse with expand/collapse toggle. JSON data displays in formatted code blocks. Timestamps show relative time. These controls enhance the detail page created in US2.
+**Goal**: JSON data displays in formatted code blocks. Timestamps show relative time. These controls enhance the detail page created in US2.
 
-**Independent Test**: View a Media detail page with a long prompt (>200 chars), verify it's collapsed with "Expand" button. Click Expand, verify full text shown. View providerParams as formatted JSON. Verify timestamps show "2 hours ago" format with full date on hover.
+**Independent Test**: View a Media detail page, verify providerParams displayed as formatted JSON. Verify timestamps show "2 hours ago" format with full date on hover.
 
-**Acceptance**: FR-014, FR-015, FR-017
+**Acceptance**: FR-015, FR-017
 
 ### Implementation for User Story 4
 
-- [ ] T027 [P] [US4] Create ExpandableText component in `src/components/Media/ExpandableText.tsx` — truncates text at `maxLength` (default 200) with "Expand" button. Toggling shows full text with "Collapse" button. Handles edge cases: text shorter than maxLength (no button), very long text (>2000 chars). Implement per contracts/components.ts `ExpandableTextProps`.
-- [ ] T028 [P] [US4] Create FormattedJson component in `src/components/Media/FormattedJson.tsx` — renders JSON data in `<pre><code>` block with proper indentation (JSON.stringify with 2-space indent). Optional `collapsed` prop for initial state. Styled with TailwindCSS monospace font, background, and overflow scroll. Implement per contracts/components.ts `FormattedJsonProps`.
-- [ ] T029 [US4] Integrate metadata controls into MediaDetailView in `src/components/Media/MediaDetailView.tsx` — replace plain prompt text with ExpandableText, replace JSON string with FormattedJson for providerParams, ensure RelativeTime is used for all timestamps. Verify Generation Info section uses all control components.
-- [ ] T030 [P] [US4] Unit test for ExpandableText in `tests/unit/ExpandableText.test.tsx` — test: short text (no button), long text (shows truncated + Expand), expand/collapse toggle, very long text (>2000 chars), empty string.
+- [ ] T027 [P] [US4] Create FormattedJson component in `src/components/Media/FormattedJson.tsx` — renders JSON data in `<pre><code>` block with proper indentation (JSON.stringify with 2-space indent). Optional `collapsed` prop for initial state. Styled with TailwindCSS monospace font, background, and overflow scroll. Implement per contracts/components.ts `FormattedJsonProps`.
+- [ ] T028 [US4] Integrate metadata controls into MediaDetailView in `src/components/Media/MediaDetailView.tsx` — replace JSON string with FormattedJson for providerParams, ensure RelativeTime is used for all timestamps. Verify Generation Info section uses all control components.
 
-**Checkpoint**: All metadata controls refined. Prompts expandable, JSON formatted, timestamps relative.
+**Checkpoint**: Metadata controls refined. JSON formatted, timestamps relative.
 
 ---
 
@@ -135,9 +133,9 @@
 
 **Purpose**: Edge case handling, final integration, and verification.
 
-- [ ] T031 Handle edge cases across components — empty gallery state message in MediaGalleryView, "SubTask not found" for missing/deleted SubTask references in MediaDetailView, hidden Generation Info for non-generated media (verify), very long prompts (>2000 chars) in ExpandableText.
-- [ ] T032 Update barrel export in `src/components/Media/index.ts` — final pass: ensure all new components (MediaGalleryView, MediaListHeader, MediaListView, MediaDetailView, ImagePreview, ExpandableText, FormattedJson, RelativeTime, MetadataBadge) are exported.
-- [ ] T033 Run quickstart.md verification checklist — manually verify all items in `specs/001-media-page-refinement/quickstart.md` §Verification Checklist.
+- [ ] T029 Handle edge cases across components — empty gallery state message in MediaGalleryView, "SubTask not found" for missing/deleted SubTask references in MediaDetailView, hidden Generation Info for non-generated media (verify).
+- [ ] T030 Update barrel export in `src/components/Media/index.ts` — final pass: ensure all new components (MediaGalleryView, MediaListHeader, MediaListView, MediaDetailView, ImagePreview, FormattedJson, RelativeTime, MetadataBadge) are exported.
+- [ ] T031 Run quickstart.md verification checklist — manually verify all items in `specs/001-media-page-refinement/quickstart.md` §Verification Checklist.
 
 ---
 
@@ -182,7 +180,7 @@ US2: T018→T019→T020→T021→T022
 **Phase 5+6** — US3 and US4 can run in parallel (different files, different concerns):
 ```
 US3: T023→T024→T025→T026
-US4: T027+T028 (parallel) → T029 → T030
+US4: T027→T028
 ```
 
 ---
@@ -217,9 +215,9 @@ US4: T027+T028 (parallel) → T029 → T030
 | Phase 3: US1 Gallery | T012–T017 (6) | Mostly sequential |
 | Phase 4: US2 Detail | T018–T022 (5) | T018 parallel, rest sequential |
 | Phase 5: US3 Columns & Hover | T023–T026 (4) | T023→T024 then T025→T026 |
-| Phase 6: US4 Controls | T027–T030 (4) | T027+T028 parallel |
-| Phase 7: Polish | T031–T033 (3) | Sequential |
-| **Total** | **33 tasks** | |
+| Phase 6: US4 Controls | T027–T028 (2) | Sequential |
+| Phase 7: Polish | T029–T031 (3) | Sequential |
+| **Total** | **31 tasks** | |
 
 ---
 
