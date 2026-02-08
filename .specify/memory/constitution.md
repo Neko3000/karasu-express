@@ -1,22 +1,19 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.2.0 → 1.5.0
+Version change: 1.5.0 → 1.6.0
 Modified principles:
-  - None renamed
+  - Principle VIII: Dependency-First Development — expanded with
+    "Framework-Native Discovery Gate" requiring pre-implementation
+    audit of PayloadCMS built-in behaviors, field options, config
+    flags, and virtual/computed features before custom code.
 Added sections:
-  - Expanded Technology Stack table with detailed version pinning
-  - Added UI Component Libraries subsection (shadcn/ui, Lucide React, LightGallery)
-  - Added AI Services subsection (LLM Prompt Optimization, Image Generation providers)
-Changes in 1.4.0:
-  - Replaced FontAwesome with Lucide React (via shadcn/ui) as icon library
-Changes in 1.5.0:
-  - Added Principle VIII: Dependency-First Development (依赖优先开发)
-  - UI resolution order: PayloadCMS → shadcn/ui → Custom
-  - Icon resolution order: Lucide React → Custom SVG (with justification)
+  - Principle VIII → "Framework-Native Discovery Gate" subsection
+  - Principle VIII → "Pre-Implementation Audit Checklist" table
+  - Principle VIII → "Known PayloadCMS Built-In Features" reference table
 Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md: ✅ No updates needed (Technical Context already captures stack)
+  - .specify/templates/plan-template.md: ✅ No updates needed (Constitution Check already gates)
   - .specify/templates/spec-template.md: ✅ No updates needed (technology-agnostic by design)
   - .specify/templates/tasks-template.md: ✅ No updates needed (task structure unchanged)
 Follow-up TODOs: None
@@ -169,6 +166,62 @@ sections prevents visual clutter while maintaining clear content separation.
 - MUST NOT introduce custom implementations when an approved dependency already provides the needed functionality
 - MUST NOT add new UI or icon dependencies without documenting why the approved stack is insufficient
 
+#### Framework-Native Discovery Gate (框架原生发现门)
+
+Before implementing ANY feature that touches PayloadCMS collections, fields, admin UI,
+or upload behavior, MUST first audit PayloadCMS's built-in capabilities:
+
+1. **Built-in field options**: Check if the desired behavior is already available as a
+   field config property (e.g., `virtual: true` to prevent DB storage, `displayPreview`
+   to control thumbnail rendering, `admin.hidden` to hide from edit form while keeping
+   list Cell rendering)
+2. **Built-in behaviors**: Check if PayloadCMS already implements the behavior natively
+   (e.g., upload collections auto-render thumbnails in filename cells; list views have
+   built-in sort, filter, pagination; relationship fields auto-link)
+3. **Built-in components**: Check `@payloadcms/ui` exports for reusable admin components
+   before building custom ones (e.g., `DefaultListView`, `useListQuery`, `useDocumentInfo`)
+4. **Config flags**: Check collection/field/upload config for flags that enable or disable
+   native behaviors (e.g., `upload.displayPreview`, `admin.disableListColumn`,
+   `admin.readOnly`, `admin.condition`)
+
+#### Pre-Implementation Audit Checklist
+
+Before writing code for a new feature, MUST answer these questions:
+
+| Question | Action if YES |
+|----------|---------------|
+| Does PayloadCMS already provide this behavior natively? | Use the native behavior; do NOT reimplement |
+| Is there a config flag that enables/disables this? | Set the flag; do NOT write custom code |
+| Does the field type support a built-in option for this? | Use the option (e.g., `virtual`, `displayPreview`) |
+| Does `@payloadcms/ui` export a hook or component for this? | Import and use it; do NOT build a custom version |
+| Does shadcn/ui provide this component? | Use shadcn/ui; do NOT build a custom version |
+| Does Lucide React have this icon? | Use Lucide; do NOT add another icon library |
+
+If the answer to ALL questions is NO, THEN custom implementation is permitted with a
+justification comment in the code explaining why built-in options were insufficient.
+
+#### Known PayloadCMS Built-In Features (Reference)
+
+Developers MUST be aware of these commonly overlooked built-in capabilities:
+
+| Feature | Config / API | Purpose |
+|---------|-------------|---------|
+| `virtual: true` | Field config | Prevents field from being stored in database |
+| `displayPreview: false` | Upload config | Hides built-in thumbnail in filename list column |
+| `admin.hidden: true` | Field config | Hides field from edit form while keeping list Cell |
+| `admin.readOnly: true` | Field config | Prevents editing in admin UI |
+| `admin.disableListColumn` | Field config | Prevents field from appearing in list view columns |
+| `admin.condition` | Field config | Conditionally show/hide field based on document state |
+| `admin.components.Cell` | Field config | Custom Cell renderer for list view columns |
+| `admin.components.Field` | Field config | Custom Field renderer for edit view |
+| `adminThumbnail` | Upload config | Specifies which image size to use for admin thumbnails |
+| `useDocumentInfo()` | `@payloadcms/ui` | Access document data in custom edit components |
+| `useListQuery()` | `@payloadcms/ui` | Access list query data (docs, pagination) in custom list views |
+| `DefaultListView` | `@payloadcms/ui` | Payload's default list view component for wrapping |
+
+This table is NOT exhaustive. When in doubt, search PayloadCMS type definitions
+(`node_modules/payload/dist/`) and documentation before implementing custom solutions.
+
 #### UI Component Resolution Order
 
 When implementing any UI element, MUST check for an existing solution in this order:
@@ -191,13 +244,16 @@ When using icons, MUST use Lucide React (shadcn/ui's icon library):
 #### Verification Gate
 
 - Before writing UI code, developer MUST search the approved dependency's documentation/API for existing components
+- Before writing field config workarounds, developer MUST search PayloadCMS type definitions for built-in options
 - If a custom component is created that duplicates approved dependency functionality, it MUST be flagged in code review and replaced
 - New third-party UI or icon libraries MUST NOT be added to `package.json` without a Complexity Tracking entry justifying why the approved stack is insufficient
 
-**Rationale:** Reusing approved dependencies ensures visual consistency, reduces bundle size, and
-prevents fragmentation across the codebase. Checking dependencies before coding avoids wasted
-effort building components that already exist. A strict resolution order eliminates ambiguity
-about which library to reach for first.
+**Rationale:** Reusing approved dependencies and framework-native features ensures visual
+consistency, reduces bundle size, prevents unnecessary database pollution, and avoids
+fragmentation across the codebase. Checking built-in behaviors, config flags, and field
+options before coding prevents wasted effort building workarounds for features that already
+exist. A strict resolution order (framework-native → approved dependency → custom) eliminates
+ambiguity and prevents rediscovery of the same built-in capabilities across features.
 
 ## Technical Constraints
 
@@ -251,6 +307,7 @@ about which library to reach for first.
 5. **Test-First Implementation:** When implementing features progressively, tests for the current phase MUST pass before advancing
 6. **API Contracts:** New endpoints MUST have OpenAPI/TypeDoc documentation
 7. **UI Consistency:** Admin panel views MUST comply with Principle VII heading hierarchy and spacing standards
+8. **Native-First Audit:** Before custom implementations, developer MUST verify no built-in PayloadCMS option exists per Principle VIII
 
 ### Testing Strategy
 
@@ -284,6 +341,7 @@ When implementing features in phases:
 2. Schema changes to `Tasks`, `SubTasks`, or `Assets` collections MUST include migration plan
 3. New AI provider integrations MUST include adapter, rate limit configuration, error mapping, AND unit tests for adapter logic
 4. Admin panel views MUST be reviewed for Principle VII compliance before merge
+5. Custom implementations MUST be reviewed for Principle VIII compliance (native-first audit) before merge
 
 ### Commit Conventions
 
@@ -315,5 +373,6 @@ MUST be documented in the Complexity Tracking section of the relevant plan docum
 - Violations MUST be justified in Complexity Tracking or rejected
 - PRs without adequate test coverage MUST be rejected per Principle VI
 - Admin panel PRs MUST verify UI Standards compliance per Principle VII
+- Custom implementations MUST pass Principle VIII native-first audit before approval
 
-**Version**: 1.5.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2026-02-06
+**Version**: 1.6.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2026-02-08

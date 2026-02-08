@@ -102,12 +102,13 @@ Follow heading hierarchy: H1 (`text-2xl font-bold mb-6`) → H2 (`text-xl font-s
 
 ## Dependency-First Development (Constitution Principle VIII)
 
-Before writing any UI code, MUST check existing dependencies for available solutions in this order:
+Before writing any UI or field config code, MUST audit existing capabilities in this order:
 
-- **UI components**: PayloadCMS built-in → shadcn/ui → Custom (last resort)
-- **Icons**: Lucide React (via shadcn/ui) → Custom SVG (with justification only)
+1. **PayloadCMS native**: Check built-in field options (`virtual`, `displayPreview`, `admin.hidden`, `admin.condition`, etc.), built-in behaviors (upload thumbnail rendering, list column features), and `@payloadcms/ui` hooks/components (`useDocumentInfo`, `useListQuery`, `DefaultListView`)
+2. **UI components**: PayloadCMS built-in → shadcn/ui → Custom (last resort)
+3. **Icons**: Lucide React (via shadcn/ui) → Custom SVG (with justification only)
 
-Do NOT add new UI or icon libraries. Do NOT build custom components when an approved dependency already provides one.
+Do NOT add new UI or icon libraries. Do NOT build custom components or workarounds when a built-in config flag or approved dependency already provides the solution. When in doubt, search PayloadCMS type definitions (`node_modules/payload/dist/`) before writing custom code.
 
 <!-- MANUAL ADDITIONS START -->
 
