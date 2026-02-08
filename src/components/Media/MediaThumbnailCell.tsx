@@ -25,7 +25,7 @@ import type { MediaDocument } from './types'
 
 interface MediaThumbnailCellProps {
   cellData?: string
-  data?: MediaDocument
+  rowData?: MediaDocument
 }
 
 // ============================================
@@ -40,7 +40,7 @@ const SCREEN_EDGE_PADDING = 16
 // COMPONENT
 // ============================================
 
-export const MediaThumbnailCell: React.FC<MediaThumbnailCellProps> = ({ cellData: _cellData, data }) => {
+export const MediaThumbnailCell: React.FC<MediaThumbnailCellProps> = ({ cellData: _cellData, rowData: data }) => {
   const [showPreview, setShowPreview] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ top: 0, left: 0 })
   const [imageLoaded, setImageLoaded] = useState(false)

@@ -39,10 +39,16 @@ export const Media: CollectionConfig = {
     // ============================================
     // Preview Field (List View Cell only)
     // ============================================
+    // NOTE: type 'text' with hidden: true is used instead of type 'ui'
+    // because PayloadCMS skips Cell component rendering for 'ui' fields
+    // in list views. This ensures MediaThumbnailCell renders as its own
+    // dedicated column, separate from the built-in filename column.
     {
       name: 'preview',
-      type: 'ui',
+      type: 'text',
+      virtual: true,
       admin: {
+        hidden: true,
         components: {
           Cell: '/components/Media/MediaThumbnailCell#MediaThumbnailCell',
         },

@@ -165,6 +165,7 @@ export interface User {
  */
 export interface Media {
   id: string;
+  preview?: string | null;
   /**
    * Alt text for accessibility
    */
@@ -741,6 +742,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  preview?: T;
   alt?: T;
   relatedSubtask?: T;
   assetType?: T;
