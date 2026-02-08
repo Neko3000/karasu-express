@@ -90,20 +90,25 @@
 
 ---
 
-## Phase 5: User Story 3 — Enhanced Hover Preview (Priority: P2)
+## Phase 5: User Story 3 — Separated Thumbnail Column & Enhanced Hover Preview (Priority: P2)
 
-**Goal**: Hovering over media thumbnails in list view shows enlarged preview with metadata overlay (dimensions, format, model). Includes debounce to prevent flash on quick mouse movements and keyboard accessibility.
+**Goal**: Two-part improvement to the Media list view. Part 1: Separate the thumbnail and filename into distinct columns — currently PayloadCMS upload collections combine the thumbnail with the filename in one column. The `preview` field (type `ui`) does NOT render its Cell component in list views (PayloadCMS skips Cell rendering for `type: 'ui'` fields). Fix this by changing the `preview` field to `type: 'text'` with `admin.hidden: true` so `MediaThumbnailCell` actually renders as its own dedicated column, while `filename` remains a standalone text column. Part 2: After separation, enhance the hover preview on the thumbnail with a metadata overlay (dimensions, format, model), debounce to prevent flash, and keyboard accessibility.
 
-**Independent Test**: Hover over any thumbnail in Media list, verify enlarged preview appears with metadata overlay after ~100ms debounce. Move cursor away quickly to verify no flash. Tab to thumbnail and press Enter/Space to trigger preview.
+**Independent Test**: Navigate to `/admin/collections/media` in list view. Verify the table has a separate thumbnail column (small image only, no text) and a separate filename column (text only). Hover over the thumbnail to verify enlarged preview appears with metadata overlay after ~100ms debounce. Move cursor away quickly to verify no flash. Tab to thumbnail and press Enter/Space to trigger preview.
 
 **Acceptance**: FR-005, FR-006, FR-007
 
-### Implementation for User Story 3
+### Part 1: Separate Thumbnail and Filename Columns
 
-- [ ] T023 [US3] Enhance MediaThumbnailCell in `src/components/Media/MediaThumbnailCell.tsx` — add metadata overlay showing `{width}×{height}`, format (extracted from mimeType), and modelId (or "N/A"). Add 100ms debounce on mouseenter to prevent flash. Add `tabIndex={0}`, `onKeyDown` handler for Enter/Space to toggle preview. Ensure rowData typing includes MediaDocument fields per contracts/components.ts `MediaThumbnailCellProps`.
-- [ ] T024 [US3] Update `src/components/Media/MediaThumbnailCell.module.css` — add styles for metadata overlay (semi-transparent background, white text, positioned at bottom of preview), smooth fade-in animation, focus-visible outline for keyboard accessibility.
+- [ ] T023 [US3] Update `preview` field in `src/collections/Media.ts` — change from `type: 'ui'` to `type: 'text'` with `admin.hidden: true` so the Cell component (`MediaThumbnailCell`) actually renders in the list view table. Keep `admin.components.Cell` pointing to `'/components/Media/MediaThumbnailCell#MediaThumbnailCell'`. Verify `defaultColumns` order places `preview` (thumbnail-only column) before `filename` (text-only column) so they appear as two distinct columns: `['preview', 'filename', 'assetType', 'relatedSubtask', 'createdAt']`. Note: `type: 'ui'` fields do NOT render Cell components in PayloadCMS list views — this is the root cause of the combined display.
+- [ ] T024 [US3] Verify MediaThumbnailCell in `src/components/Media/MediaThumbnailCell.tsx` renders only the thumbnail image (40×40) without any filename text. The current implementation already does this correctly — confirm no regressions after the field type change. Ensure the component still receives `data` (MediaDocument) via Cell props from the `type: 'text'` field.
 
-**Checkpoint**: Hover previews show metadata, don't flash on quick movements, and are keyboard accessible.
+### Part 2: Enhanced Hover Preview with Metadata
+
+- [ ] T025 [US3] Enhance MediaThumbnailCell in `src/components/Media/MediaThumbnailCell.tsx` — add metadata overlay to the hover preview showing `{width}×{height}`, format (extracted from mimeType), and modelId (or "N/A"). Add 100ms debounce on mouseenter to prevent flash on quick mouse movements. Add `tabIndex={0}`, `onKeyDown` handler for Enter/Space to toggle preview. Ensure `data` typing includes MediaDocument fields per contracts/components.ts `MediaThumbnailCellProps`.
+- [ ] T026 [US3] Update `src/components/Media/MediaThumbnailCell.module.css` — add styles for metadata overlay (semi-transparent background, white text, positioned at bottom of preview), smooth fade-in animation, focus-visible outline for keyboard accessibility.
+
+**Checkpoint**: Thumbnail and filename display as separate columns in the Media list table. Hover previews show metadata, don't flash on quick movements, and are keyboard accessible.
 
 ---
 
@@ -117,10 +122,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T025 [P] [US4] Create ExpandableText component in `src/components/Media/ExpandableText.tsx` — truncates text at `maxLength` (default 200) with "Expand" button. Toggling shows full text with "Collapse" button. Handles edge cases: text shorter than maxLength (no button), very long text (>2000 chars). Implement per contracts/components.ts `ExpandableTextProps`.
-- [ ] T026 [P] [US4] Create FormattedJson component in `src/components/Media/FormattedJson.tsx` — renders JSON data in `<pre><code>` block with proper indentation (JSON.stringify with 2-space indent). Optional `collapsed` prop for initial state. Styled with TailwindCSS monospace font, background, and overflow scroll. Implement per contracts/components.ts `FormattedJsonProps`.
-- [ ] T027 [US4] Integrate metadata controls into MediaDetailView in `src/components/Media/MediaDetailView.tsx` — replace plain prompt text with ExpandableText, replace JSON string with FormattedJson for providerParams, ensure RelativeTime is used for all timestamps. Verify Generation Info section uses all control components.
-- [ ] T028 [P] [US4] Unit test for ExpandableText in `tests/unit/ExpandableText.test.tsx` — test: short text (no button), long text (shows truncated + Expand), expand/collapse toggle, very long text (>2000 chars), empty string.
+- [ ] T027 [P] [US4] Create ExpandableText component in `src/components/Media/ExpandableText.tsx` — truncates text at `maxLength` (default 200) with "Expand" button. Toggling shows full text with "Collapse" button. Handles edge cases: text shorter than maxLength (no button), very long text (>2000 chars). Implement per contracts/components.ts `ExpandableTextProps`.
+- [ ] T028 [P] [US4] Create FormattedJson component in `src/components/Media/FormattedJson.tsx` — renders JSON data in `<pre><code>` block with proper indentation (JSON.stringify with 2-space indent). Optional `collapsed` prop for initial state. Styled with TailwindCSS monospace font, background, and overflow scroll. Implement per contracts/components.ts `FormattedJsonProps`.
+- [ ] T029 [US4] Integrate metadata controls into MediaDetailView in `src/components/Media/MediaDetailView.tsx` — replace plain prompt text with ExpandableText, replace JSON string with FormattedJson for providerParams, ensure RelativeTime is used for all timestamps. Verify Generation Info section uses all control components.
+- [ ] T030 [P] [US4] Unit test for ExpandableText in `tests/unit/ExpandableText.test.tsx` — test: short text (no button), long text (shows truncated + Expand), expand/collapse toggle, very long text (>2000 chars), empty string.
 
 **Checkpoint**: All metadata controls refined. Prompts expandable, JSON formatted, timestamps relative.
 
@@ -130,9 +135,9 @@
 
 **Purpose**: Edge case handling, final integration, and verification.
 
-- [ ] T029 Handle edge cases across components — empty gallery state message in MediaGalleryView, "SubTask not found" for missing/deleted SubTask references in MediaDetailView, hidden Generation Info for non-generated media (verify), very long prompts (>2000 chars) in ExpandableText.
-- [ ] T030 Update barrel export in `src/components/Media/index.ts` — final pass: ensure all new components (MediaGalleryView, MediaListHeader, MediaListView, MediaDetailView, ImagePreview, ExpandableText, FormattedJson, RelativeTime, MetadataBadge) are exported.
-- [ ] T031 Run quickstart.md verification checklist — manually verify all items in `specs/001-media-page-refinement/quickstart.md` §Verification Checklist.
+- [ ] T031 Handle edge cases across components — empty gallery state message in MediaGalleryView, "SubTask not found" for missing/deleted SubTask references in MediaDetailView, hidden Generation Info for non-generated media (verify), very long prompts (>2000 chars) in ExpandableText.
+- [ ] T032 Update barrel export in `src/components/Media/index.ts` — final pass: ensure all new components (MediaGalleryView, MediaListHeader, MediaListView, MediaDetailView, ImagePreview, ExpandableText, FormattedJson, RelativeTime, MetadataBadge) are exported.
+- [ ] T033 Run quickstart.md verification checklist — manually verify all items in `specs/001-media-page-refinement/quickstart.md` §Verification Checklist.
 
 ---
 
@@ -144,7 +149,7 @@
 - **Foundational (Phase 2)**: Depends on Setup (shadcn/ui must be initialized)
 - **US1 Gallery View (Phase 3)**: Depends on Foundational (uses useViewPreference, MetadataBadge)
 - **US2 Detail Page (Phase 4)**: Depends on Foundational (uses clipboard, format utils, MetadataBadge, RelativeTime)
-- **US3 Hover Preview (Phase 5)**: Depends on Foundational only (enhances existing component)
+- **US3 Separated Columns & Hover Preview (Phase 5)**: Depends on Foundational only (modifies collection config and enhances existing component)
 - **US4 Metadata Controls (Phase 6)**: Depends on US2 (integrates into MediaDetailView)
 - **Polish (Phase 7)**: Depends on all user stories complete
 
@@ -152,7 +157,7 @@
 
 - **US1 (P1)**: After Foundational — no dependencies on other stories
 - **US2 (P1)**: After Foundational — no dependencies on other stories
-- **US3 (P2)**: After Foundational — independent, can run in parallel with US1/US2
+- **US3 (P2)**: After Foundational — independent, can run in parallel with US1/US2. Part 1 (column separation) modifies `Media.ts` so should not run in parallel with US1's T016 (which also modifies `Media.ts`)
 - **US4 (P2)**: After US2 — integrates controls into detail page created by US2
 
 ### Within Each User Story
@@ -174,10 +179,10 @@ US1: T012→T013→T014→T015→T016→T017
 US2: T018→T019→T020→T021→T022
 ```
 
-**Phase 5** — US3 can run in parallel with US4 (different files):
+**Phase 5+6** — US3 and US4 can run in parallel (different files, different concerns):
 ```
-US3: T023→T024
-US4: T025+T026 (parallel) → T027 → T028
+US3: T023→T024→T025→T026
+US4: T027+T028 (parallel) → T029 → T030
 ```
 
 ---
@@ -197,7 +202,7 @@ US4: T025+T026 (parallel) → T027 → T028
 1. Setup + Foundational → Foundation ready
 2. Add US1 → Gallery view works → **MVP!**
 3. Add US2 → Detail page restructured → Deploy
-4. Add US3 → Hover previews enhanced → Deploy
+4. Add US3 → Separated columns + hover previews enhanced → Deploy
 5. Add US4 → Metadata controls refined → Deploy
 6. Polish → Edge cases, final verification → **Feature complete**
 
@@ -211,10 +216,10 @@ US4: T025+T026 (parallel) → T027 → T028
 | Phase 2: Foundational | T005–T011 (7) | All parallel |
 | Phase 3: US1 Gallery | T012–T017 (6) | Mostly sequential |
 | Phase 4: US2 Detail | T018–T022 (5) | T018 parallel, rest sequential |
-| Phase 5: US3 Hover | T023–T024 (2) | Sequential |
-| Phase 6: US4 Controls | T025–T028 (4) | T025+T026 parallel |
-| Phase 7: Polish | T029–T031 (3) | Sequential |
-| **Total** | **31 tasks** | |
+| Phase 5: US3 Columns & Hover | T023–T026 (4) | T023→T024 then T025→T026 |
+| Phase 6: US4 Controls | T027–T030 (4) | T027+T028 parallel |
+| Phase 7: Polish | T031–T033 (3) | Sequential |
+| **Total** | **33 tasks** | |
 
 ---
 
